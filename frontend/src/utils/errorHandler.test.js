@@ -10,7 +10,7 @@ import {
   parseBlockchainError,
   formatErrorForUser,
   safePromise,
-} from '../errorHandler';
+} from './errorHandler.js';
 
 describe('ChainError', () => {
   it('should create error with code and details', () => {
@@ -70,9 +70,12 @@ describe('retryWithBackoff', () => {
   it('should throw after max retries', async () => {
     const fn = vi.fn().mockRejectedValue(new Error('always fails'));
 
-    await expect(
-      retryWithBackoff(fn, { maxRetries: 2, initialDelay: 10 })
-    ).rejects.toThrow('always fails');
+    const promise = retryWithBackoff(fn, { maxRetries: 2, initialDelay: 10 });
+    promise.catch(() => {}); // Suppress unhandled rejection warning
+
+    await vi.runAllTimersAsync();
+
+    await expect(promise).rejects.toThrow('always fails');
 
     expect(fn).toHaveBeenCalledTimes(2);
   });
@@ -94,11 +97,15 @@ describe('retryWithBackoff', () => {
       .mockRejectedValueOnce(new Error('fail'))
       .mockResolvedValue('success');
 
-    await retryWithBackoff(fn, {
+    const promise = retryWithBackoff(fn, {
       maxRetries: 2,
       initialDelay: 10,
       onRetry,
     });
+
+    await vi.runAllTimersAsync();
+
+    await promise;
 
     expect(onRetry).toHaveBeenCalledWith(1, 2, 10, expect.any(Error));
   });

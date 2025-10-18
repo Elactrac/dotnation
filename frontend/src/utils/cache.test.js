@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { CacheManager, AsyncCache, PersistentCache } from '../cache';
+import { CacheManager, AsyncCache, PersistentCache } from './cache.js';
 
 describe('CacheManager', () => {
   let cache;

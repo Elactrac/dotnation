@@ -1,5 +1,6 @@
 import React from 'react';
 import { Outlet, Link } from 'react-router-dom';
+import WalletConnect from '../components/WalletConnect';
 import './LandingPage.css'; // Reusing styles
 
 const DashboardLayout = () => {
@@ -13,8 +14,7 @@ const DashboardLayout = () => {
             <Link to="/dashboard/create-campaign">Create Campaign</Link>
           </div>
           <div>
-            {/* Wallet button removed for debugging */}
-            <span style={{color: 'white'}}>Connect Wallet (Temporarily Disabled)</span>
+            <WalletConnect />
           </div>
         </nav>
       </header>

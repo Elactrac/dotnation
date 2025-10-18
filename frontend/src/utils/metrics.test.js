@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { MetricsCollector } from '../metrics';
+import { MetricsCollector } from './metrics.js';
 
 describe('MetricsCollector', () => {
   let collector;

@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import {
   VStack,
   HStack,
@@ -121,4 +122,8 @@ export const CampaignDashboard = ({ campaignId }) => {
       </SimpleGrid>
     </VStack>
   );
+};
+
+CampaignDashboard.propTypes = {
+  campaignId: PropTypes.string.isRequired,
 };

@@ -1,15 +1,21 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Box, Image, Heading, Text, Progress, Flex, Badge, Button } from '@chakra-ui/react';
 import { Link } from 'react-router-dom';
+import { 
+  formatDOT, 
+  calculateProgress, 
+  getDeadlineStatus, 
+  getCampaignStateColor 
+} from '../utils/formatters';
 
 export const CampaignCard = ({ campaign }) => {
-  const progress = (campaign.raised / campaign.goal) * 100;
-  const formattedGoal = new Intl.NumberFormat().format(campaign.goal);
-  const formattedRaised = new Intl.NumberFormat().format(campaign.raised);
-  
-  // Format deadline
-  const deadline = new Date(campaign.deadline);
-  const daysLeft = Math.max(0, Math.ceil((deadline - new Date()) / (1000 * 60 * 60 * 24)));
+  // Use formatter utilities
+  const progress = calculateProgress(campaign.raised, campaign.goal);
+  const formattedGoal = formatDOT(campaign.goal);
+  const formattedRaised = formatDOT(campaign.raised);
+  const deadlineStatus = getDeadlineStatus(campaign.deadline);
+  const stateColor = getCampaignStateColor(campaign.state || 'Active');
   
   return (
     <Box
@@ -31,11 +37,11 @@ export const CampaignCard = ({ campaign }) => {
       
       <Box p={5}>
         <Flex justify="space-between" align="center" mb={2}>
-          <Badge colorScheme="blue" fontSize="0.8em">
-            {daysLeft > 0 ? `${daysLeft} days left` : 'Ended'}
+          <Badge colorScheme={deadlineStatus.color} fontSize="0.8em">
+            {deadlineStatus.message}
           </Badge>
-          <Badge colorScheme={progress >= 100 ? 'green' : 'orange'} fontSize="0.8em">
-            {progress >= 100 ? 'Funded' : 'In Progress'}
+          <Badge colorScheme={stateColor} fontSize="0.8em">
+            {campaign.state || 'Active'}
           </Badge>
         </Flex>
         
@@ -47,7 +53,13 @@ export const CampaignCard = ({ campaign }) => {
           {campaign.description}
         </Text>
         
-        <Progress value={progress} colorScheme="blue" size="sm" borderRadius="full" mb={2} />
+        <Progress 
+          value={progress} 
+          colorScheme={progress >= 100 ? 'green' : 'blue'} 
+          size="sm" 
+          borderRadius="full" 
+          mb={2} 
+        />
         
         <Flex justify="space-between" mb={4}>
           <Text fontSize="sm" fontWeight="bold">
@@ -60,7 +72,7 @@ export const CampaignCard = ({ campaign }) => {
         
         <Button
           as={Link}
-          to={`/campaign/${campaign.id}`}
+          to={`/dashboard/campaign/${campaign.id}`}
           colorScheme="blue"
           size="sm"
           width="100%"
@@ -70,6 +82,18 @@ export const CampaignCard = ({ campaign }) => {
       </Box>
     </Box>
   );
+};
+
+CampaignCard.propTypes = {
+  campaign: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    imageUrl: PropTypes.string,
+    title: PropTypes.string.isRequired,
+    description: PropTypes.string.isRequired,
+    raised: PropTypes.number.isRequired,
+    goal: PropTypes.number.isRequired,
+    deadline: PropTypes.number.isRequired,
+  }).isRequired,
 };
 
 export default CampaignCard;
