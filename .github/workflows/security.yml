@@ -1,0 +1,51 @@
+name: Security Audit
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly on Sunday at midnight UTC
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  rust-security:
+    runs-on: ubuntu-latest
+    name: Audit Rust Dependencies
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Rust toolchain
+      uses: actions-rust-lang/setup-rust-toolchain@v1
+      with:
+        toolchain: stable
+    
+    - name: Install cargo-audit
+      run: cargo install cargo-audit --locked
+    
+    - name: Run security audit
+      working-directory: ./donation_platform
+      run: cargo audit
+  
+  frontend-security:
+    runs-on: ubuntu-latest
+    name: Audit Frontend Dependencies
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+    
+    - name: Run npm audit
+      working-directory: ./frontend
+      run: npm audit --audit-level=moderate
+      continue-on-error: true
+    
+    - name: Check for outdated packages
+      working-directory: ./frontend
+      run: npm outdated || true

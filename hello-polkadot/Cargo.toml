@@ -1,0 +1,40 @@
+[package]
+name = "hello-polkadot"
+version = "0.1.0"
+authors = ["DotNation"]
+edition = "2021"
+
+[lib]
+name = "hello_polkadot"
+path = "lib.rs"
+
+[dependencies]
+ink = { version = "5.0.2", default-features = false }
+ink_primitives = { version = "5.0.2", default-features = false }
+ink_metadata = { version = "5.0.2", default-features = false, features = ["derive"], optional = true }
+ink_env = { version = "5.0.2", default-features = false }
+ink_storage = { version = "5.0.2", default-features = false }
+ink_prelude = { version = "5.0.2", default-features = false }
+scale = { package = "parity-scale-codec", version = "3", default-features = false, features = ["derive"] }
+scale-info = { version = "2.6", default-features = false, features = ["derive"], optional = true }
+
+[profile.release]
+panic = "abort"
+codegen-units = 1
+opt-level = 3
+lto = true
+overflow-checks = true
+
+[features]
+default = ["std"]
+std = [
+    "ink/std",
+    "ink_primitives/std",
+    "ink_metadata/std",
+    "ink_env/std",
+    "ink_storage/std",
+    "ink_prelude/std",
+    "scale/std",
+    "scale-info/std",
+]
+ink-as-dependency = []
