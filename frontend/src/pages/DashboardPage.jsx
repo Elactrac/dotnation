@@ -1,4 +1,5 @@
-import React from 'react';
+
+import PropTypes from 'prop-types';
 import './Dashboard.css';
 
 // A reusable card component for the dashboard
@@ -16,6 +17,13 @@ const DashboardCard = ({ title, children, ctaText, ctaIcon }) => (
     )}
   </div>
 );
+
+DashboardCard.propTypes = {
+  title: PropTypes.string.isRequired,
+  children: PropTypes.node.isRequired,
+  ctaText: PropTypes.string,
+  ctaIcon: PropTypes.node,
+};
 
 const DashboardPage = () => {
   return (

@@ -64,7 +64,7 @@ export class MetricsCollector {
   /**
    * Record transaction start
    */
-  startTransaction(txId) {
+  startTransaction() {
     this.metrics.txPending++;
     return Date.now();
   }

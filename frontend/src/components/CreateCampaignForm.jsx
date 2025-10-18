@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import PropTypes from 'prop-types';
 import {
   VStack,
   FormControl,
@@ -228,4 +229,8 @@ export const CreateCampaignForm = ({ onSuccess }) => {
       </VStack>
     </form>
   );
+};
+
+CreateCampaignForm.propTypes = {
+  onSuccess: PropTypes.func.isRequired,
 };

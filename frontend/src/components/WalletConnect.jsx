@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useWallet } from '../contexts/WalletContext';
 import './WalletConnect.css';
 
@@ -70,3 +70,5 @@ export const WalletConnect = () => {
     </div>
   );
 };
+
+export default WalletConnect;

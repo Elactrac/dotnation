@@ -1,6 +1,8 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import { createContext, useState, useContext, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { web3Accounts, web3Enable } from '@polkadot/extension-dapp';
 import { ApiPromise, WsProvider } from '@polkadot/api';
+import { metrics } from '../utils/metrics';
 
 const WalletContext = createContext({});
 
@@ -10,6 +12,8 @@ export const WalletProvider = ({ children }) => {
   const [api, setApi] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isApiReady, setIsApiReady] = useState(false);
+  const [balance, setBalance] = useState(null);
 
   useEffect(() => {
     const initializeWallet = async () => {
@@ -22,6 +26,7 @@ export const WalletProvider = ({ children }) => {
             new Promise((_, reject) => setTimeout(() => reject(new Error('Connection timeout')), 5000))
           ]);
           setApi(apiInstance);
+          setIsApiReady(true);
           console.log('Connected to local Polkadot node');
         } catch (apiErr) {
           console.warn('Could not connect to local node, continuing without it:', apiErr.message);
@@ -39,10 +44,24 @@ export const WalletProvider = ({ children }) => {
     initializeWallet();
   }, []);
 
+  useEffect(() => {
+    const getBalance = async () => {
+      if (api && selectedAccount) {
+        const { data: { free: balance } } = await api.query.system.account(selectedAccount.address);
+        setBalance(balance.toString());
+      }
+    };
+
+    getBalance();
+  }, [api, selectedAccount]);
+
   const connectWallet = async () => {
+    const startTime = Date.now();
+    
     try {
       const extensions = await web3Enable('DotNation');
       if (extensions.length === 0) {
+        metrics.recordError('WALLET_ERROR', 'No extension installed', { operation: 'connectWallet' });
         throw new Error('No extension installed, or the user did not accept the authorization');
       }
 
@@ -51,19 +70,31 @@ export const WalletProvider = ({ children }) => {
 
       if (accounts.length > 0) {
         setSelectedAccount(accounts[0]);
+        metrics.recordWalletConnection(accounts[0].address, accounts.length);
+        metrics.recordApiCall('connectWallet', Date.now() - startTime, true);
       }
     } catch (err) {
       setError(err.message);
       console.error('Failed to connect wallet:', err);
+      metrics.recordApiCall('connectWallet', Date.now() - startTime, false);
+      metrics.recordError('WALLET_ERROR', err.message, { operation: 'connectWallet' });
     }
   };
 
   const disconnectWallet = () => {
+    if (selectedAccount) {
+      metrics.recordWalletDisconnection(selectedAccount.address);
+    }
     setSelectedAccount(null);
   };
 
   const switchAccount = (account) => {
+    const previousAddress = selectedAccount?.address;
     setSelectedAccount(account);
+    
+    if (previousAddress) {
+      metrics.recordWalletSwitch(previousAddress, account.address);
+    }
   };
 
   return (
@@ -77,6 +108,8 @@ export const WalletProvider = ({ children }) => {
         connectWallet,
         disconnectWallet,
         switchAccount,
+        isApiReady,
+        balance,
       }}
     >
       {children}
@@ -84,6 +117,11 @@ export const WalletProvider = ({ children }) => {
   );
 };
 
+WalletProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+};
+
+// eslint-disable-next-line react-refresh/only-export-components
 export const useWallet = () => {
   const context = useContext(WalletContext);
   if (context === undefined) {

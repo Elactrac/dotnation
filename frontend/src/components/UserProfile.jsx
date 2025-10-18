@@ -1,9 +1,9 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
+import PropTypes from 'prop-types';
 import {
   VStack,
   HStack,
   Box,
-  Heading,
   Text,
   Tabs,
   TabList,
@@ -13,19 +13,15 @@ import {
   SimpleGrid,
   Badge,
   Avatar,
-  Divider,
   Button,
   useClipboard,
   useToast,
 } from '@chakra-ui/react';
-import { CopyIcon, CheckIcon } from '@chakra-ui/icons';
-import { useCampaign } from '../contexts/CampaignContext';
-import { useWallet } from '../contexts/WalletContext';
-import { CampaignCard } from './CampaignCard';
+import { useCampaign } from '../contexts/CampaignContext.jsx';
+import { CampaignCard } from './CampaignCard.jsx';
 
 export const UserProfile = ({ address }) => {
   const { campaigns } = useCampaign();
-  const { selectedAccount } = useWallet();
   const toast = useToast();
   const { hasCopied, onCopy } = useClipboard(address);
 
@@ -76,14 +72,13 @@ export const UserProfile = ({ address }) => {
           <VStack align="start" flex={1}>
             <HStack>
               <Text fontSize="sm" color="gray.500">Address:</Text>
-              <Text fontFamily="mono">{address.slice(0, 8)}...{address.slice(-6)}</Text>
+              <Text fontFamily="mono">{address?.slice(0, 8)}...{address?.slice(-6)}</Text>
               <Button
                 size="sm"
                 variant="ghost"
                 onClick={handleCopyAddress}
-                leftIcon={hasCopied ? <CheckIcon /> : <CopyIcon />}
               >
-                {hasCopied ? 'Copied!' : 'Copy'}
+                {hasCopied ? '✓ Copied!' : '📋 Copy'}
               </Button>
             </HStack>
             <Badge colorScheme="blue">
@@ -145,3 +140,9 @@ export const UserProfile = ({ address }) => {
     </VStack>
   );
 };
+
+UserProfile.propTypes = {
+  address: PropTypes.string.isRequired,
+};
+
+export default UserProfile;

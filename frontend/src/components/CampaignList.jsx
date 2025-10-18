@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { Box, SimpleGrid, Heading, Text, Spinner, Alert, AlertIcon, Button } from '@chakra-ui/react';
 import { useCampaign } from '../contexts/CampaignContext';
 import { CampaignCard } from './CampaignCard';

@@ -5,7 +5,8 @@ mod donation_platform {
     use ink::prelude::vec::Vec;
     use ink::prelude::string::String;
     use ink::storage::Mapping;
-    use ink::env::Error as InkError;
+
+
 
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
@@ -30,6 +31,7 @@ mod donation_platform {
 
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
+    #[cfg_attr(feature = "std", derive(::ink::storage::traits::StorageLayout))]
     pub enum CampaignState {
         Active,
         Successful,
@@ -47,6 +49,7 @@ mod donation_platform {
 
     #[derive(Debug, scale::Encode, scale::Decode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
+    #[cfg_attr(feature = "std", derive(::ink::storage::traits::StorageLayout))]
     pub struct Campaign {
         id: u32,
         owner: AccountId,
@@ -116,7 +119,7 @@ mod donation_platform {
             
             // Store campaign and initialize empty donations list
             self.campaigns.insert(campaign_id, &campaign);
-            self.campaign_donations.insert(campaign_id, &Vec::new());
+            self.campaign_donations.insert(campaign_id, &Vec::<Donation>::new());
             
             // Increment campaign counter
             self.campaign_count += 1;

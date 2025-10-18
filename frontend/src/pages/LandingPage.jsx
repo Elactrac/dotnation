@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import './LandingPage.css';
 
@@ -15,7 +15,6 @@ const AnimatedCanvas = () => {
         const PARTICLE_COUNT = Math.floor((canvas.width * canvas.height) / 20000);
         const MAX_LINK_DISTANCE = 150;
         const PARTICLE_COLOR = 'rgba(230, 0, 122, 0.7)';
-        const LINE_COLOR = 'rgba(0, 234, 211, 0.2)';
 
         let particles = [];
         let ripples = [];
@@ -289,7 +288,7 @@ const LandingPage = () => {
                             <div className="trust-grid">
                                 <div className="trust-card scroll-animate">
                                     <h3>Verifiable On-Chain Fund Flow</h3>
-                                    <p>Funds never touch our servers. Donations go directly from a donor's wallet to the secure smart contract, and are only released to the creator.</p>
+                                    <p>Funds never touch our servers. Donations go directly from a donor&apos;s wallet to the secure smart contract, and are only released to the creator.</p>
                                     <div className="trust-diagram">
                                         <div>👤<br /><span>Donor</span></div>
                                         <div className="arrow">&rarr;</div>
@@ -314,7 +313,7 @@ const LandingPage = () => {
                                 <div className="feature-card scroll-animate"><h3>Effortless Campaign Management</h3><p>Launch a campaign in minutes. Set your goal, tell your story, and define your timeline.</p></div>
                                 <div className="feature-card scroll-animate" style={{ transitionDelay: '100ms' }}><h3>Real-Time, On-Chain Donations</h3><p>Donors connect their Polkadot.js wallet and contribute with a single click.</p></div>
                                 <div className="feature-card scroll-animate" style={{ transitionDelay: '200ms' }}><h3>Verifiable Impact & Audibility</h3><p>A public, on-chain event log tracks every key action—from campaign launch to fund withdrawal.</p></div>
-                                <div className="feature-card scroll-animate" style={{ transitionDelay: '300ms' }}><h3>Extensible & Future-Ready</h3><p>Designed for what's next, with support for NFT rewards, DAO governance, and more.</p></div>
+                                <div className="feature-card scroll-animate" style={{ transitionDelay: '300ms' }}><h3>Extensible & Future-Ready</h3><p>Designed for what&apos;s next, with support for NFT rewards, DAO governance, and more.</p></div>
                             </div>
                         </div>
                     </section>

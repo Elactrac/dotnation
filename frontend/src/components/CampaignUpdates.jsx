@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import PropTypes from 'prop-types';
 import {
   VStack,
   HStack,
@@ -144,4 +145,8 @@ export const CampaignUpdates = ({ campaignId }) => {
       </VStack>
     </VStack>
   );
+};
+
+CampaignUpdates.propTypes = {
+  campaignId: PropTypes.number.isRequired,
 };

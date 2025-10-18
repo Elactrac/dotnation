@@ -1,4 +1,5 @@
-import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
+import { createContext, useState, useContext, useEffect, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { retryWithBackoff, ChainError, ErrorCodes } from '../utils/errorHandler';
 
@@ -94,7 +95,7 @@ export const ApiProvider = ({ children }) => {
         api.disconnect();
       }
     };
-  }, []);
+  }, [connectToNode, api]);
 
   const retryConnection = useCallback(() => {
     setReconnectAttempts(0);
@@ -118,6 +119,11 @@ export const ApiProvider = ({ children }) => {
   );
 };
 
+ApiProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+};
+
+// eslint-disable-next-line react-refresh/only-export-components
 export const useApi = () => {
   const context = useContext(ApiContext);
   if (context === undefined) {

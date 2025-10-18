@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   VStack,
@@ -30,22 +30,16 @@ import {
 import { useParams } from 'react-router-dom';
 import { useCampaign } from '../contexts/CampaignContext';
 import { useWallet } from '../contexts/WalletContext';
-
-const formatBalance = (balance) => {
-  return (balance / 1_000_000_000_000).toFixed(2); // Convert from femto to DOT
-};
-
-const calculateTimeLeft = (deadline) => {
-  const now = Date.now();
-  const timeLeft = deadline - now;
-  
-  if (timeLeft <= 0) return 'Ended';
-  
-  const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  
-  return `${days}d ${hours}h left`;
-};
+import {
+  formatDOT,
+  formatDate,
+  formatRelativeTime,
+  shortenAddress,
+  calculateProgress,
+  getDeadlineStatus,
+  getCampaignStateColor,
+  parseDOT,
+} from '../utils/formatters';
 
 export const CampaignDetails = () => {
   const { id } = useParams();
@@ -65,8 +59,9 @@ export const CampaignDetails = () => {
     return <Text>Campaign not found</Text>;
   }
 
-  const progress = (campaign.fundsRaised / campaign.goal) * 100;
-  const timeLeft = calculateTimeLeft(campaign.deadline);
+  const progress = calculateProgress(campaign.raised || campaign.fundsRaised, campaign.goal);
+  const deadlineStatus = getDeadlineStatus(campaign.deadline);
+  const stateColor = getCampaignStateColor(campaign.state || 'Active');
 
   const handleDonate = async () => {
     try {
@@ -74,13 +69,14 @@ export const CampaignDetails = () => {
         throw new Error('Please connect your wallet first');
       }
 
-      const amount = parseFloat(donationAmount) * 1_000_000_000_000; // Convert to femto
-      await donateToCampaign(campaign.id, amount);
+      const amountInPlancks = parseDOT(donationAmount);
+      await donateToCampaign(campaign.id, amountInPlancks);
       
       toast({
-        title: 'Donation successful!',
+        title: 'Donation Successful! 🎉',
+        description: `You donated ${donationAmount} DOT to ${campaign.title}`,
         status: 'success',
-        duration: 5000,
+        duration: 7000,
         isClosable: true,
       });
       
@@ -88,10 +84,10 @@ export const CampaignDetails = () => {
       setDonationAmount('');
     } catch (error) {
       toast({
-        title: 'Donation failed',
-        description: error.message,
+        title: 'Donation Failed',
+        description: error.message || 'Failed to process donation',
         status: 'error',
-        duration: 5000,
+        duration: 7000,
         isClosable: true,
       });
     }
@@ -101,29 +97,35 @@ export const CampaignDetails = () => {
     <Box>
       <VStack spacing={6} align="stretch">
         <Box>
-          <Badge colorScheme={timeLeft === 'Ended' ? 'red' : 'green'} mb={2}>
-            {timeLeft}
+          <Badge colorScheme={deadlineStatus.color} mb={2}>
+            {deadlineStatus.message}
+          </Badge>
+          <Badge colorScheme={stateColor} ml={2} mb={2}>
+            {campaign.state || 'Active'}
           </Badge>
           <Heading size="xl" mb={2}>{campaign.title}</Heading>
           <Text color="gray.600" fontSize="lg">{campaign.description}</Text>
+          <Text fontSize="sm" color="gray.500" mt={2}>
+            Created {formatRelativeTime(campaign.createdAt || Date.now())}
+          </Text>
         </Box>
 
         <Box bg="white" p={6} borderRadius="lg" shadow="sm">
           <StatGroup>
             <Stat>
               <StatLabel>Raised</StatLabel>
-              <StatNumber>{formatBalance(campaign.fundsRaised)} DOT</StatNumber>
+              <StatNumber>{formatDOT(campaign.raised || campaign.fundsRaised)} DOT</StatNumber>
             </Stat>
             <Stat>
               <StatLabel>Goal</StatLabel>
-              <StatNumber>{formatBalance(campaign.goal)} DOT</StatNumber>
+              <StatNumber>{formatDOT(campaign.goal)} DOT</StatNumber>
             </Stat>
             <Stat>
               <StatLabel>Progress</StatLabel>
               <StatNumber>{progress.toFixed(1)}%</StatNumber>
             </Stat>
           </StatGroup>
-          <Progress value={progress} colorScheme="blue" size="lg" mt={4} />
+          <Progress value={progress} colorScheme={progress >= 100 ? 'green' : 'blue'} size="lg" mt={4} />
         </Box>
 
         <Grid templateColumns="repeat(2, 1fr)" gap={6}>
@@ -132,13 +134,16 @@ export const CampaignDetails = () => {
               <Heading size="md" mb={4}>Campaign Details</Heading>
               <List spacing={3}>
                 <ListItem>
-                  <Text><strong>Owner:</strong> {campaign.owner}</Text>
+                  <Text><strong>Owner:</strong> {shortenAddress(campaign.owner)}</Text>
                 </ListItem>
                 <ListItem>
-                  <Text><strong>Beneficiary:</strong> {campaign.beneficiary}</Text>
+                  <Text><strong>Beneficiary:</strong> {shortenAddress(campaign.beneficiary)}</Text>
                 </ListItem>
                 <ListItem>
-                  <Text><strong>Deadline:</strong> {new Date(campaign.deadline).toLocaleDateString()}</Text>
+                  <Text><strong>Deadline:</strong> {formatDate(campaign.deadline)}</Text>
+                </ListItem>
+                <ListItem>
+                  <Text><strong>Status:</strong> {campaign.state || 'Active'}</Text>
                 </ListItem>
               </List>
             </Box>
@@ -153,9 +158,9 @@ export const CampaignDetails = () => {
                 size="lg"
                 width="full"
                 onClick={onOpen}
-                isDisabled={timeLeft === 'Ended'}
+                isDisabled={deadlineStatus.isEnded || campaign.state !== 'Active'}
               >
-                Donate Now
+                {deadlineStatus.isEnded ? 'Campaign Ended' : 'Donate Now'}
               </Button>
             </Box>
           </GridItem>

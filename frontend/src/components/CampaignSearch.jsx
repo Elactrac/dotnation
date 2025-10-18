@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import {
   VStack,
   HStack,
@@ -31,7 +32,7 @@ export const CampaignSearch = ({ onFilteredCampaigns }) => {
   // Get unique categories from campaigns
   const categories = [...new Set(campaigns.map(c => c.category).filter(Boolean))];
 
-  const applyFilters = () => {
+  const applyFilters = useCallback(() => {
     let filtered = [...campaigns];
 
     // Apply search term filter
@@ -73,7 +74,7 @@ export const CampaignSearch = ({ onFilteredCampaigns }) => {
     });
 
     onFilteredCampaigns(filtered);
-  };
+  }, [campaigns, searchTerm, selectedCategory, selectedStatus, progressRange, onFilteredCampaigns]);
 
   // Update active filters display
   useEffect(() => {
@@ -90,7 +91,7 @@ export const CampaignSearch = ({ onFilteredCampaigns }) => {
   // Apply filters whenever they change
   useEffect(() => {
     applyFilters();
-  }, [searchTerm, selectedCategory, selectedStatus, progressRange]);
+  }, [applyFilters]);
 
   const removeFilter = (filterType) => {
     switch (filterType) {
@@ -191,4 +192,8 @@ export const CampaignSearch = ({ onFilteredCampaigns }) => {
       )}
     </VStack>
   );
+};
+
+CampaignSearch.propTypes = {
+  onFilteredCampaigns: PropTypes.func.isRequired,
 };

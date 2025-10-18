@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   Box,
@@ -84,6 +84,17 @@ const CampaignDetailsPage = () => {
     }
   };
 
+  const progress = useMemo(() => (campaign ? (campaign.raised / campaign.goal) * 100 : 0), [campaign]);
+  const formattedGoal = useMemo(() => (campaign ? new Intl.NumberFormat().format(campaign.goal) : '0'), [campaign]);
+  const formattedRaised = useMemo(() => (campaign ? new Intl.NumberFormat().format(campaign.raised) : '0'), [campaign]);
+  const deadline = useMemo(() => (campaign ? new Date(campaign.deadline) : null), [campaign]);
+  const daysLeft = useMemo(() => (deadline ? Math.max(0, Math.ceil((deadline - new Date()) / (1000 * 60 * 60 * 24))) : 0), [deadline]);
+  const isOwnerOrAdmin = useMemo(() => (selectedAccount && campaign ? 
+    (selectedAccount.address === campaign.owner || selectedAccount.address === campaign.admin) : false), [selectedAccount, campaign]);
+  const canWithdraw = useMemo(() => (isOwnerOrAdmin && campaign ? 
+    (campaign.state === 'Successful' || (campaign.state === 'Active' && daysLeft === 0)) && 
+    campaign.state !== 'Withdrawn' : false), [isOwnerOrAdmin, campaign, daysLeft]);
+
   if (isLoading) {
     return (
       <Container maxW="container.lg" py={10}>
@@ -116,23 +127,6 @@ const CampaignDetailsPage = () => {
       </Container>
     );
   }
-
-  const progress = (campaign.raised / campaign.goal) * 100;
-  const formattedGoal = new Intl.NumberFormat().format(campaign.goal);
-  const formattedRaised = new Intl.NumberFormat().format(campaign.raised);
-  
-  // Format deadline
-  const deadline = new Date(campaign.deadline);
-  const daysLeft = Math.max(0, Math.ceil((deadline - new Date()) / (1000 * 60 * 60 * 24)));
-  
-  // Check if user is campaign owner or admin
-  const isOwnerOrAdmin = selectedAccount && 
-    (selectedAccount.address === campaign.owner || selectedAccount.address === campaign.admin);
-  
-  // Check if campaign is successful and not withdrawn
-  const canWithdraw = isOwnerOrAdmin && 
-    (campaign.state === 'Successful' || (campaign.state === 'Active' && daysLeft === 0)) && 
-    campaign.state !== 'Withdrawn';
 
   return (
     <Container maxW="container.lg" py={10}>

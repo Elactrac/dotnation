@@ -1,14 +1,16 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { ApiProvider } from './contexts/ApiContext';
+import { ApiProvider } from './contexts/ApiContext.jsx';
 import { WalletProvider } from './contexts/WalletContext.jsx';
 import { CampaignProvider } from './contexts/CampaignContext.jsx';
 import ErrorBoundary from './components/ErrorBoundary';
-import LandingPage from './pages/LandingPage';
-import DashboardLayout from './pages/DashboardLayout';
-import CampaignsListPage from './pages/CampaignsListPage.jsx';
-import CreateCampaignPage from './pages/CreateCampaignPage.jsx';
-import CampaignDetailsPage from './pages/CampaignDetailsPage.jsx';
+import { Box, Spinner } from '@chakra-ui/react';
+
+const LandingPage = React.lazy(() => import('./pages/LandingPage'));
+const DashboardLayout = React.lazy(() => import('./pages/DashboardLayout'));
+const CampaignsListPage = React.lazy(() => import('./pages/CampaignsListPage.jsx'));
+const CreateCampaignPage = React.lazy(() => import('./pages/CreateCampaignPage.jsx'));
+const CampaignDetailsPage = React.lazy(() => import('./pages/CampaignDetailsPage.jsx'));
 
 const router = createBrowserRouter([
   {
@@ -26,13 +28,21 @@ const router = createBrowserRouter([
   },
 ]);
 
+const SuspenseFallback = () => (
+  <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+    <Spinner size="xl" />
+  </Box>
+);
+
 function App() {
   return (
     <ErrorBoundary>
       <ApiProvider>
         <WalletProvider>
           <CampaignProvider>
-            <RouterProvider router={router} />
+            <Suspense fallback={<SuspenseFallback />}>
+              <RouterProvider router={router} />
+            </Suspense>
           </CampaignProvider>
         </WalletProvider>
       </ApiProvider>

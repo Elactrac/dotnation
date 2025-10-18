@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import { useWallet } from './WalletContext';
 
 const CampaignContext = createContext({});
@@ -9,7 +10,7 @@ export const CampaignProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchCampaigns = async () => {
+  const fetchCampaigns = useCallback(async () => {
     if (!api) return;
     
     setIsLoading(true);
@@ -39,9 +40,9 @@ export const CampaignProvider = ({ children }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [api]);
 
-  const getCampaignDetails = async (campaignId) => {
+  const getCampaignDetails = useCallback(async (campaignId) => {
     if (!api) throw new Error('API not connected');
     
     try {
@@ -72,9 +73,9 @@ export const CampaignProvider = ({ children }) => {
     } catch (err) {
       throw new Error(`Failed to get campaign details: ${err.message}`);
     }
-  };
+  }, [api]);
 
-  const createCampaign = async (campaignData) => {
+  const createCampaign = useCallback(async (campaignData) => {
     if (!api || !selectedAccount) {
       throw new Error('Wallet not connected');
     }
@@ -93,9 +94,9 @@ export const CampaignProvider = ({ children }) => {
     } catch (err) {
       throw new Error(`Failed to create campaign: ${err.message}`);
     }
-  };
+  }, [api, selectedAccount, fetchCampaigns]);
 
-  const donateToCampaign = async (campaignId, amount) => {
+  const donateToCampaign = useCallback(async (campaignId, amount) => {
     if (!api || !selectedAccount) {
       throw new Error('Wallet not connected');
     }
@@ -110,9 +111,9 @@ export const CampaignProvider = ({ children }) => {
     } catch (err) {
       throw new Error(`Failed to donate: ${err.message}`);
     }
-  };
+  }, [api, selectedAccount, fetchCampaigns]);
 
-  const withdrawFunds = async (campaignId) => {
+  const withdrawFunds = useCallback(async (campaignId) => {
     if (!api || !selectedAccount) {
       throw new Error('Wallet not connected');
     }
@@ -124,7 +125,7 @@ export const CampaignProvider = ({ children }) => {
     } catch (err) {
       throw new Error(`Failed to withdraw funds: ${err.message}`);
     }
-  };
+  }, [api, selectedAccount, fetchCampaigns]);
 
   useEffect(() => {
     if (api) {
@@ -132,7 +133,7 @@ export const CampaignProvider = ({ children }) => {
     } else {
       setIsLoading(false);
     }
-  }, [api]);
+  }, [api, fetchCampaigns]);
 
   return (
     <CampaignContext.Provider
@@ -152,6 +153,11 @@ export const CampaignProvider = ({ children }) => {
   );
 };
 
+CampaignProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+};
+
+// eslint-disable-next-line react-refresh/only-export-components
 export const useCampaign = () => {
   const context = useContext(CampaignContext);
   if (context === undefined) {

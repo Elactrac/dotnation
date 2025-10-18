@@ -1,4 +1,5 @@
-import React from 'react';
+import { Component, useState } from 'react';
+import PropTypes from 'prop-types';
 import {
   Box,
   Button,
@@ -7,16 +8,13 @@ import {
   Text,
   VStack,
   Code,
-  useColorModeValue,
-  Icon,
 } from '@chakra-ui/react';
-import { WarningIcon } from '@chakra-ui/icons';
 
 /**
  * Error Boundary Component
  * Catches React errors and displays fallback UI
  */
-export class ErrorBoundary extends React.Component {
+export class ErrorBoundary extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -91,6 +89,12 @@ export class ErrorBoundary extends React.Component {
   }
 }
 
+ErrorBoundary.propTypes = {
+  children: PropTypes.node.isRequired,
+  onError: PropTypes.func,
+  showDetails: PropTypes.bool,
+};
+
 /**
  * Error Fallback UI Component
  */
@@ -102,26 +106,20 @@ const ErrorFallback = ({
   onReload,
   showDetails 
 }) => {
-  const [showStack, setShowStack] = React.useState(false);
-  const bgColor = useColorModeValue('gray.50', 'gray.900');
-  const borderColor = useColorModeValue('red.200', 'red.800');
+  const [showStack, setShowStack] = useState(false);
+  const bgColor = 'gray.50';
+  const borderColor = 'red.200';
 
   return (
     <Container maxW="container.md" py={10}>
       <VStack spacing={6} align="stretch">
         <Box textAlign="center">
-          <Icon 
-            as={WarningIcon} 
-            w={16} 
-            h={16} 
-            color="red.500" 
-            mb={4} 
-          />
+          <Text fontSize="6xl" mb={4}>⚠️</Text>
           <Heading size="xl" mb={2}>
             Oops! Something went wrong
           </Heading>
           <Text fontSize="lg" color="gray.600">
-            We're sorry for the inconvenience. The application encountered an error.
+            We&apos;re sorry for the inconvenience. The application encountered an error.
           </Text>
         </Box>
 
@@ -202,7 +200,7 @@ const ErrorFallback = ({
 
         <Box 
           p={4} 
-          bg={useColorModeValue('blue.50', 'blue.900')} 
+          bg="blue.50" 
           borderRadius="md"
         >
           <Heading size="xs" mb={2}>
@@ -221,15 +219,29 @@ const ErrorFallback = ({
   );
 };
 
+ErrorFallback.propTypes = {
+  error: PropTypes.object.isRequired,
+  errorInfo: PropTypes.object,
+  errorCount: PropTypes.number.isRequired,
+  onReset: PropTypes.func.isRequired,
+  onReload: PropTypes.func.isRequired,
+  showDetails: PropTypes.bool.isRequired,
+};
+
 /**
  * Higher-order component to wrap components with error boundary
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export const withErrorBoundary = (Component, errorBoundaryProps = {}) => {
-  return (props) => (
+  const WrappedComponent = (props) => (
     <ErrorBoundary {...errorBoundaryProps}>
       <Component {...props} />
     </ErrorBoundary>
   );
+  
+  WrappedComponent.displayName = `withErrorBoundary(${Component.displayName || Component.name || 'Component'})`;
+  
+  return WrappedComponent;
 };
 
 export default ErrorBoundary;

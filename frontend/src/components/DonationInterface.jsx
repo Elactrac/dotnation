@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState, memo } from 'react';
+import PropTypes from 'prop-types';
 import {
   Box,
   Button,
@@ -13,21 +14,65 @@ import {
   useToast,
   Alert,
   AlertIcon,
+  VStack,
+  HStack,
+  Stat,
+  StatLabel,
+  StatNumber,
+  StatHelpText,
+  Divider,
+  Icon,
+  FormErrorMessage,
 } from '@chakra-ui/react';
+import { FiHeart } from 'react-icons/fi';
 import { useCampaign } from '../contexts/CampaignContext.jsx';
 import { useWallet } from '../contexts/WalletContext.jsx';
+import { parseDOT, formatDOT, isValidPositiveNumber } from '../utils/formatters';
+import { asyncHandler } from '../utils/errorHandler';
 
-export const DonationInterface = ({ campaignId }) => {
-  const [amount, setAmount] = useState(1);
+export const DonationInterface = memo(({ campaignId, campaign }) => {
+  const [amount, setAmount] = useState('');
+  const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { donateToCampaign } = useCampaign();
   const { selectedAccount } = useWallet();
   const toast = useToast();
 
-  const handleDonate = async () => {
+  // Suggested donation amounts
+  const suggestedAmounts = [10, 25, 50, 100];
+
+  const validateAmount = (value) => {
+    if (!value || value === '') {
+      return 'Amount is required';
+    }
+    if (!isValidPositiveNumber(value)) {
+      return 'Please enter a valid positive number';
+    }
+    const numValue = parseFloat(value);
+    if (numValue < 0.1) {
+      return 'Minimum donation is 0.1 DOT';
+    }
+    if (numValue > 100000) {
+      return 'Maximum donation is 100,000 DOT';
+    }
+    return '';
+  };
+
+  const handleAmountChange = (value) => {
+    setAmount(value);
+    const validationError = value ? validateAmount(value) : '';
+    setError(validationError);
+  };
+
+  const handleQuickAmount = (value) => {
+    setAmount(value.toString());
+    setError('');
+  };
+
+  const handleDonate = asyncHandler(async () => {
     if (!selectedAccount) {
       toast({
-        title: 'Wallet not connected',
+        title: 'Wallet Not Connected',
         description: 'Please connect your wallet to make a donation',
         status: 'warning',
         duration: 5000,
@@ -36,10 +81,12 @@ export const DonationInterface = ({ campaignId }) => {
       return;
     }
 
-    if (amount <= 0) {
+    const validationError = validateAmount(amount);
+    if (validationError) {
+      setError(validationError);
       toast({
-        title: 'Invalid amount',
-        description: 'Please enter a positive donation amount',
+        title: 'Invalid Amount',
+        description: validationError,
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -50,76 +97,171 @@ export const DonationInterface = ({ campaignId }) => {
     setIsSubmitting(true);
 
     try {
-      await donateToCampaign(campaignId, amount);
+      const amountInPlancks = parseDOT(amount);
+      await donateToCampaign(campaignId, amountInPlancks);
+      
       toast({
-        title: 'Donation successful!',
-        description: `You have successfully donated ${amount} DOT to this campaign.`,
+        title: 'Donation Successful! 🎉',
+        description: `You donated ${amount} DOT to this campaign. Thank you for your support!`,
         status: 'success',
-        duration: 5000,
+        duration: 7000,
         isClosable: true,
       });
-      setAmount(1); // Reset amount after successful donation
-    } catch (error) {
+      
+      setAmount(''); // Reset amount after successful donation
+      setError('');
+    } catch (err) {
+      console.error('Donation error:', err);
       toast({
-        title: 'Donation failed',
-        description: error.message,
+        title: 'Donation Failed',
+        description: err.message || 'Failed to process donation. Please try again.',
         status: 'error',
-        duration: 5000,
+        duration: 7000,
         isClosable: true,
       });
     } finally {
       setIsSubmitting(false);
     }
-  };
+  });
+
+  // Calculate if campaign is active
+  const isActive = campaign?.state === 'Active';
+  const hasEnded = campaign?.deadline ? new Date(campaign.deadline) < new Date() : false;
 
   return (
     <Box
       borderWidth="1px"
       borderRadius="lg"
-      p={5}
-      boxShadow="md"
+      p={6}
+      boxShadow="lg"
       bg="white"
     >
-      <Text fontSize="xl" fontWeight="bold" mb={4}>
-        Support this campaign
-      </Text>
+      <VStack spacing={5} align="stretch">
+        {/* Header */}
+        <HStack spacing={3}>
+          <Icon as={FiHeart} boxSize={6} color="red.500" />
+          <Text fontSize="2xl" fontWeight="bold">
+            Support This Campaign
+          </Text>
+        </HStack>
 
-      {!selectedAccount && (
-        <Alert status="warning" mb={4} borderRadius="md">
-          <AlertIcon />
-          Please connect your wallet to make a donation
-        </Alert>
-      )}
+        {/* Campaign Stats */}
+        {campaign && (
+          <Box bg="gray.50" p={4} borderRadius="md">
+            <VStack spacing={3} align="stretch">
+              <Stat>
+                <StatLabel>Current Progress</StatLabel>
+                <StatNumber>{formatDOT(campaign.raised)} DOT</StatNumber>
+                <StatHelpText>of {formatDOT(campaign.goal)} DOT goal</StatHelpText>
+              </Stat>
+            </VStack>
+          </Box>
+        )}
 
-      <FormControl mb={4}>
-        <FormLabel>Donation Amount (DOT)</FormLabel>
-        <NumberInput
-          min={0.1}
-          step={0.1}
-          value={amount}
-          onChange={(valueString) => setAmount(parseFloat(valueString))}
-          precision={2}
+        <Divider />
+
+        {/* Wallet Warning */}
+        {!selectedAccount && (
+          <Alert status="warning" borderRadius="md">
+            <AlertIcon />
+            <VStack align="start" spacing={1}>
+              <Text fontWeight="bold">Wallet Not Connected</Text>
+              <Text fontSize="sm">Connect your wallet to make a donation</Text>
+            </VStack>
+          </Alert>
+        )}
+
+        {/* Campaign Ended Warning */}
+        {!isActive && (
+          <Alert status="info" borderRadius="md">
+            <AlertIcon />
+            <VStack align="start" spacing={1}>
+              <Text fontWeight="bold">Campaign Ended</Text>
+              <Text fontSize="sm">
+                {hasEnded ? 'This campaign has reached its deadline' : 'This campaign is no longer accepting donations'}
+              </Text>
+            </VStack>
+          </Alert>
+        )}
+
+        {/* Quick Amount Buttons */}
+        <Box>
+          <FormLabel mb={2}>Quick Select</FormLabel>
+          <HStack spacing={2} flexWrap="wrap">
+            {suggestedAmounts.map((value) => (
+              <Button
+                key={value}
+                size="sm"
+                variant={amount === value.toString() ? 'solid' : 'outline'}
+                colorScheme="blue"
+                onClick={() => handleQuickAmount(value)}
+                isDisabled={!selectedAccount || !isActive}
+              >
+                {value} DOT
+              </Button>
+            ))}
+          </HStack>
+        </Box>
+
+        {/* Amount Input */}
+        <FormControl isInvalid={!!error}>
+          <FormLabel>Custom Amount (DOT)</FormLabel>
+          <NumberInput
+            min={0.1}
+            step={0.1}
+            value={amount}
+            onChange={handleAmountChange}
+            precision={4}
+            isDisabled={!selectedAccount || !isActive}
+          >
+            <NumberInputField placeholder="Enter donation amount" />
+            <NumberInputStepper>
+              <NumberIncrementStepper />
+              <NumberDecrementStepper />
+            </NumberInputStepper>
+          </NumberInput>
+          <FormErrorMessage>{error}</FormErrorMessage>
+        </FormControl>
+
+        {/* Donate Button */}
+        <Button
+          colorScheme="blue"
+          size="lg"
+          width="100%"
+          onClick={handleDonate}
+          isLoading={isSubmitting}
+          loadingText="Processing Donation..."
+          isDisabled={!selectedAccount || !isActive || !!error || !amount}
+          leftIcon={<Icon as={FiHeart} />}
         >
-          <NumberInputField />
-          <NumberInputStepper>
-            <NumberIncrementStepper />
-            <NumberDecrementStepper />
-          </NumberInputStepper>
-        </NumberInput>
-      </FormControl>
+          {!selectedAccount 
+            ? 'Connect Wallet to Donate' 
+            : !isActive 
+            ? 'Campaign Ended' 
+            : amount 
+            ? `Donate ${amount} DOT` 
+            : 'Enter Amount'}
+        </Button>
 
-      <Button
-        colorScheme="blue"
-        width="100%"
-        onClick={handleDonate}
-        isLoading={isSubmitting}
-        loadingText="Processing..."
-        isDisabled={!selectedAccount || amount <= 0}
-      >
-        Donate Now
-      </Button>
+        {/* Helper Text */}
+        <Text fontSize="xs" color="gray.600" textAlign="center">
+          Your donation will be sent directly to the campaign beneficiary on the blockchain
+        </Text>
+      </VStack>
     </Box>
   );
+});
+
+DonationInterface.displayName = 'DonationInterface';
+
+DonationInterface.propTypes = {
+  campaignId: PropTypes.string.isRequired,
+  campaign: PropTypes.shape({
+    state: PropTypes.string,
+    deadline: PropTypes.number,
+    raised: PropTypes.number,
+    goal: PropTypes.number,
+  }),
 };
 
 export default DonationInterface;

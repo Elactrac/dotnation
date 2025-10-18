@@ -1,11 +1,11 @@
-import React from 'react';
+
 import { Outlet, Link } from 'react-router-dom';
-import WalletConnect from '../components/WalletConnect';
-import './LandingPage.css'; // Reusing styles
+import WalletConnect from '../components/WalletConnect.jsx';
+import './Dashboard.css';
 
 const DashboardLayout = () => {
   return (
-    <div className="content-wrapper">
+    <div className="dashboard-layout">
       <header className="header">
         <nav className="container nav-bar">
           <Link to="/dashboard" className="logo">Dot<span>Nation</span></Link>
@@ -13,12 +13,10 @@ const DashboardLayout = () => {
             <Link to="/dashboard">Campaigns</Link>
             <Link to="/dashboard/create-campaign">Create Campaign</Link>
           </div>
-          <div>
-            <WalletConnect />
-          </div>
+          <WalletConnect />
         </nav>
       </header>
-      <main style={{ padding: '2rem 0'}}>
+      <main className="dashboard-main">
         <div className="container">
           <Outlet />
         </div>

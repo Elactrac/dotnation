@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import {
   VStack,
   FormControl,
@@ -217,4 +218,10 @@ export const CampaignEdit = ({ campaignId, onSuccess, onCancel }) => {
       </VStack>
     </form>
   );
+};
+
+CampaignEdit.propTypes = {
+  campaignId: PropTypes.number.isRequired,
+  onSuccess: PropTypes.func.isRequired,
+  onCancel: PropTypes.func.isRequired,
 };

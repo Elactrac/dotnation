@@ -1,4 +1,3 @@
-import React from 'react';
 import PropTypes from 'prop-types';
 import { Box, Image, Heading, Text, Progress, Flex, Badge, Button } from '@chakra-ui/react';
 import { Link } from 'react-router-dom';
@@ -93,6 +92,7 @@ CampaignCard.propTypes = {
     raised: PropTypes.number.isRequired,
     goal: PropTypes.number.isRequired,
     deadline: PropTypes.number.isRequired,
+    state: PropTypes.string,
   }).isRequired,
 };
 
