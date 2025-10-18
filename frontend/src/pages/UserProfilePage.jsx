@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
 import {
-  Box,
   Container,
   Heading,
   Text,
@@ -16,29 +15,25 @@ import {
   StatHelpText,
   SimpleGrid,
   Flex,
-  Spinner,
   Alert,
   AlertIcon,
   Button,
   Avatar,
   Badge,
-  Divider,
   FormControl,
   FormLabel,
   Input,
   Textarea,
   Switch,
-  useColorModeValue,
-  useToast,
   Tabs,
   TabList,
   TabPanels,
   Tab,
   TabPanel,
   Progress,
-  Tag,
-  TagLabel
+  Divider
 } from '@chakra-ui/react';
+import { useToast } from '@chakra-ui/react';
 import {
   FiUser,
   FiTrendingUp,
@@ -48,12 +43,12 @@ import {
   FiEdit,
   FiAward,
   FiTarget,
-  FiDollarSign,
+  FiUsers,
   FiCalendar
 } from 'react-icons/fi';
 import { useWallet } from '../contexts/WalletContext';
 import { useCampaign } from '../contexts/CampaignContext.jsx';
-import { formatDOT, shortenAddress, formatDate } from '../utils/formatters';
+import { formatDOT, shortenAddress } from '../utils/formatters';
 import PageErrorBoundary from '../components/PageErrorBoundary';
 
 const UserProfilePage = () => {
@@ -76,7 +71,7 @@ const UserProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  const bgColor = useColorModeValue('gray.50', 'gray.900');
+
 
   // Calculate user statistics
   const userStats = useMemo(() => {

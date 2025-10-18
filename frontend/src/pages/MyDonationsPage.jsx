@@ -6,7 +6,6 @@ import {
   Text,
   Card,
   CardBody,
-  CardHeader,
   VStack,
   HStack,
   Icon,
@@ -21,8 +20,7 @@ import {
   AlertIcon,
   Badge,
   Button,
-  useColorModeValue,
-  Divider
+  useColorModeValue
 } from '@chakra-ui/react';
 import {
   FiHeart,

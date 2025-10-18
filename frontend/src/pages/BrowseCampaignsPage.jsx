@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Box,
   Container,
@@ -23,6 +23,7 @@ import {
   Spinner,
   Alert,
   AlertIcon,
+  Progress,
   useColorModeValue,
   RangeSlider,
   RangeSliderTrack,
@@ -36,21 +37,31 @@ import {
   NumberDecrementStepper,
   FormControl,
   FormLabel,
-  Divider,
+  Wrap,
+  WrapItem,
   Tag,
   TagLabel,
   TagCloseButton,
-  Wrap,
-  WrapItem
+  useDisclosure,
+  Drawer,
+  DrawerBody,
+  DrawerHeader,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerCloseButton,
+  Accordion,
+  AccordionItem,
+  AccordionButton,
+  AccordionPanel,
+  AccordionIcon
 } from '@chakra-ui/react';
 import {
   FiSearch,
   FiFilter,
-  FiTrendingUp,
   FiClock,
-  FiDollarSign,
   FiUsers,
-  FiX
+  FiX,
+  FiSliders
 } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import { useCampaign } from '../contexts/CampaignContext.jsx';
@@ -58,13 +69,15 @@ import {
   formatDOT,
   calculateProgress,
   getDeadlineStatus,
-  getCampaignStateColor,
-  formatDate
+  getCampaignStateColor
 } from '../utils/formatters';
 import PageErrorBoundary from '../components/PageErrorBoundary';
+import CampaignCard from '../components/CampaignCard';
+import { CampaignCardSkeleton } from '../components/SkeletonLoader';
 
 const BrowseCampaignsPage = () => {
   const { campaigns, isLoading, error } = useCampaign();
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   // Search and filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -73,7 +86,6 @@ const BrowseCampaignsPage = () => {
   const [goalRange, setGoalRange] = useState([0, 100000]); // DOT range
   const [progressRange, setProgressRange] = useState([0, 100]); // Progress percentage
   const [selectedCategories, setSelectedCategories] = useState([]);
-  const [showFilters, setShowFilters] = useState(false);
 
   const bgColor = useColorModeValue('gray.50', 'gray.900');
 
@@ -234,10 +246,21 @@ const BrowseCampaignsPage = () => {
               <Flex justify="space-between" align="center" wrap="wrap" gap={4}>
                 <HStack>
                   <Button
+                    leftIcon={<Icon as={FiSliders} />}
+                    variant="outline"
+                    onClick={onOpen}
+                    colorScheme={activeFiltersCount > 0 ? 'blue' : 'gray'}
+                    display={{ base: 'flex', md: 'none' }}
+                  >
+                    Filters {activeFiltersCount > 0 && `(${activeFiltersCount})`}
+                  </Button>
+
+                  <Button
                     leftIcon={<Icon as={FiFilter} />}
                     variant="outline"
                     onClick={() => setShowFilters(!showFilters)}
                     colorScheme={activeFiltersCount > 0 ? 'blue' : 'gray'}
+                    display={{ base: 'none', md: 'flex' }}
                   >
                     Filters {activeFiltersCount > 0 && `(${activeFiltersCount})`}
                   </Button>
@@ -409,79 +432,131 @@ const BrowseCampaignsPage = () => {
               </VStack>
             </CardBody>
           </Card>
+        ) : isLoading ? (
+          <CampaignCardSkeleton count={6} />
+        ) : isLoading ? (
+          <CampaignCardSkeleton count={6} />
         ) : (
-          <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }} gap={6}>
-            {filteredCampaigns.map((campaign) => {
-              const progress = calculateProgress(campaign.raised, campaign.goal);
-              const deadlineStatus = getDeadlineStatus(campaign.deadline);
-              const stateColor = getCampaignStateColor(campaign.state);
-
-              return (
-                <Card key={campaign.id} _hover={{ shadow: 'lg', transform: 'translateY(-2px)' }} transition="all 0.2s">
-                  <CardHeader pb={2}>
-                    <Flex justify="space-between" align="center" mb={2}>
-                      <Badge colorScheme={stateColor} fontSize="xs">
-                        {campaign.state}
-                      </Badge>
-                      <Text fontSize="xs" color="gray.500">
-                        #{campaign.id}
-                      </Text>
-                    </Flex>
-                    <Heading size="md" noOfLines={2}>
-                      {campaign.title}
-                    </Heading>
-                  </CardHeader>
-
-                  <CardBody pt={0}>
-                    <VStack spacing={3} align="stretch">
-                      <Text fontSize="sm" color="gray.600" noOfLines={2}>
-                        {campaign.description}
-                      </Text>
-
-                      <Box>
-                        <Flex justify="space-between" mb={1}>
-                          <Text fontSize="sm" fontWeight="medium">
-                            {formatDOT(campaign.raised)} DOT raised
-                          </Text>
-                          <Text fontSize="sm" color="gray.600">
-                            {progress.toFixed(1)}%
-                          </Text>
-                        </Flex>
-                        <Progress value={progress} colorScheme="blue" size="sm" borderRadius="full" />
-                        <Text fontSize="xs" color="gray.500" mt={1}>
-                          Goal: {formatDOT(campaign.goal)} DOT
-                        </Text>
-                      </Box>
-
-                      <Flex justify="space-between" fontSize="xs" color="gray.600">
-                        <HStack>
-                          <Icon as={FiClock} />
-                          <Text>{deadlineStatus.message}</Text>
-                        </HStack>
-                        <HStack>
-                          <Icon as={FiUsers} />
-                          <Text>0 donors</Text>
-                        </HStack>
-                      </Flex>
-                    </VStack>
-                  </CardBody>
-
-                  <CardFooter pt={0}>
-                    <Button
-                      as={Link}
-                      to={`/dashboard/campaign/${campaign.id}`}
-                      colorScheme="blue"
-                      size="sm"
-                      width="100%"
-                    >
-                      View Campaign
-                    </Button>
-                  </CardFooter>
-                </Card>
-              );
-            })}
-          </Grid>
+          <SimpleGrid columns={{ base: 1, sm: 2, lg: 3, xl: 4 }} spacing={6}>
+            {filteredCampaigns.map((campaign) => (
+              <CampaignCard
+                key={campaign.id}
+                campaign={campaign}
+                showStats={true}
+              />
+            ))}
+          </SimpleGrid>
         )}
+
+        {/* Mobile Filters Drawer */}
+        <Drawer isOpen={isOpen} placement="right" onClose={onClose} size="md">
+          <DrawerOverlay />
+          <DrawerContent>
+            <DrawerCloseButton />
+            <DrawerHeader>Filters</DrawerHeader>
+            <DrawerBody>
+              <VStack spacing={6} align="stretch">
+                {/* Status Filter */}
+                <FormControl>
+                  <FormLabel fontSize="sm" fontWeight="semibold">Status</FormLabel>
+                  <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+                    <option value="all">All Campaigns</option>
+                    <option value="Active">Active</option>
+                    <option value="Successful">Successful</option>
+                    <option value="Failed">Failed</option>
+                  </Select>
+                </FormControl>
+
+                {/* Sort Options */}
+                <FormControl>
+                  <FormLabel fontSize="sm" fontWeight="semibold">Sort By</FormLabel>
+                  <Select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="most-funded">Most Funded</option>
+                    <option value="least-funded">Least Funded</option>
+                    <option value="ending-soon">Ending Soon</option>
+                  </Select>
+                </FormControl>
+
+                {/* Goal Range */}
+                <FormControl>
+                  <FormLabel fontSize="sm" fontWeight="semibold">
+                    Goal Range: {formatDOT(goalRange[0])} - {formatDOT(goalRange[1])} DOT
+                  </FormLabel>
+                  <RangeSlider
+                    min={0}
+                    max={100000}
+                    step={1000}
+                    value={goalRange}
+                    onChange={setGoalRange}
+                  >
+                    <RangeSliderTrack>
+                      <RangeSliderFilledTrack />
+                    </RangeSliderTrack>
+                    <RangeSliderThumb index={0} />
+                    <RangeSliderThumb index={1} />
+                  </RangeSlider>
+                </FormControl>
+
+                {/* Progress Range */}
+                <FormControl>
+                  <FormLabel fontSize="sm" fontWeight="semibold">
+                    Progress: {progressRange[0]}% - {progressRange[1]}%
+                  </FormLabel>
+                  <RangeSlider
+                    min={0}
+                    max={100}
+                    value={progressRange}
+                    onChange={setProgressRange}
+                  >
+                    <RangeSliderTrack>
+                      <RangeSliderFilledTrack />
+                    </RangeSliderTrack>
+                    <RangeSliderThumb index={0} />
+                    <RangeSliderThumb index={1} />
+                  </RangeSlider>
+                </FormControl>
+
+                {/* Categories */}
+                <FormControl>
+                  <FormLabel fontSize="sm" fontWeight="semibold">Categories</FormLabel>
+                  <Wrap spacing={2}>
+                    {availableCategories.map((category) => (
+                      <WrapItem key={category}>
+                        <Tag
+                          size="sm"
+                          variant={selectedCategories.includes(category) ? 'solid' : 'outline'}
+                          colorScheme={selectedCategories.includes(category) ? 'blue' : 'gray'}
+                          cursor="pointer"
+                          onClick={() => {
+                            if (selectedCategories.includes(category)) {
+                              setSelectedCategories(selectedCategories.filter(c => c !== category));
+                            } else {
+                              setSelectedCategories([...selectedCategories, category]);
+                            }
+                          }}
+                        >
+                          <TagLabel>{category}</TagLabel>
+                          {selectedCategories.includes(category) && (
+                            <TagCloseButton />
+                          )}
+                        </Tag>
+                      </WrapItem>
+                    ))}
+                  </Wrap>
+                </FormControl>
+
+                {/* Clear Filters */}
+                {activeFiltersCount > 0 && (
+                  <Button variant="outline" onClick={clearFilters} width="full">
+                    Clear All Filters
+                  </Button>
+                )}
+              </VStack>
+            </DrawerBody>
+          </DrawerContent>
+        </Drawer>
       </VStack>
     </Container>
   );

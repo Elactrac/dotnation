@@ -142,7 +142,7 @@ export const ApiProvider = ({ children }) => {
         api.disconnect();
       }
     };
-  }, [connectToNode, api]);
+  }, [connectToNode, api, eventMonitor]);
 
   const retryConnection = useCallback(() => {
     setReconnectAttempts(0);

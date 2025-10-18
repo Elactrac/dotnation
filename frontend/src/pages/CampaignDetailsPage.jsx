@@ -22,35 +22,29 @@ import {
   Icon,
   SimpleGrid,
   Avatar,
-  Link,
+  Card,
+  CardBody,
+  Stat,
+  StatLabel,
+  StatNumber,
+  StatHelpText,
   Tabs,
   TabList,
   TabPanels,
   Tab,
   TabPanel,
-  Card,
-  CardBody,
-  CardHeader,
-  CardFooter,
-  Stat,
-  StatLabel,
-  StatNumber,
-  StatHelpText,
-  IconButton,
-  Tooltip,
-  useColorModeValue
+  Textarea,
+  FormControl,
+  FormLabel
 } from '@chakra-ui/react';
 import {
-  FiShare2,
-  FiTwitter,
-  FiFacebook,
-  FiLinkedin,
-  FiCopy,
   FiHeart,
-  FiMessageSquare,
-  FiTrendingUp,
   FiUsers,
-  FiClock
+  FiTrendingUp,
+  FiDollarSign,
+  FiCalendar,
+  FiMessageSquare,
+  FiSend
 } from 'react-icons/fi';
 import { useCampaign } from '../contexts/CampaignContext.jsx';
 import { useWallet } from '../contexts/WalletContext';
@@ -130,7 +124,7 @@ const CampaignDetailsPage = () => {
   const handleShare = async (platform) => {
     const url = window.location.href;
     const title = campaign ? `Support ${campaign.title} on DotNation!` : 'Check out this campaign on DotNation!';
-    const text = campaign ? campaign.description.substring(0, 100) + '...' : 'Support amazing causes on the blockchain.';
+
 
     try {
       switch (platform) {

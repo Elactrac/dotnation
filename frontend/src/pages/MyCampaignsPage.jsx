@@ -1,11 +1,9 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Box,
   Container,
   Heading,
   Text,
-  Grid,
-  GridItem,
   Card,
   CardBody,
   CardHeader,
@@ -25,7 +23,7 @@ import {
   AlertIcon,
   SimpleGrid,
   Flex,
-  useColorModeValue
+  Grid
 } from '@chakra-ui/react';
 import {
   FiPlus,
@@ -33,8 +31,7 @@ import {
   FiUsers,
   FiClock,
   FiEdit,
-  FiEye,
-  FiDollarSign
+  FiEye
 } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCampaign } from '../contexts/CampaignContext.jsx';
@@ -54,7 +51,7 @@ const MyCampaignsPage = () => {
   const navigate = useNavigate();
   const [localLoading, setLocalLoading] = useState(false);
 
-  const bgColor = useColorModeValue('gray.50', 'gray.900');
+
 
   // Filter campaigns created by the current user
   const myCampaigns = useMemo(() => {
