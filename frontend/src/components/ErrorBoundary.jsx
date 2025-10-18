@@ -9,6 +9,7 @@ import {
   VStack,
   Code,
 } from '@chakra-ui/react';
+import { trackError, addBreadcrumb } from '../utils/sentry';
 
 /**
  * Error Boundary Component
@@ -34,20 +35,35 @@ export class ErrorBoundary extends Component {
   }
 
   componentDidCatch(error, errorInfo) {
+    // Add breadcrumb for debugging
+    addBreadcrumb(
+      `Error boundary caught error: ${error.message}`,
+      'error_boundary',
+      'error'
+    );
+
     // Log error to console
     console.error('Error Boundary caught error:', error, errorInfo);
-    
+
     // Update state with error details
     this.setState(prevState => ({
       errorInfo,
       errorCount: prevState.errorCount + 1,
     }));
 
-    // TODO: Send error to monitoring service (e.g., Sentry)
-    // if (window.Sentry) {
-    //   window.Sentry.captureException(error, { contexts: { react: errorInfo } });
-    // }
-    
+    // Send error to Sentry with React context
+    trackError(error, {
+      extra: {
+        componentStack: errorInfo.componentStack,
+        errorBoundary: true,
+        errorCount: this.state.errorCount + 1,
+      },
+      tags: {
+        error_source: 'error_boundary',
+        component: 'ErrorBoundary',
+      },
+    });
+
     // Log to custom error tracking if available
     if (this.props.onError) {
       this.props.onError(error, errorInfo);

@@ -2,6 +2,9 @@ import { createContext, useState, useContext, useEffect, useCallback } from 'rea
 import PropTypes from 'prop-types';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { retryWithBackoff, ChainError, ErrorCodes } from '../utils/errorHandler';
+import { metrics } from '../utils/metrics';
+import { ContractEventMonitor } from '../utils/eventMonitor';
+import { loggers } from '../utils/logger';
 
 const ApiContext = createContext({});
 
@@ -11,21 +14,28 @@ export const ApiProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [reconnectAttempts, setReconnectAttempts] = useState(0);
+  const [eventMonitor, setEventMonitor] = useState(null);
 
   const connectToNode = useCallback(async (wsEndpoint = 'ws://127.0.0.1:9944') => {
+    const startTime = Date.now();
     setIsConnecting(true);
     setError(null);
+
+    loggers.api.info('Connecting to blockchain node', { wsEndpoint });
 
     try {
       const wsProvider = new WsProvider(wsEndpoint);
       
       // Add connection event listeners
       wsProvider.on('connected', () => {
-        console.log('WebSocket connected to', wsEndpoint);
+        loggers.api.info('WebSocket connected successfully', { wsEndpoint });
       });
-      
+
       wsProvider.on('disconnected', () => {
-        console.warn('WebSocket disconnected');
+        loggers.api.warn('WebSocket disconnected, attempting reconnection', {
+          wsEndpoint,
+          reconnectAttempts
+        });
         setIsReady(false);
         // Attempt to reconnect
         if (reconnectAttempts < 3) {
@@ -33,9 +43,9 @@ export const ApiProvider = ({ children }) => {
           setTimeout(() => connectToNode(wsEndpoint), 5000);
         }
       });
-      
+
       wsProvider.on('error', (error) => {
-        console.error('WebSocket error:', error);
+        loggers.api.error('WebSocket connection error', { wsEndpoint }, error);
         setError(new ChainError(
           'Connection error occurred',
           ErrorCodes.CONNECTION_FAILED,
@@ -57,7 +67,12 @@ export const ApiProvider = ({ children }) => {
           maxRetries: 3,
           initialDelay: 2000,
           onRetry: (attempt, maxRetries, delay) => {
-            console.log(`Retry attempt ${attempt}/${maxRetries} in ${delay}ms`);
+            loggers.api.warn(`Connection retry attempt ${attempt}/${maxRetries} in ${delay}ms`, {
+              wsEndpoint,
+              attempt,
+              maxRetries,
+              delay
+            });
           }
         }
       );
@@ -66,18 +81,47 @@ export const ApiProvider = ({ children }) => {
       setApi(apiInstance);
       setIsReady(true);
       setReconnectAttempts(0);
-      
-      console.log('API connected successfully to', wsEndpoint);
+
+      // Record successful connection metrics
+      metrics.recordApiCall('connectToNode', Date.now() - startTime, true);
+
+      // Initialize event monitor for contract events
+      const contractAddress = import.meta.env.VITE_CONTRACT_ADDRESS;
+      if (contractAddress) {
+        const monitor = new ContractEventMonitor(apiInstance, contractAddress);
+        setEventMonitor(monitor);
+
+        // Start monitoring events
+        monitor.start((event) => {
+          loggers.api.info('Contract event received', { event });
+          // Could emit custom events or update state based on events
+        });
+      }
+
+      loggers.api.info('API connected successfully', {
+        wsEndpoint,
+        duration: Date.now() - startTime
+      });
       
       return apiInstance;
     } catch (err) {
-      console.warn('API connection failed (app will work without node):', err.message);
+      loggers.api.warn('API connection failed (app will work without node)', {
+        wsEndpoint,
+        error: err.message,
+        duration: Date.now() - startTime
+      }, err);
+
       const chainError = new ChainError(
         'Failed to connect to blockchain node',
         ErrorCodes.CONNECTION_FAILED,
         { originalError: err.message, endpoint: wsEndpoint }
       );
       setError(chainError);
+
+      // Record failed connection metrics
+      metrics.recordApiCall('connectToNode', Date.now() - startTime, false);
+      metrics.recordError(chainError, 'error', { operation: 'connectToNode', endpoint: wsEndpoint });
+
       // Don't block the app, continue anyway
       return null;
     } finally {
@@ -91,6 +135,9 @@ export const ApiProvider = ({ children }) => {
 
     // Cleanup on unmount
     return () => {
+      if (eventMonitor) {
+        eventMonitor.stop();
+      }
       if (api) {
         api.disconnect();
       }
@@ -112,6 +159,7 @@ export const ApiProvider = ({ children }) => {
         isConnecting,
         reconnectAttempts,
         retryConnection,
+        eventMonitor,
       }}
     >
       {children}

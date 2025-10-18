@@ -16,11 +16,54 @@ import {
   Alert,
   AlertIcon,
   Button,
-  useToast
+  useToast,
+  VStack,
+  HStack,
+  Icon,
+  SimpleGrid,
+  Avatar,
+  Link,
+  Tabs,
+  TabList,
+  TabPanels,
+  Tab,
+  TabPanel,
+  Card,
+  CardBody,
+  CardHeader,
+  CardFooter,
+  Stat,
+  StatLabel,
+  StatNumber,
+  StatHelpText,
+  IconButton,
+  Tooltip,
+  useColorModeValue
 } from '@chakra-ui/react';
+import {
+  FiShare2,
+  FiTwitter,
+  FiFacebook,
+  FiLinkedin,
+  FiCopy,
+  FiHeart,
+  FiMessageSquare,
+  FiTrendingUp,
+  FiUsers,
+  FiClock
+} from 'react-icons/fi';
 import { useCampaign } from '../contexts/CampaignContext.jsx';
 import { useWallet } from '../contexts/WalletContext';
 import { DonationInterface } from '../components/DonationInterface.jsx';
+import {
+  formatDOT,
+  formatDate,
+  formatDateTime,
+  shortenAddress,
+  calculateProgress,
+  getDeadlineStatus,
+  getCampaignStateColor
+} from '../utils/formatters';
 
 const CampaignDetailsPage = () => {
   const { id } = useParams();
@@ -57,7 +100,7 @@ const CampaignDetailsPage = () => {
 
   const handleWithdraw = async () => {
     if (!campaign || !selectedAccount) return;
-    
+
     setIsWithdrawing(true);
     try {
       await withdrawFunds(id);
@@ -84,16 +127,65 @@ const CampaignDetailsPage = () => {
     }
   };
 
-  const progress = useMemo(() => (campaign ? (campaign.raised / campaign.goal) * 100 : 0), [campaign]);
-  const formattedGoal = useMemo(() => (campaign ? new Intl.NumberFormat().format(campaign.goal) : '0'), [campaign]);
-  const formattedRaised = useMemo(() => (campaign ? new Intl.NumberFormat().format(campaign.raised) : '0'), [campaign]);
-  const deadline = useMemo(() => (campaign ? new Date(campaign.deadline) : null), [campaign]);
-  const daysLeft = useMemo(() => (deadline ? Math.max(0, Math.ceil((deadline - new Date()) / (1000 * 60 * 60 * 24))) : 0), [deadline]);
-  const isOwnerOrAdmin = useMemo(() => (selectedAccount && campaign ? 
-    (selectedAccount.address === campaign.owner || selectedAccount.address === campaign.admin) : false), [selectedAccount, campaign]);
-  const canWithdraw = useMemo(() => (isOwnerOrAdmin && campaign ? 
-    (campaign.state === 'Successful' || (campaign.state === 'Active' && daysLeft === 0)) && 
-    campaign.state !== 'Withdrawn' : false), [isOwnerOrAdmin, campaign, daysLeft]);
+  const handleShare = async (platform) => {
+    const url = window.location.href;
+    const title = campaign ? `Support ${campaign.title} on DotNation!` : 'Check out this campaign on DotNation!';
+    const text = campaign ? campaign.description.substring(0, 100) + '...' : 'Support amazing causes on the blockchain.';
+
+    try {
+      switch (platform) {
+        case 'twitter':
+          window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`, '_blank');
+          break;
+        case 'facebook':
+          window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+          break;
+        case 'linkedin':
+          window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank');
+          break;
+        case 'copy':
+          await navigator.clipboard.writeText(url);
+          toast({
+            title: 'Link copied!',
+            description: 'Campaign link has been copied to clipboard',
+            status: 'success',
+            duration: 3000,
+            isClosable: true,
+          });
+          break;
+        default:
+          break;
+      }
+    } catch (err) {
+      toast({
+        title: 'Share failed',
+        description: 'Unable to share this campaign',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const campaignStats = useMemo(() => {
+    if (!campaign) return null;
+
+    const progress = calculateProgress(campaign.raised, campaign.goal);
+    const deadlineStatus = getDeadlineStatus(campaign.deadline);
+    const stateColor = getCampaignStateColor(campaign.state);
+
+    return {
+      progress,
+      deadlineStatus,
+      stateColor,
+      formattedGoal: formatDOT(campaign.goal),
+      formattedRaised: formatDOT(campaign.raised),
+      isOwner: selectedAccount && selectedAccount.address === campaign.owner,
+      canWithdraw: selectedAccount && campaign.owner === selectedAccount.address &&
+        (campaign.state === 'Successful' || (campaign.state === 'Active' && deadlineStatus.daysLeft === 0)) &&
+        campaign.state !== 'Withdrawn'
+    };
+  }, [campaign, selectedAccount]);
 
   if (isLoading) {
     return (
@@ -129,100 +221,202 @@ const CampaignDetailsPage = () => {
   }
 
   return (
-    <Container maxW="container.lg" py={10}>
+    <Container maxW="container.xl" py={10}>
       <Grid templateColumns={{ base: '1fr', lg: '2fr 1fr' }} gap={8}>
         <GridItem>
-          <Image
-            src={campaign.imageUrl || 'https://via.placeholder.com/800x400?text=Campaign+Image'}
-            alt={campaign.title}
-            borderRadius="lg"
-            width="100%"
-            height="400px"
-            objectFit="cover"
-            mb={6}
-          />
-          
-          <Flex justify="space-between" align="center" mb={4}>
-            <Heading size="xl">{campaign.title}</Heading>
-            <Badge 
-              colorScheme={campaign.state === 'Successful' ? 'green' : 
-                         campaign.state === 'Withdrawn' ? 'purple' : 
-                         campaign.state === 'Failed' ? 'red' : 'blue'}
-              p={2}
-              fontSize="md"
-            >
-              {campaign.state}
-            </Badge>
-          </Flex>
-          
-          <Flex justify="space-between" mb={4}>
-            <Text>Created by: {campaign.owner.substring(0, 8)}...{campaign.owner.substring(campaign.owner.length - 8)}</Text>
-            <Text>Beneficiary: {campaign.beneficiary.substring(0, 8)}...{campaign.beneficiary.substring(campaign.beneficiary.length - 8)}</Text>
-          </Flex>
-          
-          <Box mb={6}>
-            <Progress value={progress} colorScheme="blue" size="md" borderRadius="full" mb={2} />
-            <Flex justify="space-between">
-              <Text fontSize="xl" fontWeight="bold">
-                {formattedRaised} DOT raised
-              </Text>
-              <Text fontSize="xl">
-                of {formattedGoal} DOT goal
-              </Text>
-            </Flex>
-          </Box>
-          
-          <Flex justify="space-between" mb={6}>
-            <Badge colorScheme={daysLeft > 0 ? 'green' : 'red'} p={2}>
-              {daysLeft > 0 ? `${daysLeft} days left` : 'Campaign ended'}
-            </Badge>
-            <Text>Deadline: {deadline.toLocaleDateString()}</Text>
-          </Flex>
-          
-          <Divider mb={6} />
-          
-          <Box mb={8}>
-            <Heading size="md" mb={4}>About this campaign</Heading>
-            <Text whiteSpace="pre-wrap">{campaign.description}</Text>
-          </Box>
-          
-          {canWithdraw && (
-            <Button
-              colorScheme="green"
-              size="lg"
+          {/* Campaign Header */}
+          <VStack spacing={6} align="stretch">
+            <Image
+              src={campaign.imageUrl || 'https://via.placeholder.com/800x400?text=Campaign+Image'}
+              alt={campaign.title}
+              borderRadius="lg"
               width="100%"
-              mb={8}
-              onClick={handleWithdraw}
-              isLoading={isWithdrawing}
-              loadingText="Processing withdrawal..."
-            >
-              Withdraw Funds
-            </Button>
-          )}
-          
-          {donations.length > 0 && (
-            <Box mb={8}>
-              <Heading size="md" mb={4}>Recent Donations</Heading>
-              {donations.map((donation, index) => (
-                <Box key={index} p={4} borderWidth="1px" borderRadius="md" mb={2}>
-                  <Flex justify="space-between">
-                    <Text>
-                      {donation.donor.substring(0, 8)}...{donation.donor.substring(donation.donor.length - 8)}
+              height="400px"
+              objectFit="cover"
+            />
+
+            <Flex justify="space-between" align="center">
+              <Heading size="xl">{campaign.title}</Heading>
+              <HStack>
+                <Badge
+                  colorScheme={campaignStats?.stateColor}
+                  p={2}
+                  fontSize="md"
+                >
+                  {campaign.state}
+                </Badge>
+                <HStack spacing={1}>
+                  <Tooltip label="Share on Twitter">
+                    <IconButton
+                      icon={<FiTwitter />}
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleShare('twitter')}
+                      aria-label="Share on Twitter"
+                    />
+                  </Tooltip>
+                  <Tooltip label="Share on Facebook">
+                    <IconButton
+                      icon={<FiFacebook />}
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleShare('facebook')}
+                      aria-label="Share on Facebook"
+                    />
+                  </Tooltip>
+                  <Tooltip label="Share on LinkedIn">
+                    <IconButton
+                      icon={<FiLinkedin />}
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleShare('linkedin')}
+                      aria-label="Share on LinkedIn"
+                    />
+                  </Tooltip>
+                  <Tooltip label="Copy link">
+                    <IconButton
+                      icon={<FiCopy />}
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleShare('copy')}
+                      aria-label="Copy link"
+                    />
+                  </Tooltip>
+                </HStack>
+              </HStack>
+            </Flex>
+
+            {/* Campaign Stats */}
+            <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
+              <Stat>
+                <StatLabel>Funds Raised</StatLabel>
+                <StatNumber color="green.500">{campaignStats?.formattedRaised} DOT</StatNumber>
+                <StatHelpText>of {campaignStats?.formattedGoal} DOT goal</StatHelpText>
+              </Stat>
+              <Stat>
+                <StatLabel>Progress</StatLabel>
+                <StatNumber>{campaignStats?.progress.toFixed(1)}%</StatNumber>
+                <Progress value={campaignStats?.progress} colorScheme="blue" size="sm" mt={2} />
+              </Stat>
+              <Stat>
+                <StatLabel>Time Left</StatLabel>
+                <StatNumber color={campaignStats?.deadlineStatus.color}>
+                  {campaignStats?.deadlineStatus.message}
+                </StatNumber>
+                <StatHelpText>Deadline: {formatDate(campaign.deadline)}</StatHelpText>
+              </Stat>
+            </SimpleGrid>
+
+            {/* Campaign Details */}
+            <Flex justify="space-between" wrap="wrap" gap={4}>
+              <VStack align="start" spacing={1}>
+                <Text fontSize="sm" color="gray.600">Created by</Text>
+                <Text fontWeight="medium">{shortenAddress(campaign.owner)}</Text>
+              </VStack>
+              <VStack align="start" spacing={1}>
+                <Text fontSize="sm" color="gray.600">Beneficiary</Text>
+                <Text fontWeight="medium">{shortenAddress(campaign.beneficiary)}</Text>
+              </VStack>
+              <VStack align="start" spacing={1}>
+                <Text fontSize="sm" color="gray.600">Total Donors</Text>
+                <HStack>
+                  <Icon as={FiUsers} />
+                  <Text fontWeight="medium">{donations.length}</Text>
+                </HStack>
+              </VStack>
+            </Flex>
+
+            <Divider />
+
+            {/* Campaign Content Tabs */}
+            <Tabs variant="enclosed" colorScheme="blue">
+              <TabList>
+                <Tab><Icon as={FiHeart} mr={2} />About</Tab>
+                <Tab><Icon as={FiTrendingUp} mr={2} />Updates</Tab>
+                <Tab><Icon as={FiMessageSquare} mr={2} />Discussion</Tab>
+                <Tab><Icon as={FiUsers} mr={2} />Donors ({donations.length})</Tab>
+              </TabList>
+
+              <TabPanels>
+                <TabPanel>
+                  <Box>
+                    <Heading size="md" mb={4}>About this campaign</Heading>
+                    <Text whiteSpace="pre-wrap" lineHeight="tall">{campaign.description}</Text>
+                  </Box>
+                </TabPanel>
+
+                <TabPanel>
+                  <VStack spacing={4} align="stretch">
+                    <Heading size="md">Campaign Updates</Heading>
+                    <Text color="gray.600" fontStyle="italic">
+                      No updates yet. Campaign updates will appear here as the creator shares progress.
                     </Text>
-                    <Text fontWeight="bold">{donation.amount} DOT</Text>
-                  </Flex>
-                  <Text fontSize="sm" color="gray.500">
-                    {new Date(donation.timestamp).toLocaleString()}
-                  </Text>
-                </Box>
-              ))}
-            </Box>
-          )}
+                  </VStack>
+                </TabPanel>
+
+                <TabPanel>
+                  <VStack spacing={4} align="stretch">
+                    <Heading size="md">Discussion</Heading>
+                    <Text color="gray.600" fontStyle="italic">
+                      Comments and discussion feature coming soon. Stay tuned!
+                    </Text>
+                  </VStack>
+                </TabPanel>
+
+                <TabPanel>
+                  <VStack spacing={4} align="stretch">
+                    <Heading size="md">Recent Donations</Heading>
+                    {donations.length > 0 ? (
+                      donations.slice(0, 10).map((donation, index) => (
+                        <Card key={index} size="sm">
+                          <CardBody>
+                            <Flex justify="space-between" align="center">
+                              <HStack>
+                                <Avatar size="sm" name={shortenAddress(donation.donor)} />
+                                <VStack align="start" spacing={0}>
+                                  <Text fontWeight="medium">{shortenAddress(donation.donor)}</Text>
+                                  <Text fontSize="sm" color="gray.500">
+                                    {formatDateTime(donation.timestamp)}
+                                  </Text>
+                                </VStack>
+                              </HStack>
+                              <Badge colorScheme="green" fontSize="md" p={2}>
+                                {formatDOT(donation.amount)} DOT
+                              </Badge>
+                            </Flex>
+                          </CardBody>
+                        </Card>
+                      ))
+                    ) : (
+                      <Text color="gray.600" fontStyle="italic" textAlign="center" py={8}>
+                        No donations yet. Be the first to support this campaign!
+                      </Text>
+                    )}
+                  </VStack>
+                </TabPanel>
+              </TabPanels>
+            </Tabs>
+
+            {/* Withdraw Button for Campaign Owner */}
+            {campaignStats?.canWithdraw && (
+              <Button
+                colorScheme="green"
+                size="lg"
+                width="100%"
+                onClick={handleWithdraw}
+                isLoading={isWithdrawing}
+                loadingText="Processing withdrawal..."
+                leftIcon={<Icon as={FiTrendingUp} />}
+              >
+                Withdraw Funds
+              </Button>
+            )}
+          </VStack>
         </GridItem>
-        
+
         <GridItem>
           <Box position="sticky" top="20px">
-            <DonationInterface campaignId={id} />
+            <DonationInterface campaignId={id} campaign={campaign} />
           </Box>
         </GridItem>
       </Grid>
