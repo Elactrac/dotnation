@@ -1,0 +1,71 @@
+name: Security Audit
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly on Sunday at midnight UTC
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  rust-security:
+    runs-on: ubuntu-latest
+    name: Audit Rust Dependencies
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        toolchain: stable
+    
+    - name: Cache cargo-audit
+      uses: actions/cache@v4
+      with:
+        path: ~/.cargo/bin/cargo-audit
+        key: ${{ runner.os }}-cargo-audit-v0.18.0 # Pin to a version
+    
+    - name: Install cargo-audit
+      run: cargo install cargo-audit --version 0.18.0
+      if: steps.cache-cargo-audit.outputs.cache-hit != 'true'
+    
+    - name: Run security audit
+      working-directory: ./donation_platform
+      # Ignoring advisories should be done in a config file for better tracking
+      # e.g., in donation_platform/.cargo/config.toml
+      # [audit]
+      # ignore = ["RUSTSEC-2024-0344", "RUSTSEC-2024-0388"]
+      run: cargo audit
+  
+  frontend-security:
+    runs-on: ubuntu-latest
+    name: Audit Frontend Dependencies
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Install dependencies
+      working-directory: ./frontend
+      run: npm ci
+
+    - name: Run npm audit
+      working-directory: ./frontend
+      # Fails the build if moderate or higher vulnerabilities are found.
+      # Use `continue-on-error: true` if you only want a report without failing.
+      run: npm audit --audit-level=moderate
+    
+    - name: Check for outdated packages
+      working-directory: ./frontend
+      # The `|| true` prevents the step from failing if outdated packages are found.
+      # This step is for reporting purposes.
+      run: npm outdated || true

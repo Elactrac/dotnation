@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Stitch Design</title>
+<link href="data:image/x-icon;base64," rel="icon" type="image/x-icon"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#ee2b8c",
+              "background-light": "#f8f6f7",
+              "background-dark": "#221019",
+            },
+            fontFamily: {
+              display: ["Space Grotesk", "sans-serif"],
+            },
+            borderRadius: { DEFAULT: "0.5rem", lg: "0.75rem", xl: "1rem", full: "9999px" },
+          },
+        },
+      };
+    </script>
+<style>
+      .glassmorphism {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+      }
+      .dark .glassmorphism {
+        background: rgba(255, 255, 255, 0.05);
+      }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-white">
+<div class="relative min-h-screen w-full overflow-x-hidden">
+<div class="absolute inset-0 -z-10 h-full w-full bg-background-dark"></div>
+<header class="flex items-center justify-between whitespace-nowrap border-b border-primary/20 px-10 py-4">
+<div class="flex items-center gap-4">
+<div class="h-8 w-8 text-primary">
+<svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M36.7273 44C33.9891 44 31.6043 39.8386 30.3636 33.69C29.123 39.8386 26.7382 44 24 44C21.2618 44 18.877 39.8386 17.6364 33.69C16.3957 39.8386 14.0109 44 11.2727 44C7.25611 44 4 35.0457 4 24C4 12.9543 7.25611 4 11.2727 4C14.0109 4 16.3957 8.16144 17.6364 14.31C18.877 8.16144 21.2618 4 24 4C26.7382 4 29.123 8.16144 30.3636 14.31C31.6043 8.16144 33.9891 4 36.7273 4C40.7439 4 44 12.9543 44 24C44 35.0457 40.7439 44 36.7273 44Z" fill="currentColor"></path>
+</svg>
+</div>
+<h2 class="text-xl font-bold text-white">DotNation</h2>
+</div>
+<nav class="hidden items-center gap-8 md:flex">
+<a class="text-sm font-medium text-white/70 transition-colors hover:text-white" href="#">Dashboard</a>
+<a class="text-sm font-medium text-white/70 transition-colors hover:text-white" href="#">Campaigns</a>
+<a class="text-sm font-medium text-white/70 transition-colors hover:text-white" href="#">Discover</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/20 text-white/70 transition-colors hover:bg-primary/30 hover:text-white">
+<span class="material-symbols-outlined"> notifications </span>
+</button>
+<div class="h-10 w-10 rounded-full bg-cover bg-center bg-no-repeat" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAnhOufoGLgb6kx6rNQ2CuN-KPYPus1kojLi_4krdhH-XjxCuG1x9VvHI5d4aJ567J5gRZxvX90Egnx5W26rlqnMYaFs-zFjqpWMndIcNYgBI2RHF_Rb5THb0htkwB8FKJo5x1m4rAS-y_LcUKZs9bAHqmzLlRgPVR1zH9sbiaElrPvIz0Q1s_hHwnDD_UnShXnQe-XtiIHxnMm2W7nrE-trCkvLAYKF9FoSyXbmEkOFW9o69aFkwzn05sWvhOiJas_Dt-GHRehwO0");'></div>
+</div>
+</header>
+<main class="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8">
+<h1 class="mb-12 text-4xl font-bold tracking-tighter text-white">Settings</h1>
+<div class="space-y-12">
+<section>
+<h2 class="mb-6 text-xl font-semibold text-white">App Preferences</h2>
+<div class="space-y-4 rounded-lg border border-primary/20 bg-background-light/5 p-6 glassmorphism dark:bg-background-dark/5">
+<div class="flex items-center justify-between">
+<div>
+<h3 class="font-medium text-white">Language</h3>
+<p class="text-sm text-white/50">Choose your preferred language for the app interface.</p>
+</div>
+<div class="flex items-center gap-2 text-white">
+<span>English</span>
+<span class="material-symbols-outlined text-white/50"> chevron_right </span>
+</div>
+</div>
+<div class="h-px bg-primary/20"></div>
+<div class="flex items-center justify-between">
+<div>
+<h3 class="font-medium text-white">Currency</h3>
+<p class="text-sm text-white/50">Select your preferred currency for displaying amounts.</p>
+</div>
+<div class="flex items-center gap-2 text-white">
+<span>USD</span>
+<span class="material-symbols-outlined text-white/50"> chevron_right </span>
+</div>
+</div>
+</div>
+</section>
+<section>
+<h2 class="mb-6 text-xl font-semibold text-white">Notifications</h2>
+<div class="space-y-4 rounded-lg border border-primary/20 bg-background-light/5 p-6 glassmorphism dark:bg-background-dark/5">
+<div class="flex items-center justify-between">
+<div>
+<h3 class="font-medium text-white">Campaign Updates</h3>
+<p class="text-sm text-white/50">Receive notifications for campaign updates and milestones.</p>
+</div>
+<label class="relative inline-flex cursor-pointer items-center">
+<input checked="" class="peer sr-only" type="checkbox" value=""/>
+<div class="peer h-6 w-11 rounded-full bg-primary/30 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/50 dark:border-gray-600 dark:bg-gray-700"></div>
+</label>
+</div>
+<div class="h-px bg-primary/20"></div>
+<div class="flex items-center justify-between">
+<div>
+<h3 class="font-medium text-white">New Campaigns</h3>
+<p class="text-sm text-white/50">Get notified about new campaigns and trending projects.</p>
+</div>
+<label class="relative inline-flex cursor-pointer items-center">
+<input class="peer sr-only" type="checkbox" value=""/>
+<div class="peer h-6 w-11 rounded-full bg-primary/30 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/50 dark:border-gray-600 dark:bg-gray-700"></div>
+</label>
+</div>
+<div class="h-px bg-primary/20"></div>
+<div class="flex items-center justify-between">
+<div>
+<h3 class="font-medium text-white">Contributions &amp; Rewards</h3>
+<p class="text-sm text-white/50">Receive alerts for contributions and rewards.</p>
+</div>
+<label class="relative inline-flex cursor-pointer items-center">
+<input checked="" class="peer sr-only" type="checkbox" value=""/>
+<div class="peer h-6 w-11 rounded-full bg-primary/30 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/50 dark:border-gray-600 dark:bg-gray-700"></div>
+</label>
+</div>
+</div>
+</section>
+<section>
+<h2 class="mb-6 text-xl font-semibold text-white">Privacy</h2>
+<div class="space-y-4 rounded-lg border border-primary/20 bg-background-light/5 p-6 glassmorphism dark:bg-background-dark/5">
+<div class="flex items-center justify-between">
+<div>
+<h3 class="font-medium text-white">Profile Visibility</h3>
+<p class="text-sm text-white/50">Control who can view your profile and activity.</p>
+</div>
+<div class="flex items-center gap-2 text-white">
+<span>Public</span>
+<span class="material-symbols-outlined text-white/50"> chevron_right </span>
+</div>
+</div>
+<div class="h-px bg-primary/20"></div>
+<div class="flex items-center justify-between">
+<div>
+<h3 class="font-medium text-white">Data Management</h3>
+<p class="text-sm text-white/50">Manage your data and privacy settings.</p>
+</div>
+<button class="rounded-full bg-primary/20 px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-primary/30">Manage</button>
+</div>
+</div>
+</section>
+<section>
+<h2 class="mb-6 text-xl font-semibold text-white">Security</h2>
+<div class="space-y-4 rounded-lg border border-primary/20 bg-background-light/5 p-6 glassmorphism dark:bg-background-dark/5">
+<div class="flex items-center justify-between">
+<div>
+<h3 class="font-medium text-white">Change Password</h3>
+<p class="text-sm text-white/50">Change your password to keep your account secure.</p>
+</div>
+<button class="rounded-full bg-primary/20 px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-primary/30">Change</button>
+</div>
+<div class="h-px bg-primary/20"></div>
+<div class="flex items-center justify-between">
+<div>
+<h3 class="font-medium text-white">Two-Factor Authentication</h3>
+<p class="text-sm text-white/50">Enable two-factor authentication for added security.</p>
+</div>
+<label class="relative inline-flex cursor-pointer items-center">
+<input class="peer sr-only" type="checkbox" value=""/>
+<div class="peer h-6 w-11 rounded-full bg-primary/30 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/50 dark:border-gray-600 dark:bg-gray-700"></div>
+</label>
+</div>
+</div>
+</section>
+<section>
+<h2 class="mb-6 text-xl font-semibold text-white">About</h2>
+<div class="space-y-4 rounded-lg border border-primary/20 bg-background-light/5 p-6 glassmorphism dark:bg-background-dark/5">
+<div class="flex items-center justify-between">
+<div>
+<h3 class="font-medium text-white">Terms &amp; Privacy</h3>
+<p class="text-sm text-white/50">View the terms of service and privacy policy.</p>
+</div>
+<button class="rounded-full bg-primary/20 px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-primary/30">View</button>
+</div>
+<div class="h-px bg-primary/20"></div>
+<div class="flex items-center justify-between">
+<div>
+<h3 class="font-medium text-white">About DotNation</h3>
+<p class="text-sm text-white/50">Learn more about the DotNation platform.</p>
+</div>
+<button class="rounded-full bg-primary/20 px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-primary/30">Learn More</button>
+</div>
+</div>
+</section>
+</div>
+</main>
+</div>
+</body></html>
