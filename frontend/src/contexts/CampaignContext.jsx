@@ -19,7 +19,7 @@ const EVM_CONTRACT_ABI = [
 const CampaignContext = createContext({});
 
 export const CampaignProvider = ({ children }) => {
-  const { api, isReady } = useApi();
+  const { api, contract, isReady } = useApi();
   const { selectedAccount, walletType } = useWallet();
   const [campaigns, setCampaigns] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -37,62 +37,99 @@ export const CampaignProvider = ({ children }) => {
   };
 
   const fetchCampaigns = useCallback(async () => {
-    // For development without deployed contract, use mock data
-    const mockCampaigns = [
-      {
-        id: 1,
-        owner: '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY',
-        title: 'Decentralized Education Platform',
-        description: 'Building the future of learning with blockchain technology.',
-        goal: 1000000000000n, // 1000 DOT
-        raised: 500000000000n, // 500 DOT
-        deadline: Date.now() + 86400000 * 30, // 30 days
-        state: 'Active',
-        beneficiary: '5FHneW46xGXgs5mUiveU4sbTyGBzmvcE1QP9KG1Yqk5j9',
-      },
-      {
-        id: 2,
-        owner: '5FHneW46xGXgs5mUiveU4sbTyGBzmvcE1QP9KG1Yqk5j9',
-        title: 'Green Energy Initiative',
-        description: 'Funding renewable energy projects for a sustainable future.',
-        goal: 2000000000000n, // 2000 DOT
-        raised: 800000000000n, // 800 DOT
-        deadline: Date.now() + 86400000 * 15, // 15 days
-        state: 'Active',
-        beneficiary: '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY',
-      },
-    ];
+    if (!contract) {
+      // Fallback to mock data if contract not available
+      const mockCampaigns = [
+        {
+          id: 1,
+          owner: '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY',
+          title: 'Decentralized Education Platform',
+          description: 'Building the future of learning with blockchain technology.',
+          goal: 1000000000000n, // 1000 DOT
+          raised: 500000000000n, // 500 DOT
+          deadline: Date.now() + 86400000 * 30, // 30 days
+          state: 'Active',
+          beneficiary: '5FHneW46xGXgs5mUiveU4sbTyGBzmvcE1QP9KG1Yqk5j9',
+        },
+        {
+          id: 2,
+          owner: '5FHneW46xGXgs5mUiveU4sbTyGBzmvcE1QP9KG1Yqk5j9',
+          title: 'Green Energy Initiative',
+          description: 'Funding renewable energy projects for a sustainable future.',
+          goal: 2000000000000n, // 2000 DOT
+          raised: 800000000000n, // 800 DOT
+          deadline: Date.now() + 86400000 * 15, // 15 days
+          state: 'Active',
+          beneficiary: '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY',
+        },
+      ];
+      setCampaigns(mockCampaigns);
+      setIsLoading(false);
+      return;
+    }
 
-    setCampaigns(mockCampaigns);
-    setIsLoading(false);
-  }, []);
+    try {
+      const { result, output } = await contract.query.getCampaigns(selectedAccount?.address || '', { gasLimit: -1 });
+
+      if (result.isErr) {
+        throw new Error(`Contract error: ${result.asErr.toString()}`);
+      }
+
+      const campaignsData = output.toHuman() || [];
+      const formattedCampaigns = campaignsData.map(campaign => ({
+        id: parseInt(campaign.id),
+        owner: campaign.owner,
+        title: campaign.title,
+        description: campaign.description,
+        goal: BigInt(campaign.goal.replace(/,/g, '')),
+        raised: BigInt(campaign.raised.replace(/,/g, '')),
+        deadline: parseInt(campaign.deadline),
+        state: campaign.state,
+        beneficiary: campaign.beneficiary,
+      }));
+
+      setCampaigns(formattedCampaigns);
+    } catch (err) {
+      console.error('Failed to fetch campaigns:', err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [contract, selectedAccount]);
 
   const getCampaignDetails = useCallback(async (campaignId) => {
-    if (!api || !isReady) throw new Error('API not connected');
-    
+    if (!contract) {
+      throw new Error('Contract not loaded');
+    }
+
     try {
-      const details = await api.query.donationPlatform.getCampaignDetails(campaignId);
-      if (!details) throw new Error('Campaign not found');
-      
-      const campaign = details.campaign;
-      const donations = details.donations;
-      
+      const { result, output } = await contract.query.getCampaignDetails(selectedAccount?.address || '', { gasLimit: -1 }, campaignId);
+
+      if (result.isErr) {
+        throw new Error(`Contract error: ${result.asErr.toString()}`);
+      }
+
+      if (!output) throw new Error('Campaign not found');
+
+      const campaign = output.toHuman();
+      const donations = campaign.donations || [];
+
       return {
         campaign: {
-          id: campaign.id.toNumber(),
-          owner: campaign.owner.toString(),
-          title: campaign.title.toString(),
-          description: campaign.description.toString(),
-          goal: campaign.goal.toBigInt(),
-          raised: campaign.raised.toBigInt(),
-          deadline: campaign.deadline.toNumber(),
-          state: campaign.state.toString(),
-          beneficiary: campaign.beneficiary.toString(),
+          id: parseInt(campaign.id),
+          owner: campaign.owner,
+          title: campaign.title,
+          description: campaign.description,
+          goal: BigInt(campaign.goal.replace(/,/g, '')),
+          raised: BigInt(campaign.raised.replace(/,/g, '')),
+          deadline: parseInt(campaign.deadline),
+          state: campaign.state,
+          beneficiary: campaign.beneficiary,
         },
         donations: donations.map(donation => ({
-          donor: donation.donor.toString(),
-          amount: donation.amount.toBigInt(),
-          timestamp: donation.timestamp.toNumber()
+          donor: donation.donor,
+          amount: BigInt(donation.amount.replace(/,/g, '')),
+          timestamp: parseInt(donation.timestamp)
         }))
       };
     } catch (err) {
@@ -123,86 +160,109 @@ export const CampaignProvider = ({ children }) => {
   };
 
   const createCampaign = useCallback(async (campaignData) => {
-    // Mock campaign creation for development
-    console.log('Mock creating campaign:', campaignData);
-
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // Add to mock campaigns
-    const newCampaign = {
-      id: Date.now(),
-      owner: selectedAccount?.address || 'mock-owner',
-      title: campaignData.title,
-      description: campaignData.description,
-      goal: BigInt(campaignData.goal),
-      raised: 0n,
-      deadline: campaignData.deadline,
-      state: 'Active',
-      beneficiary: campaignData.beneficiary || selectedAccount?.address,
-    };
-
-    setCampaigns(prev => [...prev, newCampaign]);
-
-    return newCampaign.id;
-  }, [selectedAccount]);
-
-  const donateToCampaign = useCallback(async (campaignId, amount) => {
-    // Mock donation for development
-    console.log('Mock donating to campaign:', campaignId, amount);
-
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // Update campaign raised amount
-    setCampaigns(prev => prev.map(campaign =>
-      campaign.id === campaignId
-        ? { ...campaign, raised: campaign.raised + BigInt(amount * 1_000_000_000_000) }
-        : campaign
-    ));
-
-    return true;
-  }, []);
-
-  const withdrawFunds = useCallback(async (campaignId) => {
-    if (!api || !isReady || !selectedAccount) {
-      throw new Error('API or wallet not connected');
+    if (!contract || !selectedAccount) {
+      throw new Error('Contract not loaded or wallet not connected');
     }
-
-    const startTime = metrics.startTransaction();
 
     try {
-      const tx = api.tx.donationPlatform.withdrawFunds(campaignId);
-      await tx.signAndSend(selectedAccount.address);
+      const { gasRequired, storageDeposit, result } = await contract.query.createCampaign(
+        selectedAccount.address,
+        { gasLimit: -1, storageDepositLimit: null },
+        campaignData.title,
+        campaignData.description,
+        campaignData.goal,
+        campaignData.deadline,
+        campaignData.beneficiary
+      );
 
-      // Record successful withdrawal
-      metrics.completeTransaction(startTime, true, {
-        operation: 'withdrawFunds',
-        campaignId
-      });
+      if (result.isErr) {
+        const error = result.asErr.toString();
+        throw new Error(mapError(error) || error);
+      }
 
-      // Invalidate cache since campaign data changed
-      asyncCache.invalidate(`campaigns:*`);
+      // Execute the transaction
+      const tx = contract.tx.createCampaign(
+        { gasLimit: gasRequired, storageDepositLimit: storageDeposit },
+        campaignData.title,
+        campaignData.description,
+        campaignData.goal,
+        campaignData.deadline,
+        campaignData.beneficiary
+      );
 
-      await fetchCampaigns(); // Refresh the campaign list
+      return tx;
     } catch (err) {
-      metrics.completeTransaction(startTime, false, {
-        operation: 'withdrawFunds',
-        campaignId,
-        error: err.message
-      });
-      metrics.recordError(err, 'error', { operation: 'withdrawFunds' });
+      throw new Error(`Failed to create campaign: ${err.message}`);
+    }
+  }, [contract, selectedAccount, mapError]);
+
+  const donateToCampaign = useCallback(async (campaignId, amount) => {
+    if (!contract || !selectedAccount) {
+      throw new Error('Contract not loaded or wallet not connected');
+    }
+
+    try {
+      const amountInPlanks = BigInt(amount) * BigInt(1_000_000_000_000); // Convert DOT to planks
+
+      const { gasRequired, storageDeposit, result } = await contract.query.donate(
+        selectedAccount.address,
+        { gasLimit: -1, storageDepositLimit: null, value: amountInPlanks },
+        campaignId
+      );
+
+      if (result.isErr) {
+        const error = result.asErr.toString();
+        throw new Error(mapError(error) || error);
+      }
+
+      // Execute the transaction
+      const tx = contract.tx.donate(
+        { gasLimit: gasRequired, storageDepositLimit: storageDeposit, value: amountInPlanks },
+        campaignId
+      );
+
+      return tx;
+    } catch (err) {
+      throw new Error(`Failed to donate: ${err.message}`);
+    }
+  }, [contract, selectedAccount, mapError]);
+
+  const withdrawFunds = useCallback(async (campaignId) => {
+    if (!contract || !selectedAccount) {
+      throw new Error('Contract not loaded or wallet not connected');
+    }
+
+    try {
+      const { gasRequired, storageDeposit, result } = await contract.query.withdrawFunds(
+        selectedAccount.address,
+        { gasLimit: -1, storageDepositLimit: null },
+        campaignId
+      );
+
+      if (result.isErr) {
+        const error = result.asErr.toString();
+        throw new Error(mapError(error) || error);
+      }
+
+      // Execute the transaction
+      const tx = contract.tx.withdrawFunds(
+        { gasLimit: gasRequired, storageDepositLimit: storageDeposit },
+        campaignId
+      );
+
+      return tx;
+    } catch (err) {
       throw new Error(`Failed to withdraw funds: ${err.message}`);
     }
-  }, [api, selectedAccount, fetchCampaigns]);
+  }, [contract, selectedAccount, mapError]);
 
   useEffect(() => {
-    if (api && isReady) {
+    if (contract) {
       fetchCampaigns();
     } else {
       setIsLoading(false);
     }
-  }, [api, isReady, fetchCampaigns]);
+  }, [contract, fetchCampaigns]);
 
   return (
     <CampaignContext.Provider

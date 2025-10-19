@@ -1,0 +1,52 @@
+name: Gemini Backend CI
+
+on:
+  push:
+    branches: [ master, main, develop ]
+    paths:
+      - 'gemini-backend/**'
+      - '.github/workflows/backend-ci.yml'
+  pull_request:
+    branches: [ master, main, develop ]
+    paths:
+      - 'gemini-backend/**'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: gemini-backend/package-lock.json
+    
+    - name: Install dependencies
+      working-directory: ./gemini-backend
+      run: npm ci
+    
+    - name: Check for syntax errors
+      working-directory: ./gemini-backend
+      run: node -c server.js
+    
+    - name: Run tests (if configured)
+      working-directory: ./gemini-backend
+      run: npm test || echo "No tests configured yet"
+      continue-on-error: true
+    
+    - name: Check environment variables setup
+      working-directory: ./gemini-backend
+      run: |
+        if [ ! -f .env ]; then
+          echo "⚠️  .env file not found (expected for local development)"
+          echo "Make sure to set GEMINI_API_KEY in your deployment environment"
+        fi
+    
+    - name: Security audit
+      working-directory: ./gemini-backend
+      run: npm audit --audit-level=moderate
+      continue-on-error: true

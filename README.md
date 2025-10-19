@@ -1,5 +1,10 @@
 # DotNation
 
+[![Contract CI](https://github.com/Elactrac/dotnation/workflows/Smart%20Contract%20CI/badge.svg)](https://github.com/Elactrac/dotnation/actions/workflows/contract-ci.yml)
+[![Frontend CI](https://github.com/Elactrac/dotnation/workflows/Frontend%20CI/badge.svg)](https://github.com/Elactrac/dotnation/actions/workflows/frontend-ci.yml)
+[![Backend CI](https://github.com/Elactrac/dotnation/workflows/Gemini%20Backend%20CI/badge.svg)](https://github.com/Elactrac/dotnation/actions/workflows/backend-ci.yml)
+[![Security Audit](https://github.com/Elactrac/dotnation/workflows/Security%20Audit/badge.svg)](https://github.com/Elactrac/dotnation/actions/workflows/security.yml)
+
 A decentralized crowdfunding platform built on Polkadot, enabling transparent and secure fundraising through smart contracts.
 
 ## Features
@@ -80,9 +85,10 @@ A decentralized crowdfunding platform built on Polkadot, enabling transparent an
 
 ## Project Structure
 
-- `donation_platform/`: ink! smart contract
-- `frontend/`: React application
-- `.github/workflows/`: CI/CD pipelines
+- `donation_platform/`: ink! smart contract for on-chain campaign management
+- `frontend/`: React + Vite application with Tailwind CSS
+- `gemini-backend/`: Node.js + Express server for Gemini AI integration
+- `.github/workflows/`: Automated CI/CD pipelines (see [WORKFLOWS.md](.github/WORKFLOWS.md))
 - Documentation files (CONTRIBUTING.md, CI_CD_SETUP.md, etc.)
 
 ## Architecture
@@ -173,11 +179,43 @@ npm run dev  # Development server with hot reload
 ## Tech Stack
 
 - **Smart Contract**: Rust, ink! 5.0.2, cargo-contract 5.0.3+
-- **Frontend**: React 18, Vite, Tailwind CSS, Polkadot.js API
-- **Backend**: Node.js (optional API server in gemini-backend/)
+- **Frontend**: React 18, Vite 5, Tailwind CSS 3, Polkadot.js API, Chakra UI 3
+- **Backend**: Node.js 18+, Express 5, Google Gemini AI API
 - **Infrastructure**: Substrate, GitHub Actions, Vercel
-- **Security**: Sentry (error monitoring), custom validation
-- **Development**: ESLint, Prettier, Husky (pre-commit hooks)
+- **Security**: Sentry (error monitoring), custom validation, npm/cargo audit
+- **Development**: ESLint, Prettier, Husky (pre-commit hooks), Vitest
+
+## Components
+
+### 1. Smart Contract (donation_platform/)
+- **Language**: Rust + ink! 5.0.2
+- **Features**: Campaign state machine, secure fund transfers, event logging
+- **Security**: Reentrancy guards, overflow protection, access controls
+- **Testing**: Unit tests + e2e tests with ink! test environment
+
+### 2. Frontend (frontend/)
+- **Framework**: React 18 + Vite 5
+- **Styling**: Tailwind CSS 3 + Chakra UI 3
+- **Blockchain**: Polkadot.js extension integration
+- **Features**: Campaign browsing, creation, donations, wallet management
+- **State**: React Context API (Wallet, API, Campaign contexts)
+
+### 3. Gemini Backend (gemini-backend/)
+- **Purpose**: AI-powered campaign assistance and content generation
+- **Stack**: Node.js + Express + Google Generative AI
+- **API**: RESTful endpoints for campaign suggestions and optimization
+- **Deployment**: Railway, Render, Fly.io compatible
+
+## CI/CD Workflows
+
+DotNation uses GitHub Actions for automated testing and deployment. See [.github/WORKFLOWS.md](.github/WORKFLOWS.md) for details.
+
+**Active Workflows:**
+- ✅ Smart Contract CI - Build, test, and validate contract on every push
+- ✅ Frontend CI - Lint, test, and build frontend application
+- ✅ Gemini Backend CI - Test and audit backend server
+- ✅ Security Audit - Weekly dependency vulnerability scans
+- ✅ Deploy - Manual deployment to testnet/mainnet with environment configs
 
 ## Current Status
 

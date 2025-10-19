@@ -23,6 +23,7 @@ jobs:
         toolchain: stable
     
     - name: Cache cargo-audit
+      id: cache-cargo-audit
       uses: actions/cache@v4
       with:
         path: ~/.cargo/bin/cargo-audit

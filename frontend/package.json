@@ -8,6 +8,7 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@polkadot/api": "^16.4.9",
+    "@polkadot/api-contract": "^16.4.9",
     "@polkadot/extension-dapp": "^0.62.2",
     "@sentry/react": "^10.20.0",
     "@sentry/tracing": "^7.120.4",
