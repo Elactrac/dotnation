@@ -1,34 +1,61 @@
 # Dependencies
 node_modules/
-package-lock.json
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
 # Build outputs
 dist/
 build/
+.next/
+out/
 target/
 
-# Environment files
-.env
-.env.local
-.env.production
-.env.*.local
-
-# IDE
+# IDE files
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 
-# OS
+# OS files
 .DS_Store
 Thumbs.db
 
 # Logs
+logs
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# Vercel
+.vercel/
+
+# Contract artifacts
+target/
+
+# Substrate node binaries
+substrate-contracts-node
+substrate-contracts-node-mac/
+substrate-contracts-node.tar.gz
+
+# Temporary files
+*.tmp
+*.temp
 
 # Testing
 coverage/

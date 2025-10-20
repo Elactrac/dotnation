@@ -1,20 +1,21 @@
 # Gemini Backend - AI Campaign Assistant
 
-Node.js + Express server that integrates Google's Gemini AI to provide intelligent campaign assistance for DotNation.
+Node.js + Express server that integrates Google's Gemini AI (FREE tier) to provide intelligent campaign assistance for DotNation.
 
 ## Features
 
-- **Campaign Suggestions**: AI-powered campaign title and description generation
-- **Content Optimization**: Improve existing campaign descriptions
+- **Campaign Description Generation**: AI-powered campaign description creation
+- **Content Summarization**: Concise summaries of campaign descriptions
 - **CORS Enabled**: Works with frontend on different domains
 - **Environment Config**: Secure API key management
+- **FREE**: Uses Google's free Gemini API tier
 
 ## Setup
 
 ### Prerequisites
 
 - Node.js 18+
-- Google Gemini API key ([Get one here](https://ai.google.dev/))
+- Google Gemini API key ([Get FREE one here](https://aistudio.google.com/app/apikey))
 
 ### Installation
 
@@ -44,23 +45,39 @@ Server will start on `http://localhost:3001`
 
 ## API Endpoints
 
-### Generate Campaign Suggestion
+### Generate Campaign Description
 
 ```http
-POST /api/generate-campaign
+POST /api/generate-description
 Content-Type: application/json
 
 {
-  "prompt": "Create a campaign for a community garden project"
+  "title": "Decentralized Education Platform"
 }
 ```
 
 **Response**:
 ```json
 {
-  "title": "Community Garden Initiative",
-  "description": "Help us create a sustainable community garden...",
-  "suggestedGoal": 5000
+  "description": "Transforming education through blockchain technology..."
+}
+```
+
+### Summarize Campaign Description
+
+```http
+POST /api/summarize
+Content-Type: application/json
+
+{
+  "description": "Long campaign description text here..."
+}
+```
+
+**Response**:
+```json
+{
+  "summary": "Brief summary of the campaign goals and solutions..."
 }
 ```
 
@@ -74,148 +91,40 @@ GET /health
 ```json
 {
   "status": "ok",
-  "gemini": "connected"
+  "message": "Gemini backend is running"
 }
-```
-
-## Deployment
-
-### Option 1: Railway
-
-```bash
-# Install Railway CLI
-npm i -g @railway/cli
-
-# Login and deploy
-railway login
-railway init
-railway up
-```
-
-Set environment variable:
-```bash
-railway variables set GEMINI_API_KEY=your_key_here
-```
-
-### Option 2: Render
-
-1. Create new Web Service on [Render](https://render.com)
-2. Connect your GitHub repo
-3. Set build command: `npm install`
-4. Set start command: `node server.js`
-5. Add environment variable `GEMINI_API_KEY`
-
-### Option 3: Fly.io
-
-```bash
-# Install Fly CLI
-curl -L https://fly.io/install.sh | sh
-
-# Deploy
-fly launch
-fly secrets set GEMINI_API_KEY=your_key_here
-fly deploy
-```
-
-### Option 4: Heroku
-
-```bash
-# Create app
-heroku create dotnation-backend
-
-# Set environment variable
-heroku config:set GEMINI_API_KEY=your_key_here
-
-# Deploy
-git push heroku main
 ```
 
 ## Environment Variables
 
 | Variable | Description | Required |
 |----------|-------------|----------|
-| `GEMINI_API_KEY` | Google Gemini API key | ✅ Yes |
+| `GEMINI_API_KEY` | Google Gemini API key (FREE) | ✅ Yes |
 | `PORT` | Server port (default: 3001) | ❌ No |
 | `NODE_ENV` | Environment (development/production) | ❌ No |
 
 ## Integration with Frontend
 
-Update frontend `.env.local`:
+The frontend automatically calls these endpoints at `http://localhost:3001`
+
+## Testing
 
 ```bash
-VITE_GEMINI_BACKEND_URL=http://localhost:3001
-```
-
-For production:
-```bash
-VITE_GEMINI_BACKEND_URL=https://your-backend.railway.app
-```
-
-## Development
-
-### Test API Locally
-
-```bash
-# Using curl
-curl -X POST http://localhost:3001/api/generate-campaign \
+# Test description generation
+curl -X POST http://localhost:3001/api/generate-description \
   -H "Content-Type: application/json" \
-  -d '{"prompt": "medical equipment fundraiser"}'
+  -d '{"title":"Green Energy Initiative"}'
 
-# Using httpie
-http POST http://localhost:3001/api/generate-campaign prompt="medical equipment fundraiser"
+# Test summarization
+curl -X POST http://localhost:3001/api/summarize \
+  -H "Content-Type: application/json" \
+  -d '{"description":"This campaign is about renewable energy solutions."}'
 ```
 
-### Error Handling
+## Cost
 
-The API returns appropriate HTTP status codes:
-- `200` - Success
-- `400` - Bad request (missing prompt)
-- `500` - Server error (Gemini API failure)
+**FREE** - Uses Google's Gemini API free tier (15 RPM, 1M tokens/month)</content>
+</xai:function_call">Now let me add all the resolved files and commit the merge. 
 
-## Security Notes
-
-- **Never commit `.env` file** - Already in `.gitignore`
-- **Use HTTPS in production** - Most platforms provide this automatically
-- **Rate limit API calls** - Implement rate limiting for production use
-- **Validate inputs** - Server validates all incoming requests
-
-## Troubleshooting
-
-### Error: "Cannot find module 'dotenv'"
-
-```bash
-npm install
-```
-
-### Error: "GEMINI_API_KEY is not set"
-
-Check your `.env` file exists and contains the API key.
-
-### Error: "Failed to generate campaign"
-
-- Verify your Gemini API key is valid
-- Check your internet connection
-- Ensure you haven't exceeded API quota
-
-### CORS errors
-
-The server allows all origins by default. For production, update `cors` config in `server.js`:
-
-```javascript
-app.use(cors({
-  origin: 'https://your-frontend-domain.com'
-}));
-```
-
-## CI/CD
-
-This backend is automatically tested via GitHub Actions (`.github/workflows/backend-ci.yml`):
-
-- ✅ Syntax validation
-- ✅ Dependency installation
-- ✅ Security audit
-- ✅ Deployment artifact creation
-
-## License
-
-MIT
+<xai:function_call name="bash">
+<parameter name="command">git add .gitignore gemini-backend/README.md gemini-backend/server.js
