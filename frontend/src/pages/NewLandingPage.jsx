@@ -272,7 +272,7 @@ const NewLandingPage = () => {
                   </svg>
                 </div>
                 <h3 className="text-xl font-bold font-display">Community Governed</h3>
-                <p className="text-white/60 font-body">Designed to be a public good, the protocol's future will be guided by its community of users, not a central corporation.</p>
+                <p className="text-white/60 font-body">Designed to be a public good, the protocol&apos;s future will be guided by its community of users, not a central corporation.</p>
               </div>
             </div>
           </section>
@@ -410,7 +410,7 @@ const NewLandingPage = () => {
               <div className="text-center md:text-left">
                 <h2 className="text-4xl lg:text-5xl font-bold tracking-tight font-display">Natively Integrated with Polkadot</h2>
                 <p className="mt-4 max-w-2xl text-lg text-white/70 font-body">
-                  DotNation isn't just built on Polkadot; it's designed to leverage its unique strengths. We utilize shared security, interoperability, and on-chain governance to create a fundraising platform that is more secure, scalable, and future-proof.
+                  DotNation isn&apos;t just built on Polkadot; it&apos;s designed to leverage its unique strengths. We utilize shared security, interoperability, and on-chain governance to create a fundraising platform that is more secure, scalable, and future-proof.
                 </p>
               </div>
               <div className="flex justify-center">

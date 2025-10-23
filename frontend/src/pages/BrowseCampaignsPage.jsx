@@ -1,6 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { FiSearch, FiX, FiSliders, FiFilter } from 'react-icons/fi';
-import { Link } from 'react-router-dom';
+import { FiSearch, FiX, FiSliders } from 'react-icons/fi';
 import { useCampaign } from '../contexts/CampaignContext.jsx';
 import { formatDOT } from '../utils/formatters';
 import PageErrorBoundary from '../components/PageErrorBoundary';
@@ -426,8 +425,12 @@ const BrowseCampaignsPage = () => {
   );
 };
 
-export default () => (
+const BrowseCampaignsPageWrapper = () => (
   <PageErrorBoundary pageName="Browse Campaigns">
     <BrowseCampaignsPage />
   </PageErrorBoundary>
 );
+
+BrowseCampaignsPageWrapper.displayName = 'BrowseCampaignsPageWrapper';
+
+export default BrowseCampaignsPageWrapper;

@@ -1,5 +1,5 @@
-
 import { useMemo } from 'react';
+import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { useCampaign } from '../contexts/CampaignContext.jsx';
 import { useWallet } from '../contexts/WalletContext.jsx';
@@ -18,7 +18,11 @@ const AnimatedStat = ({ value, label }) => {
     );
 };
 
-// A component for the status chart
+AnimatedStat.propTypes = {
+    value: PropTypes.number.isRequired,
+    label: PropTypes.string.isRequired,
+};
+
 const CampaignStatusChart = ({ stats }) => {
     const maxStat = Math.max(...Object.values(stats));
     const chartData = [
@@ -54,6 +58,15 @@ const CampaignStatusChart = ({ stats }) => {
     );
 };
 
+CampaignStatusChart.propTypes = {
+    stats: PropTypes.shape({
+        Active: PropTypes.number,
+        Successful: PropTypes.number,
+        EndingSoon: PropTypes.number,
+        Failed: PropTypes.number,
+    }).isRequired,
+};
+
 const PlatformActivity = ({ campaigns }) => {
     const recentCampaigns = [...campaigns].sort((a, b) => b.id - a.id).slice(0, 3);
 
@@ -69,6 +82,10 @@ const PlatformActivity = ({ campaigns }) => {
             </div>
         </div>
     );
+};
+
+PlatformActivity.propTypes = {
+    campaigns: PropTypes.array.isRequired,
 };
 
 const CampaignsListPage = () => {
@@ -142,7 +159,7 @@ const CampaignsListPage = () => {
                     ))
                 ) : (
                     <div style={{ textAlign: 'center', padding: '50px', background: 'var(--card-bg)', borderRadius: '12px' }}>
-                        <h3>You haven't created any campaigns yet.</h3>
+                        <h3>You haven&apos;t created any campaigns yet.</h3>
                         <p style={{ marginTop: '0.5rem', color: 'var(--secondary-text)' }}>Get started by creating a new one!</p>
                     </div>
                 )}

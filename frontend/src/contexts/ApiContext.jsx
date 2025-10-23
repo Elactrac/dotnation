@@ -1,4 +1,5 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import { createContext, useState, useContext, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { ContractPromise } from '@polkadot/api-contract';
 import contractMetadata from '../contracts/donation_platform.json';
@@ -58,7 +59,7 @@ export const ApiProvider = ({ children }) => {
         api.disconnect();
       }
     };
-  }, []);
+  }, [api]);
 
   return (
     <ApiContext.Provider
@@ -80,4 +81,8 @@ export const useApi = () => {
     throw new Error('useApi must be used within an ApiProvider');
   }
   return context;
+};
+
+ApiProvider.propTypes = {
+  children: PropTypes.node.isRequired,
 };

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import PropTypes from 'prop-types';
 import {
   Box,
   Container,
@@ -47,6 +48,11 @@ const SettingsPage = () => {
     </Box>
   );
 
+  SettingSection.propTypes = {
+    title: PropTypes.string.isRequired,
+    children: PropTypes.node.isRequired,
+  };
+
   const SettingRow = ({ title, description, children, showDivider = true }) => (
     <>
       <Flex justify="space-between" align="center" py={4}>
@@ -63,6 +69,13 @@ const SettingsPage = () => {
       {showDivider && <Box h="1px" bg={borderColor} />}
     </>
   );
+
+  SettingRow.propTypes = {
+    title: PropTypes.string.isRequired,
+    description: PropTypes.string.isRequired,
+    children: PropTypes.node.isRequired,
+    showDivider: PropTypes.bool,
+  };
 
   return (
     <Box minH="100vh" py={16}>

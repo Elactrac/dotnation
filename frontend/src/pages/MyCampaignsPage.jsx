@@ -222,7 +222,7 @@ const MyCampaignsPage = () => {
                   No Campaigns Yet
                 </Heading>
                 <Text color="white" maxW="md">
-                  You haven't created any campaigns yet. Start your first crowdfunding campaign to make a difference!
+                  You haven&apos;t created any campaigns yet. Start your first crowdfunding campaign to make a difference!
                 </Text>
                 <Button
                   leftIcon={<Icon as={FiPlus} />}
@@ -341,8 +341,12 @@ const MyCampaignsPage = () => {
   );
 };
 
-export default () => (
+const MyCampaignsPageWrapper = () => (
   <PageErrorBoundary pageName="My Campaigns">
     <MyCampaignsPage />
   </PageErrorBoundary>
 );
+
+MyCampaignsPageWrapper.displayName = 'MyCampaignsPageWrapper';
+
+export default MyCampaignsPageWrapper;

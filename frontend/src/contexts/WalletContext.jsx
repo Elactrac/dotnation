@@ -11,7 +11,6 @@ export const WalletProvider = ({ children }) => {
   const { api, isReady: isApiReady } = useApi();
   const [accounts, setAccounts] = useState([]);
   const [selectedAccount, setSelectedAccount] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [balance, setBalance] = useState(null);
 
@@ -125,7 +124,6 @@ export const WalletProvider = ({ children }) => {
         accounts,
         selectedAccount,
         api,
-        isLoading,
         error,
         connectWallet,
         disconnectWallet,

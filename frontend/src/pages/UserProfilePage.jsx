@@ -296,7 +296,7 @@ const UserProfilePage = () => {
                       <HStack justify="space-between">
                         <HStack>
                           <Icon as={FiTrendingUp} color="blue.500" />
-                          <Text>Created campaign "Community Garden Project"</Text>
+                          <Text>Created campaign &quot;Community Garden Project&quot;</Text>
                         </HStack>
                         <Text fontSize="sm" color="gray.600">2 days ago</Text>
                       </HStack>
@@ -304,7 +304,7 @@ const UserProfilePage = () => {
                       <HStack justify="space-between">
                         <HStack>
                           <Icon as={FiHeart} color="red.500" />
-                          <Text>Donated to "Education for All"</Text>
+                          <Text>Donated to &quot;Education for All&quot;</Text>
                         </HStack>
                         <Text fontSize="sm" color="gray.600">1 week ago</Text>
                       </HStack>
@@ -312,7 +312,7 @@ const UserProfilePage = () => {
                       <HStack justify="space-between">
                         <HStack>
                           <Icon as={FiTarget} color="green.500" />
-                          <Text>Campaign "Tech Startup" reached goal</Text>
+                          <Text>Campaign &quot;Tech Startup&quot; reached goal</Text>
                         </HStack>
                         <Text fontSize="sm" color="gray.600">2 weeks ago</Text>
                       </HStack>
@@ -528,8 +528,12 @@ const UserProfilePage = () => {
   );
 };
 
-export default () => (
+const UserProfilePageWrapper = () => (
   <PageErrorBoundary pageName="User Profile">
     <UserProfilePage />
   </PageErrorBoundary>
 );
+
+UserProfilePageWrapper.displayName = 'UserProfilePageWrapper';
+
+export default UserProfilePageWrapper;

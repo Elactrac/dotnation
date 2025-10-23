@@ -1,40 +1,16 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { ethers } from 'ethers';
 import { useWallet } from './WalletContext';
 import { useApi } from './ApiContext';
-import { metrics } from '../utils/metrics';
-import { asyncCache } from '../utils/cache';
-
-// --- Placeholder for EVM Contract ---
-// In a real app, this would come from a dedicated file or environment variables.
-const EVM_CONTRACT_ADDRESS = '0x...'; // Replace with your deployed Solidity contract address
-const EVM_CONTRACT_ABI = [
-  // A minimal ABI for the donate function
-  "function donate(uint256 campaignId) public payable",
-  // Add other function definitions here as needed
-];
-// ------------------------------------
 
 const CampaignContext = createContext({});
 
 export const CampaignProvider = ({ children }) => {
-  const { api, contract, isReady } = useApi();
-  const { selectedAccount, walletType } = useWallet();
+  const { api, contract } = useApi();
+  const { selectedAccount } = useWallet();
   const [campaigns, setCampaigns] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  const retryApiCall = async (fn, retries = 3, delay = 1000) => {
-    for (let i = 0; i < retries; i++) {
-      try {
-        return await fn();
-      } catch (err) {
-        if (i === retries - 1) throw err;
-        await new Promise(resolve => setTimeout(resolve, delay * (i + 1)));
-      }
-    }
-  };
 
   const fetchCampaigns = useCallback(async () => {
     if (!contract) {

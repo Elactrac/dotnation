@@ -1,17 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useCampaign } from '../contexts/CampaignContext';
 import { useWallet } from '../contexts/WalletContext';
 
 const NewDashboardPage = () => {
-  const { campaigns, isLoading, refreshCampaigns: fetchCampaigns } = useCampaign();
+  const { campaigns, isLoading, refreshCampaigns } = useCampaign();
   const { selectedAccount } = useWallet();
   const [totalRaised, setTotalRaised] = useState(0);
   const [myContributions, setMyContributions] = useState([]);
 
+  const fetchCampaigns = useCallback(() => {
+    refreshCampaigns();
+  }, [refreshCampaigns]);
+
   useEffect(() => {
     fetchCampaigns();
-  }, []);
+  }, [fetchCampaigns]);
 
   useEffect(() => {
     // Calculate total raised across all campaigns

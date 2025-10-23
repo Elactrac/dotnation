@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import {
   Box,
@@ -7,9 +6,7 @@ import {
   Text,
   SimpleGrid,
   VStack,
-  HStack,
   Button,
-  Progress,
   Badge,
   Image,
   Flex,
@@ -256,7 +253,7 @@ const DashboardPage = () => {
                 {selectedAccount ? (
                   <VStack spacing={4} align="stretch">
                     {userContributions.map((contrib, index) => (
-                      <React.Fragment key={index}>
+                      <Box key={index}>
                         <Box>
                           <Flex justify="space-between" align="center" mb={1}>
                             <Text color={textColor} fontWeight="medium">
@@ -273,7 +270,7 @@ const DashboardPage = () => {
                         {index < userContributions.length - 1 && (
                           <Box h="1px" bg={borderColor} />
                         )}
-                      </React.Fragment>
+                      </Box>
                     ))}
 
                     <Button

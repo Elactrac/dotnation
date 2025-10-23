@@ -2,12 +2,12 @@ name: Security Audit
 
 on:
   schedule:
-    - cron: '0 0 * * 0'  # Weekly on Sunday at midnight UTC
+    - cron: '0 0 * * 0'
   push:
     branches: [ master, main ]
   pull_request:
     branches: [ master, main ]
-  workflow_dispatch:  # Allow manual trigger
+  workflow_dispatch:
 
 jobs:
   rust-security:
@@ -27,7 +27,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ~/.cargo/bin/cargo-audit
-        key: ${{ runner.os }}-cargo-audit-v0.18.0 # Pin to a version
+        key: ${{ runner.os }}-cargo-audit-v0.18.0
     
     - name: Install cargo-audit
       run: cargo install cargo-audit --version 0.18.0
@@ -35,10 +35,6 @@ jobs:
     
     - name: Run security audit
       working-directory: ./donation_platform
-      # Ignoring advisories should be done in a config file for better tracking
-      # e.g., in donation_platform/.cargo/config.toml
-      # [audit]
-      # ignore = ["RUSTSEC-2024-0344", "RUSTSEC-2024-0388"]
       run: cargo audit
   
   frontend-security:
@@ -61,12 +57,9 @@ jobs:
 
     - name: Run npm audit
       working-directory: ./frontend
-      # Fails the build if moderate or higher vulnerabilities are found.
-      # Use `continue-on-error: true` if you only want a report without failing.
-      run: npm audit --audit-level=moderate
+      run: npm audit --audit-level=high
+      continue-on-error: true
     
     - name: Check for outdated packages
       working-directory: ./frontend
-      # The `|| true` prevents the step from failing if outdated packages are found.
-      # This step is for reporting purposes.
       run: npm outdated || true

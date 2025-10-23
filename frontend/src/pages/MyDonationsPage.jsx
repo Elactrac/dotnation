@@ -219,7 +219,7 @@ const MyDonationsPage = () => {
                   No Donations Yet
                 </Heading>
                 <Text color="white" maxW="md">
-                  You haven't made any donations yet. Browse campaigns and start supporting causes you care about!
+                  You haven&apos;t made any donations yet. Browse campaigns and start supporting causes you care about!
                 </Text>
                 <Button
                   as={Link}
@@ -317,8 +317,12 @@ const MyDonationsPage = () => {
   );
 };
 
-export default () => (
+const MyDonationsPageWrapper = () => (
   <PageErrorBoundary pageName="My Donations">
     <MyDonationsPage />
   </PageErrorBoundary>
 );
+
+MyDonationsPageWrapper.displayName = 'MyDonationsPageWrapper';
+
+export default MyDonationsPageWrapper;
