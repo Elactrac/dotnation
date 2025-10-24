@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
-import { useToast } from '@chakra-ui/react'; // Kept for notifications, can be replaced later
+import toast from 'react-hot-toast';
 import { useWallet } from '../contexts/WalletContext';
 
 // Reusable form components for consistent styling
@@ -21,7 +21,6 @@ TextareaField.propTypes = { className: PropTypes.string };
 
 export const CreateCampaignForm = ({ onSuccess }) => {
   const { selectedAccount } = useWallet();
-  const toast = useToast();
 
   console.log('CreateCampaignForm render - selectedAccount:', selectedAccount);
   
@@ -61,7 +60,7 @@ export const CreateCampaignForm = ({ onSuccess }) => {
 
   const handleGenerateDescription = async () => {
     if (!formData.title) {
-      toast({ title: 'Please enter a campaign title first.', status: 'warning', duration: 3000, isClosable: true });
+      toast.error('Please enter a campaign title first.');
       return;
     }
     setIsGenerating(true);
@@ -74,10 +73,10 @@ export const CreateCampaignForm = ({ onSuccess }) => {
       if (!response.ok) throw new Error('Failed to get a response from the AI service.');
       const data = await response.json();
       setFormData(prev => ({ ...prev, description: data.description }));
-      toast({ title: 'Description generated!', status: 'success', duration: 3000, isClosable: true });
+      toast.success('Description generated!');
     } catch (error) {
       console.error("AI generation error:", error);
-      toast({ title: 'AI Generation Failed', description: error.message, status: 'error', duration: 5000, isClosable: true });
+      toast.error(`AI Generation Failed: ${error.message}`);
     } finally {
       setIsGenerating(false);
     }
@@ -112,7 +111,7 @@ export const CreateCampaignForm = ({ onSuccess }) => {
       setShowModal(true);
     } catch (error) {
       console.error("Contract summary generation error:", error);
-      toast({ title: 'Summary Generation Failed', description: error.message, status: 'error', duration: 5000, isClosable: true });
+      toast.error(`Summary Generation Failed: ${error.message}`);
     } finally {
       setIsGeneratingSummary(false);
     }
@@ -145,10 +144,10 @@ export const CreateCampaignForm = ({ onSuccess }) => {
 
       // Simulate successful creation
       await new Promise(resolve => setTimeout(resolve, 2000)); // 2 second delay
-      toast({ title: 'Campaign created! (Test Mode)', description: 'This was a test - no real contract deployed.', status: 'success', duration: 5000, isClosable: true });
+      toast.success('Campaign created! (Test Mode) - This was a test, no real contract deployed.');
       onSuccess();
     } catch (error) {
-      toast({ title: 'Failed to create campaign', description: error.message, status: 'error', duration: 5000, isClosable: true });
+      toast.error(`Failed to create campaign: ${error.message}`);
     } finally {
       setIsSubmitting(false);
     }

@@ -15,7 +15,6 @@ import {
   Badge,
   List,
   ListItem,
-  useToast,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -26,6 +25,7 @@ import {
   FormLabel,
   Input,
   useDisclosure,
+  useToast,
 } from '@chakra-ui/react';
 import { useParams } from 'react-router-dom';
 import { useCampaign } from '../contexts/CampaignContext';
@@ -45,10 +45,10 @@ export const CampaignDetails = () => {
   const { id } = useParams();
   const { campaigns, donateToCampaign } = useCampaign();
   const { selectedAccount } = useWallet();
-  const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [donationAmount, setDonationAmount] = useState('');
   const [campaign, setCampaign] = useState(null);
+  const toast = useToast();
 
   useEffect(() => {
     const foundCampaign = campaigns.find(c => c.id === parseInt(id));
@@ -71,23 +71,23 @@ export const CampaignDetails = () => {
 
       const amountInPlancks = parseDOT(donationAmount);
       await donateToCampaign(campaign.id, amountInPlancks);
-      
+
       toast({
-        title: 'Donation Successful! 🎉',
-        description: `You donated ${donationAmount} DOT to ${campaign.title}`,
+        title: 'Donation Successful',
+        description: `You donated ${donationAmount} DOT to ${campaign.title} 🎉`,
         status: 'success',
-        duration: 7000,
+        duration: 5000,
         isClosable: true,
       });
-      
+
       onClose();
       setDonationAmount('');
     } catch (error) {
       toast({
-        title: 'Donation Failed',
+        title: 'Error',
         description: error.message || 'Failed to process donation',
         status: 'error',
-        duration: 7000,
+        duration: 5000,
         isClosable: true,
       });
     }

@@ -22,8 +22,8 @@ import { CampaignCard } from './CampaignCard.jsx';
 
 export const UserProfile = ({ address }) => {
   const { campaigns } = useCampaign();
-  const toast = useToast();
   const { hasCopied, onCopy } = useClipboard(address);
+  const toast = useToast();
 
   // Get user's created campaigns
   const createdCampaigns = useMemo(() => 
@@ -59,7 +59,7 @@ export const UserProfile = ({ address }) => {
     toast({
       title: 'Address copied!',
       status: 'success',
-      duration: 2000,
+      duration: 5000,
       isClosable: true,
     });
   };

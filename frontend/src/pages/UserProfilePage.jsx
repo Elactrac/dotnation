@@ -33,7 +33,7 @@ import {
   Progress,
   Divider
 } from '@chakra-ui/react';
-import { useToast } from '@chakra-ui/react';
+import toast from 'react-hot-toast';
 import {
   FiUser,
   FiTrendingUp,
@@ -54,7 +54,6 @@ import PageErrorBoundary from '../components/PageErrorBoundary';
 const UserProfilePage = () => {
   const { selectedAccount, balance } = useWallet();
   const { campaigns } = useCampaign();
-  const toast = useToast();
 
   // Profile state
   const [profile, setProfile] = useState({
@@ -125,23 +124,11 @@ const UserProfilePage = () => {
       // In a real app, this would save to API
       await new Promise(resolve => setTimeout(resolve, 1000)); // Mock delay
 
-      toast({
-        title: 'Profile Updated',
-        description: 'Your profile has been saved successfully.',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
+      toast.success('Profile Updated - Your profile has been saved successfully.');
 
       setIsEditing(false);
     } catch (error) {
-      toast({
-        title: 'Save Failed',
-        description: 'Failed to save profile. Please try again.',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
+      toast.error('Save Failed - Failed to save profile. Please try again.');
     } finally {
       setIsSaving(false);
     }

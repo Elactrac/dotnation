@@ -72,16 +72,7 @@
   @apply text-xs font-body text-text-secondary uppercase tracking-wide;
 }
 
-/* Status Colors */
-.text-success { @apply text-success; }
-.text-warning { @apply text-warning; }
-.text-error { @apply text-error; }
-.text-info { @apply text-info; }
-
-.bg-success { @apply bg-success; }
-.bg-warning { @apply bg-warning; }
-.bg-error { @apply bg-error; }
-.bg-info { @apply bg-info; }
+/* Status Colors - Now defined in Tailwind config */
 
 /* Layout */
 .container-padding {
@@ -105,18 +96,7 @@
   @apply shadow-glow-secondary;
 }
 
-/* Animations */
-.animate-fade-in {
-  @apply animate-fade-in;
-}
-
-.animate-slide-up {
-  @apply animate-slide-up;
-}
-
-.animate-scale-in {
-  @apply animate-scale-in;
-}
+/* Animations - Now defined in Tailwind config */
 
 /* Responsive Utilities */
 .mobile-hidden {

@@ -10,9 +10,9 @@ import {
   NumberInput,
   NumberInputField,
   FormErrorMessage,
-  useToast,
   Alert,
   AlertIcon,
+  useToast,
 } from '@chakra-ui/react';
 import { useCampaign } from '../contexts/CampaignContext';
 import { useWallet } from '../contexts/WalletContext';
@@ -20,7 +20,6 @@ import { useWallet } from '../contexts/WalletContext';
 export const CampaignEdit = ({ campaignId, onSuccess, onCancel }) => {
   const { campaigns, updateCampaign } = useCampaign();
   const { selectedAccount } = useWallet();
-  const toast = useToast();
   
   const [formData, setFormData] = useState({
     title: '',
@@ -32,6 +31,7 @@ export const CampaignEdit = ({ campaignId, onSuccess, onCancel }) => {
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const toast = useToast();
 
   useEffect(() => {
     const campaign = campaigns.find(c => c.id === campaignId);
@@ -88,7 +88,7 @@ export const CampaignEdit = ({ campaignId, onSuccess, onCancel }) => {
       });
 
       toast({
-        title: 'Campaign updated!',
+        title: 'Success',
         description: 'Your campaign has been updated successfully.',
         status: 'success',
         duration: 5000,
@@ -98,7 +98,7 @@ export const CampaignEdit = ({ campaignId, onSuccess, onCancel }) => {
       onSuccess();
     } catch (error) {
       toast({
-        title: 'Failed to update campaign',
+        title: 'Error',
         description: error.message,
         status: 'error',
         duration: 5000,

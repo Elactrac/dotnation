@@ -9,9 +9,9 @@ import {
   Button,
   Textarea,
   IconButton,
-  useToast,
   Divider,
   Avatar,
+  useToast,
 } from '@chakra-ui/react';
 import { DeleteIcon } from '@chakra-ui/icons';
 import { useCampaign } from '../contexts/CampaignContext';
@@ -20,9 +20,9 @@ import { useWallet } from '../contexts/WalletContext';
 export const CampaignUpdates = ({ campaignId }) => {
   const { campaigns, addCampaignUpdate, deleteCampaignUpdate } = useCampaign();
   const { selectedAccount } = useWallet();
-  const toast = useToast();
   const [newUpdate, setNewUpdate] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const toast = useToast();
 
   const campaign = campaigns.find(c => c.id === campaignId);
   const isCreator = campaign?.creator === selectedAccount?.address;
@@ -42,17 +42,11 @@ export const CampaignUpdates = ({ campaignId }) => {
       toast({
         title: 'Update posted',
         status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
-    } catch (error) {
-      toast({
-        title: 'Failed to post update',
-        description: error.message,
-        status: 'error',
         duration: 5000,
         isClosable: true,
       });
+    } catch (error) {
+      toast.error(error.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -64,12 +58,12 @@ export const CampaignUpdates = ({ campaignId }) => {
       toast({
         title: 'Update deleted',
         status: 'success',
-        duration: 3000,
+        duration: 5000,
         isClosable: true,
       });
     } catch (error) {
       toast({
-        title: 'Failed to delete update',
+        title: 'Error',
         description: error.message,
         status: 'error',
         duration: 5000,

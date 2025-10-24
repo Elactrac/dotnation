@@ -1,21 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Container,
-  Box,
-  Heading,
-  VStack,
-  FormControl,
-  FormLabel,
-  Input,
-  Textarea,
-  Button,
-  useToast,
-  FormErrorMessage,
-  Text,
-  Card,
-  CardBody,
-} from '@chakra-ui/react';
+import { Toaster, toast } from 'react-hot-toast';
 import { useWallet } from '../contexts/WalletContext.jsx';
 import { useCampaign } from '../contexts/CampaignContext.jsx';
 import { parseDOT, isValidAddress, isValidPositiveNumber } from '../utils/formatters';
@@ -25,7 +10,6 @@ const CreateCampaignPage = () => {
   const { selectedAccount } = useWallet();
   const { createCampaign } = useCampaign();
   const navigate = useNavigate();
-  const toast = useToast();
 
   const [formData, setFormData] = useState({
     title: '',
@@ -40,7 +24,6 @@ const CreateCampaignPage = () => {
 
   const handleChange = (field) => (e) => {
     setFormData((prev) => ({ ...prev, [field]: e.target.value }));
-    // Clear error when user starts typing
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: '' }));
     }
@@ -97,28 +80,17 @@ const CreateCampaignPage = () => {
     e.preventDefault();
 
     if (!selectedAccount) {
-      toast({
-        title: 'Wallet Not Connected',
-        description: 'Please connect your wallet to create a campaign',
-        status: 'warning',
-        duration: 5000,
-        isClosable: true,
-      });
+      toast.error('Please connect your wallet to create a campaign');
       return;
     }
 
     if (!validateForm()) {
-      toast({
-        title: 'Validation Error',
-        description: 'Please fix the errors in the form',
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      });
+      toast.error('Please fix the errors in the form');
       return;
     }
 
     setIsSubmitting(true);
+    const toastId = toast.loading('Creating campaign...');
 
     try {
       const goalInPlanck = parseDOT(formData.goal);
@@ -132,121 +104,114 @@ const CreateCampaignPage = () => {
         formData.beneficiary
       );
 
-      toast({
-        title: 'Campaign Created!',
-        description: 'Your campaign has been created successfully',
-        status: 'success',
-        duration: 5000,
-        isClosable: true,
-      });
-
-      // Navigate to campaigns list
+      toast.success('Campaign created successfully!', { id: toastId });
       navigate('/dashboard');
     } catch (error) {
       console.error('Campaign creation error:', error);
-      toast({
-        title: 'Creation Failed',
-        description: error.message || 'Failed to create campaign',
-        status: 'error',
-        duration: 7000,
-        isClosable: true,
-      });
+      toast.error(error.message || 'Failed to create campaign', { id: toastId });
     } finally {
       setIsSubmitting(false);
     }
   });
 
   return (
-    <Container maxW="container.md" py={8}>
-      <Card>
-        <CardBody>
-          <VStack spacing={6} align="stretch">
-            <Box>
-              <Heading size="xl" mb={2}>Create New Campaign</Heading>
-              <Text color="white">
-                Launch your crowdfunding campaign on the blockchain
-              </Text>
-            </Box>
+    <div className="bg-background-dark font-body text-white/90 min-h-screen">
+      <Toaster position="top-center" reverseOrder={false} />
+      <div className="relative min-h-screen w-full flex flex-col overflow-x-hidden">
+        <div className="fixed top-0 left-0 w-24 h-24 bg-primary/20 rounded-full pointer-events-none blur-3xl z-0 -translate-x-1/2 -translate-y-1/2"></div>
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[200%] h-[200%] pointer-events-none">
+          <div className="absolute inset-0 bg-background-dark bg-[radial-gradient(circle_at_center,rgba(238,43,140,0.1)_0%,transparent_30%)] animate-pulse-slow"></div>
+        </div>
+        <div className="layout-container flex h-full grow flex-col z-10">
+          <main className="flex-1 flex flex-col items-center py-12">
+            <div className="w-full max-w-3xl px-4 sm:px-6 lg:px-8">
+              <div className="mb-12 text-center">
+                <h1 className="text-4xl md:text-5xl font-bold font-display tracking-tight text-white">Create New Campaign</h1>
+                <p className="mt-4 text-lg text-white/60 font-body">Launch your crowdfunding campaign on the blockchain</p>
+              </div>
 
-            <form onSubmit={handleSubmit}>
-              <VStack spacing={5} align="stretch">
-                <FormControl isInvalid={!!errors.title} isRequired>
-                  <FormLabel>Campaign Title</FormLabel>
-                  <Input
-                    placeholder="Enter a compelling campaign title"
-                    value={formData.title}
-                    onChange={handleChange('title')}
-                    size="lg"
-                  />
-                  <FormErrorMessage>{errors.title}</FormErrorMessage>
-                </FormControl>
+              <div className="p-8 rounded-xl border border-white/10 bg-white/5 backdrop-blur-lg">
+                <form onSubmit={handleSubmit} className="space-y-8">
+                  <div>
+                    <label htmlFor="title" className="block text-sm font-medium text-white/80 mb-2">Campaign Title</label>
+                    <input
+                      id="title"
+                      type="text"
+                      placeholder="Enter a compelling campaign title"
+                      value={formData.title}
+                      onChange={handleChange('title')}
+                      className={`w-full bg-white/5 border ${errors.title ? 'border-red-500' : 'border-white/10'} rounded-lg px-4 py-3 text-white placeholder-white/40 focus:ring-2 focus:ring-primary focus:outline-none`}
+                    />
+                    {errors.title && <p className="text-red-500 text-sm mt-2">{errors.title}</p>}
+                  </div>
 
-                <FormControl isInvalid={!!errors.description} isRequired>
-                  <FormLabel>Description</FormLabel>
-                  <Textarea
-                    placeholder="Describe your campaign and what you plan to achieve"
-                    value={formData.description}
-                    onChange={handleChange('description')}
-                    rows={6}
-                    resize="vertical"
-                  />
-                  <FormErrorMessage>{errors.description}</FormErrorMessage>
-                </FormControl>
+                  <div>
+                    <label htmlFor="description" className="block text-sm font-medium text-white/80 mb-2">Description</label>
+                    <textarea
+                      id="description"
+                      placeholder="Describe your campaign and what you plan to achieve"
+                      value={formData.description}
+                      onChange={handleChange('description')}
+                      rows={6}
+                      className={`w-full bg-white/5 border ${errors.description ? 'border-red-500' : 'border-white/10'} rounded-lg px-4 py-3 text-white placeholder-white/40 focus:ring-2 focus:ring-primary focus:outline-none resize-vertical`}
+                    />
+                    {errors.description && <p className="text-red-500 text-sm mt-2">{errors.description}</p>}
+                  </div>
 
-                <FormControl isInvalid={!!errors.goal} isRequired>
-                  <FormLabel>Funding Goal (DOT)</FormLabel>
-                  <Input
-                    type="number"
-                    placeholder="100"
-                    value={formData.goal}
-                    onChange={handleChange('goal')}
-                    step="0.01"
-                    min="1"
-                  />
-                  <FormErrorMessage>{errors.goal}</FormErrorMessage>
-                </FormControl>
+                  <div>
+                    <label htmlFor="goal" className="block text-sm font-medium text-white/80 mb-2">Funding Goal (DOT)</label>
+                    <input
+                      id="goal"
+                      type="number"
+                      placeholder="100"
+                      value={formData.goal}
+                      onChange={handleChange('goal')}
+                      step="0.01"
+                      min="1"
+                      className={`w-full bg-white/5 border ${errors.goal ? 'border-red-500' : 'border-white/10'} rounded-lg px-4 py-3 text-white placeholder-white/40 focus:ring-2 focus:ring-primary focus:outline-none`}
+                    />
+                    {errors.goal && <p className="text-red-500 text-sm mt-2">{errors.goal}</p>}
+                  </div>
 
-                <FormControl isInvalid={!!errors.deadline} isRequired>
-                  <FormLabel>Campaign Deadline</FormLabel>
-                  <Input
-                    type="datetime-local"
-                    value={formData.deadline}
-                    onChange={handleChange('deadline')}
-                  />
-                  <FormErrorMessage>{errors.deadline}</FormErrorMessage>
-                </FormControl>
+                  <div>
+                    <label htmlFor="deadline" className="block text-sm font-medium text-white/80 mb-2">Campaign Deadline</label>
+                    <input
+                      id="deadline"
+                      type="datetime-local"
+                      value={formData.deadline}
+                      onChange={handleChange('deadline')}
+                      className={`w-full bg-white/5 border ${errors.deadline ? 'border-red-500' : 'border-white/10'} rounded-lg px-4 py-3 text-white placeholder-white/40 focus:ring-2 focus:ring-primary focus:outline-none`}
+                    />
+                    {errors.deadline && <p className="text-red-500 text-sm mt-2">{errors.deadline}</p>}
+                  </div>
 
-                <FormControl isInvalid={!!errors.beneficiary} isRequired>
-                  <FormLabel>Beneficiary Address</FormLabel>
-                  <Input
-                    placeholder="5GrwvaEF5zXb26Fz9rc..."
-                    value={formData.beneficiary}
-                    onChange={handleChange('beneficiary')}
-                    fontFamily="monospace"
-                  />
-                  <FormErrorMessage>{errors.beneficiary}</FormErrorMessage>
-                  <Text fontSize="sm" color="white" mt={1}>
-                    Enter the Polkadot address that will receive the funds
-                  </Text>
-                </FormControl>
+                  <div>
+                    <label htmlFor="beneficiary" className="block text-sm font-medium text-white/80 mb-2">Beneficiary Address</label>
+                    <input
+                      id="beneficiary"
+                      placeholder="5GrwvaEF5zXb26Fz9rc..."
+                      value={formData.beneficiary}
+                      onChange={handleChange('beneficiary')}
+                      className={`w-full bg-white/5 border ${errors.beneficiary ? 'border-red-500' : 'border-white/10'} rounded-lg px-4 py-3 text-white placeholder-white/40 font-mono focus:ring-2 focus:ring-primary focus:outline-none`}
+                    />
+                    {errors.beneficiary && <p className="text-red-500 text-sm mt-2">{errors.beneficiary}</p>}
+                    <p className="text-xs text-white/50 mt-2">Enter the Polkadot address that will receive the funds</p>
+                  </div>
 
-                <Button
-                  type="submit"
-                  colorScheme="blue"
-                  size="lg"
-                  width="100%"
-                  isLoading={isSubmitting}
-                  loadingText="Creating Campaign..."
-                  mt={4}
-                >
-                  Create Campaign
-                </Button>
-              </VStack>
-            </form>
-          </VStack>
-        </CardBody>
-      </Card>
-    </Container>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full flex items-center justify-center rounded-full h-12 px-6 bg-primary text-white text-base font-bold tracking-wide hover:bg-primary/90 transition-all transform hover:scale-105 duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSubmitting ? 'Creating Campaign...' : 'Create Campaign'}
+                  </button>
+                </form>
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    </div>
   );
 };
 

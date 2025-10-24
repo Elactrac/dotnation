@@ -11,7 +11,6 @@ import {
   NumberIncrementStepper,
   NumberDecrementStepper,
   Text,
-  useToast,
   Alert,
   AlertIcon,
   VStack,
@@ -23,6 +22,7 @@ import {
   Divider,
   Icon,
   FormErrorMessage,
+  useToast,
 } from '@chakra-ui/react';
 import { FiHeart } from 'react-icons/fi';
 import { useCampaign } from '../contexts/CampaignContext.jsx';
@@ -111,7 +111,6 @@ export const DonationInterface = memo(({ campaignId, campaign }) => {
       setAmount(''); // Reset amount after successful donation
       setError('');
     } catch (err) {
-      console.error('Donation error:', err);
       toast({
         title: 'Donation Failed',
         description: err.message || 'Failed to process donation. Please try again.',
