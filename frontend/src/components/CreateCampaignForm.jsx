@@ -24,6 +24,8 @@ export const CreateCampaignForm = ({ onSuccess }) => {
   const { createCampaign } = useCampaign();
   const { selectedAccount } = useWallet();
   const toast = useToast();
+
+  console.log('CreateCampaignForm render - selectedAccount:', selectedAccount);
   
   const [formData, setFormData] = useState({
     title: '',
@@ -85,6 +87,13 @@ export const CreateCampaignForm = ({ onSuccess }) => {
 
   const handleGenerateContractSummary = async () => {
     setIsGeneratingSummary(true);
+    console.log('Generating contract summary with data:', {
+      title: formData.title,
+      description: formData.description,
+      goal: formData.goal,
+      deadline: formData.deadline,
+      beneficiary: formData.beneficiary,
+    });
     try {
       const response = await fetch('http://localhost:3001/api/contract-summary', {
         method: 'POST',
@@ -97,8 +106,10 @@ export const CreateCampaignForm = ({ onSuccess }) => {
           beneficiary: formData.beneficiary,
         }),
       });
-      if (!response.ok) throw new Error('Failed to generate contract summary.');
+      console.log('API response status:', response.status);
+      if (!response.ok) throw new Error(`Failed to generate contract summary: ${response.status}`);
       const data = await response.json();
+      console.log('Received summary:', data.summary);
       setContractSummary(data.summary);
       setShowModal(true);
     } catch (error) {
@@ -111,7 +122,12 @@ export const CreateCampaignForm = ({ onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateForm()) return;
+    console.log('Form submitted, validating...');
+    if (!validateForm()) {
+      console.log('Form validation failed');
+      return;
+    }
+    console.log('Form validation passed, generating summary...');
     await handleGenerateContractSummary();
   };
 
@@ -204,27 +220,31 @@ export const CreateCampaignForm = ({ onSuccess }) => {
 
       {/* Contract Summary Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
-            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Campaign Contract Summary</h2>
-            <div className="prose dark:prose-invert max-w-none mb-6">
-              <pre className="whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300">{contractSummary}</pre>
-            </div>
-            <div className="flex gap-4 justify-end">
-              <button
-                onClick={() => setShowModal(false)}
-                className="btn-secondary px-4 py-2"
-                disabled={isSubmitting}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleConfirmCreate}
-                disabled={isSubmitting}
-                className="btn-primary px-4 py-2 disabled:opacity-50"
-              >
-                {isSubmitting ? 'Creating...' : 'Confirm & Create Campaign'}
-              </button>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="p-6">
+              <h2 className="text-xl font-bold mb-4 text-gray-900">Campaign Contract Summary</h2>
+              <div className="mb-6">
+                <div className="whitespace-pre-wrap text-sm text-gray-700 bg-gray-50 p-4 rounded border">
+                  {contractSummary}
+                </div>
+              </div>
+              <div className="flex gap-4 justify-end">
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                  disabled={isSubmitting}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmCreate}
+                  disabled={isSubmitting}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {isSubmitting ? 'Creating...' : 'Confirm & Create Campaign'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
