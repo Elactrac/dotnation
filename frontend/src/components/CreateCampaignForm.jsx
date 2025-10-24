@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useToast } from '@chakra-ui/react'; // Kept for notifications, can be replaced later
-import { useCampaign } from '../contexts/CampaignContext';
 import { useWallet } from '../contexts/WalletContext';
 
 // Reusable form components for consistent styling
@@ -21,7 +20,6 @@ TextareaField.propTypes = { className: PropTypes.string };
 
 
 export const CreateCampaignForm = ({ onSuccess }) => {
-  const { createCampaign } = useCampaign();
   const { selectedAccount } = useWallet();
   const toast = useToast();
 
@@ -135,10 +133,19 @@ export const CreateCampaignForm = ({ onSuccess }) => {
     setShowModal(false);
     setIsSubmitting(true);
     try {
-      const deadlineTimestamp = new Date(formData.deadline).getTime();
-      const goalAmount = Math.floor(parseFloat(formData.goal) * 1_000_000_000_000);
-      await createCampaign({ ...formData, goal: goalAmount, deadline: deadlineTimestamp });
-      toast({ title: 'Campaign created!', description: 'Your campaign has been created successfully.', status: 'success', duration: 5000, isClosable: true });
+      // For testing: Skip actual contract deployment
+      console.log('TEST MODE: Skipping contract deployment');
+      console.log('Would deploy with:', {
+        title: formData.title,
+        description: formData.description,
+        goal: Math.floor(parseFloat(formData.goal) * 1_000_000_000_000),
+        deadline: new Date(formData.deadline).getTime(),
+        beneficiary: formData.beneficiary
+      });
+
+      // Simulate successful creation
+      await new Promise(resolve => setTimeout(resolve, 2000)); // 2 second delay
+      toast({ title: 'Campaign created! (Test Mode)', description: 'This was a test - no real contract deployed.', status: 'success', duration: 5000, isClosable: true });
       onSuccess();
     } catch (error) {
       toast({ title: 'Failed to create campaign', description: error.message, status: 'error', duration: 5000, isClosable: true });
