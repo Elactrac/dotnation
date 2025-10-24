@@ -210,12 +210,12 @@ export const CreateCampaignForm = ({ onSuccess }) => {
 
         <button
           type="submit"
-          disabled={isSubmitting || isGeneratingSummary || !selectedAccount}
+          disabled={isSubmitting || isGeneratingSummary}
           className="btn-primary w-full h-12 text-base font-bold disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
         >
           {isGeneratingSummary ? 'Generating Summary...' : isSubmitting ? 'Creating Campaign...' : 'Create Campaign'}
         </button>
-        {!selectedAccount && <p className="text-center text-warning text-body-sm">Please connect your wallet to create a campaign.</p>}
+        {!selectedAccount && <p className="text-center text-orange-500 text-sm">Note: Wallet connection required for actual deployment.</p>}
       </div>
 
       {/* Contract Summary Modal */}
