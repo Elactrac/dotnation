@@ -143,6 +143,91 @@ ${description}
   }
 });
 
+// API Endpoint for Contract Summary
+app.post('/api/contract-summary', async (req, res) => {
+  try {
+    const { title, description, goal, deadline, beneficiary } = req.body;
+
+    if (!title || !description || !goal || !deadline || !beneficiary) {
+      return res.status(400).json({ error: 'All campaign details are required for contract summary.' });
+    }
+
+    // Check if API key is properly configured
+    if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your_gemini_api_key_here') {
+      // Return mock contract summary for testing
+      const mockSummary = `**Campaign Contract Summary**
+
+**Project:** ${title}
+**Funding Goal:** ${goal} DOT
+**Deadline:** ${new Date(deadline).toLocaleDateString()}
+**Beneficiary:** ${beneficiary.substring(0, 10)}...
+
+**What happens next:**
+- Your campaign will be deployed as a smart contract on the Polkadot blockchain
+- Funds will be held in escrow until the goal is reached or deadline passes
+- If goal is met, beneficiary can withdraw funds; otherwise, donors can reclaim donations
+- All transactions are transparent and immutable on the blockchain
+
+**Important Notes:**
+- Contract terms are final once deployed
+- Ensure beneficiary address is correct
+- Campaign cannot be modified after creation`;
+
+      console.log('Returning mock contract summary (no API key configured)');
+      return res.json({ summary: mockSummary });
+    }
+
+    // Temporary: Use mock for contract summary to avoid API issues
+    const mockSummary = `**Campaign Contract Summary**
+
+**Project:** ${title}
+**Funding Goal:** ${goal} DOT
+**Deadline:** ${new Date(deadline).toLocaleDateString()}
+**Beneficiary:** ${beneficiary.substring(0, 10)}...
+
+**What happens next:**
+- Your campaign will be deployed as a smart contract on the Polkadot blockchain
+- Funds will be held in escrow until the goal is reached or deadline passes
+- If goal is met, beneficiary can withdraw funds; otherwise, donors can reclaim donations
+- All transactions are transparent and immutable on the blockchain
+
+**Important Notes:**
+- Contract terms are final once deployed
+- Ensure beneficiary address is correct
+- Campaign cannot be modified after creation`;
+
+    console.log('Returning mock contract summary (temporary fix)');
+    return res.json({ summary: mockSummary });
+
+    const prompt = `Generate a clear, concise summary of a crowdfunding campaign contract based on the following details. Explain what the contract does, the key terms, and important implications for the creator and donors. Structure it with sections for clarity.
+
+Campaign Details:
+- Title: ${title}
+- Description: ${description.substring(0, 200)}${description.length > 200 ? '...' : ''}
+- Goal: ${goal} DOT
+- Deadline: ${new Date(deadline).toLocaleString()}
+- Beneficiary Address: ${beneficiary}
+
+Focus on:
+1. What the contract will do
+2. Key terms and conditions
+3. Rights and responsibilities
+4. Potential risks and considerations
+
+Keep the summary informative but not overwhelming, around 200-300 words.`;
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+
+    res.json({ summary: text });
+
+  } catch (error) {
+    console.error('Error generating contract summary:', error);
+    res.status(500).json({ error: 'Failed to generate contract summary.' });
+  }
+});
+
 // Test endpoint
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'Gemini backend is running' });

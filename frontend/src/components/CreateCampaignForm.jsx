@@ -40,6 +40,9 @@ export const CreateCampaignForm = ({ onSuccess }) => {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [contractSummary, setContractSummary] = useState('');
+  const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
 
   const validateForm = () => {
     const newErrors = {};
@@ -80,9 +83,40 @@ export const CreateCampaignForm = ({ onSuccess }) => {
     }
   };
 
+  const handleGenerateContractSummary = async () => {
+    setIsGeneratingSummary(true);
+    try {
+      const response = await fetch('http://localhost:3001/api/contract-summary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: formData.title,
+          description: formData.description,
+          goal: formData.goal,
+          deadline: formData.deadline,
+          beneficiary: formData.beneficiary,
+        }),
+      });
+      if (!response.ok) throw new Error('Failed to generate contract summary.');
+      const data = await response.json();
+      setContractSummary(data.summary);
+      setShowModal(true);
+    } catch (error) {
+      console.error("Contract summary generation error:", error);
+      toast({ title: 'Summary Generation Failed', description: error.message, status: 'error', duration: 5000, isClosable: true });
+    } finally {
+      setIsGeneratingSummary(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
+    await handleGenerateContractSummary();
+  };
+
+  const handleConfirmCreate = async () => {
+    setShowModal(false);
     setIsSubmitting(true);
     try {
       const deadlineTimestamp = new Date(formData.deadline).getTime();
@@ -160,13 +194,41 @@ export const CreateCampaignForm = ({ onSuccess }) => {
 
         <button
           type="submit"
-          disabled={isSubmitting || !selectedAccount}
+          disabled={isSubmitting || isGeneratingSummary || !selectedAccount}
           className="btn-primary w-full h-12 text-base font-bold disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
         >
-          {isSubmitting ? 'Creating Campaign...' : 'Create Campaign'}
+          {isGeneratingSummary ? 'Generating Summary...' : isSubmitting ? 'Creating Campaign...' : 'Create Campaign'}
         </button>
         {!selectedAccount && <p className="text-center text-warning text-body-sm">Please connect your wallet to create a campaign.</p>}
       </div>
+
+      {/* Contract Summary Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Campaign Contract Summary</h2>
+            <div className="prose dark:prose-invert max-w-none mb-6">
+              <pre className="whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300">{contractSummary}</pre>
+            </div>
+            <div className="flex gap-4 justify-end">
+              <button
+                onClick={() => setShowModal(false)}
+                className="btn-secondary px-4 py-2"
+                disabled={isSubmitting}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmCreate}
+                disabled={isSubmitting}
+                className="btn-primary px-4 py-2 disabled:opacity-50"
+              >
+                {isSubmitting ? 'Creating...' : 'Confirm & Create Campaign'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </form>
   );
 };
