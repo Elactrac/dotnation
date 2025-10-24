@@ -9,8 +9,27 @@ export default {
     extend: {
       colors: {
         primary: "#ee2b8c",
+        secondary: "#7c3aed",
+        surface: "#ffffff",
+        border: "#e5e7eb",
         "background-light": "#f8f6f7",
         "background-dark": "#100811",
+        text: {
+          primary: "#1f2937",
+          secondary: "#6b7280",
+          muted: "#9ca3af",
+        },
+        success: "#10b981",
+        warning: "#f59e0b",
+        error: "#ef4444",
+        info: "#3b82f6",
+      },
+      boxShadow: {
+        soft: "0 2px 8px rgba(0, 0, 0, 0.1)",
+        medium: "0 4px 16px rgba(0, 0, 0, 0.15)",
+        hard: "0 8px 32px rgba(0, 0, 0, 0.2)",
+        glow: "0 0 20px rgba(238, 43, 140, 0.3)",
+        "glow-secondary": "0 0 20px rgba(124, 58, 237, 0.3)",
       },
       fontFamily: {
         display: ["Space Grotesk", "sans-serif"],
