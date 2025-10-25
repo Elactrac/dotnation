@@ -21,9 +21,10 @@ export const ApiProvider = ({ children }) => {
 
         console.log(`Connecting to ${rpcEndpoint}...`);
 
+        // Use a shorter timeout and don't block the UI
         const apiInstance = await Promise.race([
           ApiPromise.create({ provider: wsProvider }),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Connection timeout')), 10000))
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Connection timeout')), 5000))
         ]);
 
         await apiInstance.isReady;
@@ -47,10 +48,12 @@ export const ApiProvider = ({ children }) => {
       } catch (err) {
         console.warn('API connection failed:', err.message);
         setError(err.message);
-        // Don't block the app, continue anyway
+        // Don't block the app - set ready to true anyway so the UI can load
+        setIsReady(true);
       }
     };
 
+    // Initialize API asynchronously without blocking
     initializeApi();
 
     // Cleanup on unmount

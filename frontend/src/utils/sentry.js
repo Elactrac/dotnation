@@ -5,36 +5,37 @@ import { BrowserTracing } from '@sentry/tracing';
  * Initialize Sentry error tracking and performance monitoring
  */
 export const initSentry = () => {
-  const dsn = import.meta.env.VITE_SENTRY_DSN;
-  const environment = import.meta.env.MODE || 'development';
+  try {
+    const dsn = import.meta.env.VITE_SENTRY_DSN;
+    const environment = import.meta.env.MODE || 'development';
 
-  if (!dsn) {
-    console.warn('Sentry DSN not configured. Error tracking disabled.');
-    return;
-  }
+    if (!dsn) {
+      console.warn('Sentry DSN not configured. Error tracking disabled.');
+      return;
+    }
 
-  Sentry.init({
-    dsn,
-    environment,
-    integrations: [
-      new BrowserTracing({
-        // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
-        tracePropagationTargets: [
-          'localhost',
-          /^https:\/\/yourdomain\.com\/api/,
-          /^https:\/\/dotnation\.vercel\.app\/api/,
-        ],
-      }),
-    ],
+    Sentry.init({
+      dsn,
+      environment,
+      integrations: [
+        new BrowserTracing({
+          // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
+          tracePropagationTargets: [
+            'localhost',
+            /^https:\/\/yourdomain\.com\/api/,
+            /^https:\/\/dotnation\.vercel\.app\/api/,
+          ],
+        }),
+      ],
 
-    // Performance Monitoring
-    tracesSampleRate: environment === 'production' ? 0.1 : 1.0, // Capture 100% of transactions in development, 10% in production
+      // Performance Monitoring
+      tracesSampleRate: environment === 'production' ? 0.1 : 1.0, // Capture 100% of transactions in development, 10% in production
 
-    // Release Health
-    autoSessionTracking: true,
+      // Release Health
+      autoSessionTracking: true,
 
-    // Error filtering and context
-    beforeSend(event, hint) {
+      // Error filtering and context
+      beforeSend(event, hint) {
       // Filter out development errors in production
       if (environment === 'production' && event.exception) {
         const error = hint.originalException;
@@ -70,6 +71,9 @@ export const initSentry = () => {
   Sentry.setTag('component', 'frontend');
 
   console.log(`Sentry initialized for ${environment} environment`);
+  } catch (error) {
+    console.warn('Failed to initialize Sentry:', error.message);
+  }
 };
 
 /**
