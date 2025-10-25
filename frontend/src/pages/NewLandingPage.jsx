@@ -95,23 +95,23 @@ const NewLandingPage = () => {
                  <div className="absolute inset-0 bg-primary/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                </div>
                <div>
-                 <h1 className="text-white text-2xl font-bold font-display tracking-tight">DotNation</h1>
-                 <p className="text-white/60 text-xs font-medium">Blockchain Crowdfunding</p>
+                  <h1 className="text-gray-100 text-2xl font-bold font-display tracking-tight">DotNation</h1>
+                  <p className="text-gray-400 text-xs font-medium">Blockchain Crowdfunding</p>
                </div>
              </Link>
            </div>
 
            <div className="flex flex-1 justify-end gap-6 items-center">
              <nav className="hidden lg:flex items-center gap-1">
-                <a className="px-4 py-2 text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200 font-medium text-sm" href="#features">Features</a>
-                <a className="px-4 py-2 text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200 font-medium text-sm" href="#how-it-works">How It Works</a>
-                <a className="px-4 py-2 text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200 font-medium text-sm" href="#built-for-polkadot">For Polkadot</a>
+                <a className="px-4 py-2 text-gray-300 hover:text-gray-100 hover:bg-gray-800/50 rounded-lg transition-all duration-200 font-medium text-sm" href="#features">Features</a>
+                <a className="px-4 py-2 text-gray-300 hover:text-gray-100 hover:bg-gray-800/50 rounded-lg transition-all duration-200 font-medium text-sm" href="#how-it-works">How It Works</a>
+                <a className="px-4 py-2 text-gray-300 hover:text-gray-100 hover:bg-gray-800/50 rounded-lg transition-all duration-200 font-medium text-sm" href="#built-for-polkadot">For Polkadot</a>
                 <NavLink
                   to="/about"
                   className={({ isActive }) =>
                     isActive
-                      ? "px-4 py-2 text-white bg-white/10 rounded-lg font-medium text-sm"
-                      : "px-4 py-2 text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200 font-medium text-sm"
+                      ? "px-4 py-2 text-gray-100 bg-gray-800/70 rounded-lg font-medium text-sm"
+                      : "px-4 py-2 text-gray-300 hover:text-gray-100 hover:bg-gray-800/50 rounded-lg transition-all duration-200 font-medium text-sm"
                   }
                 >
                   About
@@ -123,8 +123,8 @@ const NewLandingPage = () => {
                   to="/login"
                   className={({ isActive }) =>
                     isActive
-                      ? "px-4 py-2 text-white bg-white/10 rounded-lg font-medium text-sm"
-                      : "px-4 py-2 text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200 font-medium text-sm"
+                      ? "px-4 py-2 text-gray-100 bg-gray-800/70 rounded-lg font-medium text-sm"
+                      : "px-4 py-2 text-gray-300 hover:text-gray-100 hover:bg-gray-800/50 rounded-lg transition-all duration-200 font-medium text-sm"
                   }
                 >
                   Login
@@ -132,14 +132,14 @@ const NewLandingPage = () => {
 
                 <NavLink
                   to="/dashboard"
-                  className="px-4 py-2 text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200 font-medium text-sm"
+                  className="px-4 py-2 text-gray-300 hover:text-gray-100 hover:bg-gray-800/50 rounded-lg transition-all duration-200 font-medium text-sm"
                 >
                   Dashboard
                 </NavLink>
 
                 <Link
                   to="/create-campaign"
-                  className="flex items-center justify-center rounded-full h-11 px-6 bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold tracking-wide hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 transform hover:scale-105"
+                  className="flex items-center justify-center rounded-full h-11 px-6 bg-gradient-to-r from-primary to-secondary text-gray-100 text-sm font-semibold tracking-wide hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 transform hover:scale-105"
                 >
                   <span>Start Campaign</span>
                   <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -149,16 +149,16 @@ const NewLandingPage = () => {
 
               {selectedAccount ? (
                 <div className="relative group">
-                  <button className="flex items-center gap-2 rounded-full h-10 px-4 bg-white/10 text-white text-sm font-medium hover:bg-white/20 transition-colors duration-300">
+                  <button className="flex items-center gap-2 rounded-full h-10 px-4 bg-gray-800/70 text-gray-200 text-sm font-medium hover:bg-gray-700/80 transition-colors duration-300">
                     <span className="w-6 h-6 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500" />
                     <span>{formatAddress(selectedAccount.address)}</span>
-                    <svg
-                      className="w-4 h-4 text-white/70"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
+                      <svg
+                        className="w-4 h-4 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
                       <path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
                     </svg>
                   </button>
@@ -166,19 +166,20 @@ const NewLandingPage = () => {
                   {/* Dropdown */}
                   <div className="absolute right-0 mt-2 w-64 rounded-xl border border-white/10 bg-background-dark/95 backdrop-blur-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                     <div className="p-4">
-                      <p className="text-xs text-white/50 mb-2">Connected Account</p>
-                      <p className="text-sm text-white font-medium mb-4">{selectedAccount.address}</p>
+                      <p className="text-xs text-gray-400 mb-2">Connected Account</p>
+                      <p className="text-sm text-gray-200 font-medium mb-4">{selectedAccount.address}</p>
                       {accounts.length > 1 && (
                         <div className="mb-4">
-                          <p className="text-xs text-white/50 mb-2">Switch Account</p>
+                          <p className="text-xs text-gray-400 mb-2">Switch Account</p>
                           {accounts.map((account) => (
                             <button
                               key={account.address}
                               onClick={() => switchAccount(account)}
                               className={`w-full text-left px-3 py-2 rounded-lg text-sm ${
-                                account.address === selectedAccount.address
-                                  ? 'bg-primary/20 text-primary'
-                                  : 'text-white/70 hover:bg-white/10'
+                                  account.address === selectedAccount.address
+
+                                    ? 'bg-primary/20 text-primary'
+                                    : 'text-gray-300 hover:bg-gray-800/50'
                               } transition-colors`}
                             >
                               {account.meta.name || formatAddress(account.address)}
@@ -188,7 +189,7 @@ const NewLandingPage = () => {
                       )}
                       <button
                         onClick={disconnectWallet}
-                        className="w-full px-4 py-2 rounded-lg bg-white/10 text-white text-sm font-medium hover:bg-white/20 transition-colors"
+                        className="w-full px-4 py-2 rounded-lg bg-gray-800/70 text-gray-200 text-sm font-medium hover:bg-gray-700/80 transition-colors"
                       >
                         Disconnect
                       </button>
@@ -198,7 +199,7 @@ const NewLandingPage = () => {
               ) : (
                 <button
                   onClick={connectWallet}
-                  className="flex items-center gap-2 rounded-full h-10 px-4 bg-white/10 text-white text-sm font-medium hover:bg-white/20 transition-colors duration-300"
+                  className="flex items-center gap-2 rounded-full h-10 px-4 bg-gray-800/70 text-gray-200 text-sm font-medium hover:bg-gray-700/80 transition-colors duration-300"
                 >
                   Connect Wallet
                 </button>

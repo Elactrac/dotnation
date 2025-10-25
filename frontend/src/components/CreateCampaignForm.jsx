@@ -160,55 +160,55 @@ export const CreateCampaignForm = ({ onSuccess }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-2xl mx-auto">
-      <div className="space-form">
+    <form onSubmit={handleSubmit} className="w-full max-w-4xl mx-auto">
+      <div className="space-y-8">
         <FormField label="Campaign Title" name="title" error={errors.title}>
           <InputField name="title" value={formData.title} onChange={handleChange} placeholder="My Awesome Project" />
         </FormField>
 
         <div>
-          <div className="flex justify-between items-center mb-2">
-            <label htmlFor="description" className="form-label">Description</label>
-            <button
-              type="button"
-              onClick={handleGenerateDescription}
-              disabled={isGenerating || !formData.title}
-              className="btn-ghost text-xs px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isGenerating ? 'Generating...' : '✨ Generate with AI'}
-            </button>
-          </div>
-          <TextareaField 
-            name="description" 
-            value={formData.description} 
-            onChange={handleChange} 
-            placeholder="Describe your campaign, or generate one with AI after entering a title." 
-            rows={8} 
-          />
-          {errors.description && <p className="text-red-400 text-sm mt-1">{errors.description}</p>}
-        </div>
+           <div className="flex justify-between items-center mb-3">
+             <label htmlFor="description" className="block text-sm font-medium text-gray-200 mb-2">Description</label>
+             <button
+               type="button"
+               onClick={handleGenerateDescription}
+               disabled={isGenerating || !formData.title}
+               className="px-3 py-1.5 text-xs bg-primary/20 hover:bg-primary/30 text-primary rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+             >
+               {isGenerating ? 'Generating...' : '✨ Generate with AI'}
+             </button>
+           </div>
+           <TextareaField
+             name="description"
+             value={formData.description}
+             onChange={handleChange}
+             placeholder="Describe your campaign, or generate one with AI after entering a title."
+             rows={8}
+           />
+           {errors.description && <p className="text-red-400 text-sm mt-2">{errors.description}</p>}
+         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 space-y-0">
-          <FormField label="Funding Goal (DOT)" name="goal" error={errors.goal}>
-            <InputField name="goal" type="number" value={formData.goal} onChange={handleChange} placeholder="1000" />
-          </FormField>
-          <FormField label="Campaign Deadline" name="deadline" error={errors.deadline}>
-            <InputField name="deadline" type="datetime-local" value={formData.deadline} onChange={handleChange} min={new Date().toISOString().slice(0, 16)} />
-          </FormField>
-        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+           <FormField label="Funding Goal (DOT)" name="goal" error={errors.goal}>
+             <InputField name="goal" type="number" value={formData.goal} onChange={handleChange} placeholder="1000" />
+           </FormField>
+           <FormField label="Campaign Deadline" name="deadline" error={errors.deadline}>
+             <InputField name="deadline" type="datetime-local" value={formData.deadline} onChange={handleChange} min={new Date().toISOString().slice(0, 16)} />
+           </FormField>
+         </div>
 
         <FormField label="Beneficiary Address" name="beneficiary" error={errors.beneficiary}>
           <InputField name="beneficiary" value={formData.beneficiary} onChange={handleChange} placeholder="Enter the beneficiary's Polkadot address" />
         </FormField>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 space-y-0">
-          <FormField label="Category" name="category">
-            <InputField name="category" value={formData.category} onChange={handleChange} placeholder="e.g., Technology, Healthcare" />
-          </FormField>
-          <FormField label="Campaign Image URL" name="imageUrl">
-            <InputField name="imageUrl" value={formData.imageUrl} onChange={handleChange} placeholder="https://example.com/image.png" />
-          </FormField>
-        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+           <FormField label="Category" name="category">
+             <InputField name="category" value={formData.category} onChange={handleChange} placeholder="e.g., Technology, Healthcare" />
+           </FormField>
+           <FormField label="Campaign Image URL" name="imageUrl">
+             <InputField name="imageUrl" value={formData.imageUrl} onChange={handleChange} placeholder="https://example.com/image.png" />
+           </FormField>
+         </div>
 
         <FormField label="Website (Optional)" name="website">
           <InputField name="website" value={formData.website} onChange={handleChange} placeholder="https://myproject.com" />
@@ -226,19 +226,19 @@ export const CreateCampaignForm = ({ onSuccess }) => {
 
       {/* Contract Summary Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 border border-gray-700 rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
             <div className="p-6">
-              <h2 className="text-xl font-bold mb-4 text-gray-900">Campaign Contract Summary</h2>
+              <h2 className="text-xl font-bold mb-4 text-gray-100">Campaign Contract Summary</h2>
               <div className="mb-6">
-                <div className="whitespace-pre-wrap text-sm text-gray-700 bg-gray-50 p-4 rounded border">
+                <div className="whitespace-pre-wrap text-sm text-gray-300 bg-gray-800 p-4 rounded-lg border border-gray-600">
                   {contractSummary}
                 </div>
               </div>
               <div className="flex gap-4 justify-end">
                 <button
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                  className="px-4 py-2 border border-gray-600 rounded-lg text-gray-300 hover:bg-gray-800 transition-colors disabled:opacity-50"
                   disabled={isSubmitting}
                 >
                   Cancel
@@ -246,7 +246,7 @@ export const CreateCampaignForm = ({ onSuccess }) => {
                 <button
                   onClick={handleConfirmCreate}
                   disabled={isSubmitting}
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+                  className="px-4 py-2 bg-primary text-gray-100 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
                 >
                   {isSubmitting ? 'Creating...' : 'Confirm & Create Campaign'}
                 </button>
