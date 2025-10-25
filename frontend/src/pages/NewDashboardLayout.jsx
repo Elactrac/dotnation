@@ -189,12 +189,12 @@ const NewDashboardLayout = () => {
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 flex flex-col items-center">
+        <main className="flex-1 flex flex-col items-center pb-16">
           <Outlet />
         </main>
 
         {/* Footer */}
-        <footer className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-auto">
+        <footer className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-auto pt-8">
           <div className="py-6 border-t border-white/10">
             <div className="flex flex-col md:flex-row justify-between items-center gap-8">
               <div className="flex items-center gap-6">

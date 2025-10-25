@@ -115,22 +115,14 @@ const CreateCampaignPage = () => {
   });
 
   return (
-    <div className="bg-background-dark font-body text-white/90 min-h-screen">
+    <div className="w-full max-w-3xl px-4 sm:px-6 lg:px-8 py-6">
       <Toaster position="top-center" reverseOrder={false} />
-      <div className="relative min-h-screen w-full flex flex-col overflow-x-hidden">
-        <div className="fixed top-0 left-0 w-24 h-24 bg-primary/20 rounded-full pointer-events-none blur-3xl z-0 -translate-x-1/2 -translate-y-1/2"></div>
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[200%] h-[200%] pointer-events-none">
-          <div className="absolute inset-0 bg-background-dark bg-[radial-gradient(circle_at_center,rgba(238,43,140,0.1)_0%,transparent_30%)] animate-pulse-slow"></div>
-        </div>
-        <div className="layout-container flex h-full grow flex-col z-10">
-          <main className="flex-1 flex flex-col items-center py-12">
-            <div className="w-full max-w-3xl px-4 sm:px-6 lg:px-8">
-              <div className="mb-12 text-center">
-                <h1 className="text-4xl md:text-5xl font-bold font-display tracking-tight text-white">Create New Campaign</h1>
-                <p className="mt-4 text-lg text-white/60 font-body">Launch your crowdfunding campaign on the blockchain</p>
-              </div>
+      <div className="mb-12 text-center">
+        <h1 className="text-4xl md:text-5xl font-bold font-display tracking-tight text-white">Create New Campaign</h1>
+        <p className="mt-4 text-lg text-white/60 font-body">Launch your crowdfunding campaign on the blockchain</p>
+      </div>
 
-              <div className="p-8 rounded-xl border border-white/10 bg-white/5 backdrop-blur-lg">
+      <div className="p-8 rounded-xl border border-white/10 bg-white/5 backdrop-blur-lg">
                 <form onSubmit={handleSubmit} className="space-y-8">
                   <div>
                     <label htmlFor="title" className="block text-sm font-medium text-white/80 mb-2">Campaign Title</label>
@@ -206,10 +198,6 @@ const CreateCampaignPage = () => {
                     {isSubmitting ? 'Creating Campaign...' : 'Create Campaign'}
                   </button>
                 </form>
-              </div>
-            </div>
-          </main>
-        </div>
       </div>
     </div>
   );
