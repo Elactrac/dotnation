@@ -5,10 +5,10 @@ import { useWallet } from '../contexts/WalletContext';
 
 // Reusable form components for consistent styling
 const FormField = ({ label, name, error, children }) => (
-    <div className="form-group">
-        <label htmlFor={name} className="form-label">{label}</label>
+    <div className="space-y-2">
+        <label htmlFor={name} className="block text-sm font-medium text-gray-200">{label}</label>
         {children}
-        {error && <p className="form-error">{error}</p>}
+        {error && <p className="text-red-400 text-sm mt-1">{error}</p>}
     </div>
 );
 FormField.propTypes = { label: PropTypes.string, name: PropTypes.string, error: PropTypes.string, children: PropTypes.node };
@@ -168,7 +168,7 @@ export const CreateCampaignForm = ({ onSuccess }) => {
 
         <div>
            <div className="flex justify-between items-center mb-3">
-             <label htmlFor="description" className="block text-sm font-medium text-gray-200 mb-2">Description</label>
+             <label htmlFor="description" className="block text-sm font-medium text-gray-200">Description</label>
              <button
                type="button"
                onClick={handleGenerateDescription}
