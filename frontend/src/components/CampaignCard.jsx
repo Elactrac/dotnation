@@ -3,6 +3,13 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { formatDotBalance, getCampaignStatus, calculateProgress } from '../utils/formatters';
 
+/**
+ * A card component that displays a summary of a fundraising campaign.
+ * It includes the campaign title, progress, status, and actions like viewing details or generating an AI summary.
+ * @param {object} props - The component props.
+ * @param {object} props.campaign - The campaign object to display.
+ * @returns {JSX.Element} The campaign card component.
+ */
 const CampaignCard = ({ campaign }) => {
     const [summary, setSummary] = useState('');
     const [isSummarizing, setIsSummarizing] = useState(false);
@@ -13,6 +20,10 @@ const CampaignCard = ({ campaign }) => {
 
     const canWithdraw = status.text === 'Successful';
 
+    /**
+     * Handles the AI summary generation for the campaign description.
+     * Toggles the summary visibility if it's already generated.
+     */
     const handleSummarize = async () => {
         if (summary || summaryError) { // Toggle off if summary is already shown
             setSummary('');
@@ -106,7 +117,16 @@ const CampaignCard = ({ campaign }) => {
     );
 };
 
-// ActionButton Component
+/**
+ * A reusable button component for actions in the CampaignCard.
+ * @param {object} props - The component props.
+ * @param {string} props.title - The tooltip title for the button.
+ * @param {function} props.onClick - The function to call when the button is clicked.
+ * @param {boolean} props.disabled - Whether the button is disabled.
+ * @param {React.ReactNode} props.children - The icon or content of the button.
+ * @param {string} props.className - Additional CSS classes for the button.
+ * @returns {JSX.Element} The action button component.
+ */
 const ActionButton = ({ title, onClick, disabled, children, className = '' }) => (
     <button
         onClick={onClick}
@@ -120,9 +140,13 @@ const ActionButton = ({ title, onClick, disabled, children, className = '' }) =>
 ActionButton.propTypes = { title: PropTypes.string, onClick: PropTypes.func, disabled: PropTypes.bool, children: PropTypes.node, className: PropTypes.string };
 
 // Icons
+/** Renders a magic icon. @returns {JSX.Element} */
 const MagicIcon = () => <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 0 24 24" fill="currentColor"><path d="M15 23.27L13.73 22l1.27-1.27L16.27 22l-1.27 1.27zM11.5 21.5L10 20l1.5-1.5L13 20l-1.5 1.5zM7 18l-1.5-1.5L7 15l1.5 1.5L7 18zM4.73 15L3.46 13.73 4.73 12.46 6 13.73 4.73 15zM12 8c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM20.73 6.46L19.46 5.19 20.73 3.92 22 5.19 20.73 6.46zM18 11l-1.5-1.5L18 8l1.5 1.5L18 11z"></path></svg>;
+/** Renders a spinning loading icon. @returns {JSX.Element} */
 const SpinnerIcon = () => <svg className="animate-spin" xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>;
+/** Renders a view icon. @returns {JSX.Element} */
 const ViewIcon = () => <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"></path></svg>;
+/** Renders a withdraw icon. @returns {JSX.Element} */
 const WithdrawIcon = () => <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 0 24 24" fill="currentColor"><path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z"></path></svg>;
 
 CampaignCard.propTypes = {

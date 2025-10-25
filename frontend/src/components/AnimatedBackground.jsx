@@ -2,11 +2,8 @@ import { Box } from '@chakra-ui/react';
 import { keyframes } from '@emotion/react';
 
 /**
- * AnimatedBackground Component
- * Creates a pulsing radial gradient background effect
- * Adds atmospheric depth to pages
+ * Keyframes for the pulsing background animation.
  */
-
 const pulseAnimation = keyframes`
   0%, 100% {
     transform: scale(1);
@@ -18,6 +15,11 @@ const pulseAnimation = keyframes`
   }
 `;
 
+/**
+ * Renders an animated background with a pulsing radial gradient effect.
+ * This component is used to add atmospheric depth to pages.
+ * @returns {JSX.Element} The animated background component.
+ */
 const AnimatedBackground = () => {
   return (
     <Box

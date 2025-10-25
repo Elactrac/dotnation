@@ -1,4 +1,12 @@
+/**
+ * @file Renders the About page for DotNation.
+ * @exports AboutPage
+ */
 
+/**
+ * @file Renders the About page for DotNation.
+ * @exports AboutPage
+ */
 const AboutPage = () => {
   return (
     <div className="min-h-screen bg-background-dark text-white">
