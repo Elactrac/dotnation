@@ -71,82 +71,81 @@ const NewLandingPage = () => {
       />
 
       {/* Background Gradient */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[200%] h-[200%] pointer-events-none">
-        <div className="absolute inset-0 bg-background-dark bg-[radial-gradient(circle_at_center,rgba(238,43,140,0.05)_0%,transparent_30%)] animate-pulse-slow" />
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(238,43,140,0.05)_0%,transparent_50%)] animate-pulse-slow" />
       </div>
 
       {/* Main Content */}
-      <div className="layout-container flex h-full grow flex-col z-10">
+      <div className="relative flex flex-col min-h-screen z-10">
         {/* Header */}
-        <header className="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap px-10 py-4 border-b border-white/10 backdrop-blur-md bg-background-dark/50 transition-transform duration-300">
-          <div className="flex items-center gap-3 text-white">
-            <svg
-              className="text-primary size-8"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
-              <circle cx="12" cy="12" fill="currentColor" r="4" />
-            </svg>
-            <h2 className="text-white text-2xl font-bold font-display">DotNation</h2>
-          </div>
+        <header className="sticky top-0 z-50 flex items-center justify-between px-6 lg:px-10 py-5 border-b border-white/10 backdrop-blur-md bg-background-dark/80 transition-transform duration-300">
+           <div className="flex items-center gap-4">
+             <Link to="/" className="flex items-center gap-4 group">
+               <div className="relative">
+                 <svg
+                   className="text-primary size-9 group-hover:scale-110 transition-transform duration-300"
+                   fill="none"
+                   stroke="currentColor"
+                   viewBox="0 0 24 24"
+                   xmlns="http://www.w3.org/2000/svg"
+                 >
+                   <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
+                   <circle cx="12" cy="12" fill="currentColor" r="4" />
+                 </svg>
+                 <div className="absolute inset-0 bg-primary/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+               </div>
+               <div>
+                 <h1 className="text-white text-2xl font-bold font-display tracking-tight">DotNation</h1>
+                 <p className="text-white/60 text-xs font-medium">Blockchain Crowdfunding</p>
+               </div>
+             </Link>
+           </div>
 
-          <div className="flex flex-1 justify-end gap-8 items-center">
-            <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
-               <a className="text-white/80 hover:text-white transition-colors duration-300" href="#features">Features</a>
-               <a className="text-white/80 hover:text-white transition-colors duration-300" href="#how-it-works">How It Works</a>
-               <a className="text-white/80 hover:text-white transition-colors duration-300" href="#built-for-polkadot">For Polkadot</a>
-               <NavLink
-                 to="/about"
-                 className={({ isActive }) =>
-                   isActive
-                     ? "text-white font-bold"
-                     : "text-white/80 hover:text-white transition-colors duration-300"
-                 }
-               >
-                 About
-               </NavLink>
-               <NavLink
-                 to="/login"
-                 className={({ isActive }) =>
-                   isActive
-                     ? "text-white font-bold"
-                     : "text-white/80 hover:text-white transition-colors duration-300"
-                 }
-               >
-                 Login
-               </NavLink>
-               <NavLink
-                 to="/signup"
-                 className={({ isActive }) =>
-                   isActive
-                     ? "text-white font-bold"
-                     : "text-white/80 hover:text-white transition-colors duration-300"
-                 }
-               >
-                 Signup
-               </NavLink>
-               <NavLink
-                 to="/dashboard"
-                 className={({ isActive }) =>
-                   isActive
-                     ? "text-white font-bold"
-                     : "text-white/80 hover:text-white transition-colors duration-300"
-                 }
-               >
-                 Dashboard
-               </NavLink>
-             </nav>
+           <div className="flex flex-1 justify-end gap-6 items-center">
+             <nav className="hidden lg:flex items-center gap-1">
+                <a className="px-4 py-2 text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200 font-medium text-sm" href="#features">Features</a>
+                <a className="px-4 py-2 text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200 font-medium text-sm" href="#how-it-works">How It Works</a>
+                <a className="px-4 py-2 text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200 font-medium text-sm" href="#built-for-polkadot">For Polkadot</a>
+                <NavLink
+                  to="/about"
+                  className={({ isActive }) =>
+                    isActive
+                      ? "px-4 py-2 text-white bg-white/10 rounded-lg font-medium text-sm"
+                      : "px-4 py-2 text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200 font-medium text-sm"
+                  }
+                >
+                  About
+                </NavLink>
+              </nav>
 
-            <div className="flex gap-4">
-              <Link
-                to="/create-campaign"
-                className="flex items-center justify-center rounded-full h-10 px-6 bg-primary text-white text-sm font-bold tracking-wide hover:bg-primary/90 transition-all transform hover:scale-105 duration-300"
-              >
-                <span>Start Funding</span>
-              </Link>
+              <div className="flex items-center gap-3">
+                <NavLink
+                  to="/login"
+                  className={({ isActive }) =>
+                    isActive
+                      ? "px-4 py-2 text-white bg-white/10 rounded-lg font-medium text-sm"
+                      : "px-4 py-2 text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200 font-medium text-sm"
+                  }
+                >
+                  Login
+                </NavLink>
+
+                <NavLink
+                  to="/dashboard"
+                  className="px-4 py-2 text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200 font-medium text-sm"
+                >
+                  Dashboard
+                </NavLink>
+
+                <Link
+                  to="/create-campaign"
+                  className="flex items-center justify-center rounded-full h-11 px-6 bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold tracking-wide hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 transform hover:scale-105"
+                >
+                  <span>Start Campaign</span>
+                  <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </Link>
 
               {selectedAccount ? (
                 <div className="relative group">
@@ -210,9 +209,9 @@ const NewLandingPage = () => {
 
         {/* Hero Section */}
         <main className="flex-1 flex flex-col">
-          <section className="py-32 sm:py-40 lg:py-48">
-            <div className="relative isolate px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-              <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,rgba(238,43,140,0.2)_0%,transparent_50%)] animate-subtle-float"></div>
+           <section className="py-32 sm:py-40 lg:py-48 relative">
+             <div className="relative isolate px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+               <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,rgba(238,43,140,0.15)_0%,transparent_70%)] animate-subtle-float pointer-events-none"></div>
               <div className="text-center">
                 <h1 className="text-6xl md:text-8xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-white to-white/70 font-display">
                   Trustless Funding for Visionary Ideas.

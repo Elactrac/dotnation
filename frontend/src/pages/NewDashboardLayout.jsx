@@ -34,12 +34,12 @@ const NewDashboardLayout = () => {
       />
 
       {/* Background Gradient */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[200%] h-[200%] pointer-events-none">
-        <div className="absolute inset-0 bg-background-dark bg-[radial-gradient(circle_at_center,rgba(238,43,140,0.1)_0%,transparent_30%)] animate-pulse-slow" />
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(238,43,140,0.1)_0%,transparent_50%)] animate-pulse-slow" />
       </div>
 
       {/* Main Layout Container */}
-      <div className="layout-container flex h-full grow flex-col z-10">
+      <div className="relative flex flex-col min-h-screen z-10">
         {/* Header */}
         <header className="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap px-10 py-4 border-b border-white/10 backdrop-blur-md bg-background-dark/50">
           <div className="flex items-center gap-3 text-white">
