@@ -35,7 +35,7 @@ const AnimatedBackground = () => {
       <Box
         position="absolute"
         inset="0"
-        bgGradient="radial(circle at center, rgba(238, 43, 140, 0.1) 0%, transparent 30%)"
+        bgGradient="radial(circle at center, rgba(56, 116, 255, 0.1) 0%, transparent 30%)"
         animation={`${pulseAnimation} 7s cubic-bezier(0.4, 0, 0.6, 1) infinite`}
       />
     </Box>

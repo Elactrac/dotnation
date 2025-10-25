@@ -72,7 +72,7 @@ const NewLandingPage = () => {
 
       {/* Background Gradient */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(238,43,140,0.05)_0%,transparent_50%)] animate-pulse-slow" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(56,116,255,0.05)_0%,transparent_50%)] animate-pulse-slow" />
       </div>
 
       {/* Main Content */}
@@ -150,7 +150,7 @@ const NewLandingPage = () => {
               {selectedAccount ? (
                 <div className="relative group">
                   <button className="flex items-center gap-2 rounded-full h-10 px-4 bg-gray-800/70 text-gray-200 text-sm font-medium hover:bg-gray-700/80 transition-colors duration-300">
-                    <span className="w-6 h-6 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500" />
+                    <span className="w-6 h-6 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-500" />
                     <span>{formatAddress(selectedAccount.address)}</span>
                       <svg
                         className="w-4 h-4 text-gray-400"
@@ -212,7 +212,7 @@ const NewLandingPage = () => {
         <main className="flex-1 flex flex-col">
            <section className="py-32 sm:py-40 lg:py-48 relative">
              <div className="relative isolate px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-               <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,rgba(238,43,140,0.15)_0%,transparent_70%)] animate-subtle-float pointer-events-none"></div>
+               <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,rgba(56,116,255,0.15)_0%,transparent_70%)] animate-subtle-float pointer-events-none"></div>
               <div className="text-center">
                 <h1 className="text-6xl md:text-8xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-white to-white/70 font-display">
                   Trustless Funding for Visionary Ideas.
@@ -223,13 +223,13 @@ const NewLandingPage = () => {
                 <div className="mt-12 flex items-center justify-center gap-4">
                   <Link
                     to="/dashboard"
-                    className="flex mx-auto items-center justify-center rounded-full h-14 px-10 bg-primary text-white text-lg font-bold tracking-wide hover:bg-primary/90 transition-all transform hover:scale-105 duration-300"
+                    className="flex mx-auto items-center justify-center rounded-full h-14 px-10 bg-primary text-white text-lg font-bold tracking-wide hover:bg-primary/90 transition-all transform hover:scale-105 duration-300 shadow-lg shadow-primary/30"
                   >
                     Explore Campaigns
                   </Link>
                   <Link
                     to="/create-campaign"
-                    className="flex mx-auto items-center justify-center rounded-full h-14 px-10 bg-primary/20 text-white text-lg font-bold tracking-wide hover:bg-primary/30 transition-colors duration-300"
+                    className="flex mx-auto items-center justify-center rounded-full h-14 px-10 border-2 border-primary text-primary text-lg font-bold tracking-wide hover:bg-primary hover:text-white transition-all transform hover:scale-105 duration-300 backdrop-blur-sm"
                   >
                     Launch App
                   </Link>
@@ -451,7 +451,7 @@ const NewLandingPage = () => {
           {/* CTA Section */}
           <section className="py-24 sm:py-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
             <div className="relative rounded-xl overflow-hidden bg-primary/10 backdrop-blur-lg border border-primary/20 px-8 py-16">
-              <div className="absolute -inset-2 bg-[radial-gradient(circle_at_50%_50%,rgba(238,43,140,0.1)_0%,transparent_70%)] opacity-50 animate-pulse-slow"></div>
+              <div className="absolute -inset-2 bg-[radial-gradient(circle_at_50%_50%,rgba(56,116,255,0.1)_0%,transparent_70%)] opacity-50 animate-pulse-slow"></div>
               <div className="text-center relative">
                 <h2 className="text-4xl font-bold tracking-tight font-display">Ready to build the future?</h2>
                 <p className="mt-4 max-w-xl mx-auto text-lg text-white/70 font-body">

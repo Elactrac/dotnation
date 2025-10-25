@@ -14,7 +14,7 @@ const AnimatedCanvas = () => {
 
         const PARTICLE_COUNT = Math.floor((canvas.width * canvas.height) / 20000);
         const MAX_LINK_DISTANCE = 150;
-        const PARTICLE_COLOR = 'rgba(230, 0, 122, 0.7)';
+        const PARTICLE_COLOR = 'rgba(56, 116, 255, 0.7)';
 
         let particles = [];
         let ripples = [];
@@ -45,7 +45,7 @@ const AnimatedCanvas = () => {
             draw() {
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.strokeStyle = `rgba(230, 0, 122, ${this.opacity})`;
+                ctx.strokeStyle = `rgba(56, 116, 255, ${this.opacity})`;
                 ctx.lineWidth = 1.5;
                 ctx.stroke();
             }

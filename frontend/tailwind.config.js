@@ -8,7 +8,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: "#ee2b8c",
+        primary: "#3874ff",
         secondary: "#7c3aed",
         surface: "#ffffff",
         border: "#e5e7eb",
@@ -28,7 +28,7 @@ export default {
         soft: "0 2px 8px rgba(0, 0, 0, 0.1)",
         medium: "0 4px 16px rgba(0, 0, 0, 0.15)",
         hard: "0 8px 32px rgba(0, 0, 0, 0.2)",
-        glow: "0 0 20px rgba(238, 43, 140, 0.3)",
+        glow: "0 0 20px rgba(56, 116, 255, 0.3)",
         "glow-secondary": "0 0 20px rgba(124, 58, 237, 0.3)",
       },
       fontFamily: {

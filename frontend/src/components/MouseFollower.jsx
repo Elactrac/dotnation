@@ -7,7 +7,7 @@ import { Box } from '@chakra-ui/react';
  * Creates a glowing effect that follows the user's mouse cursor
  * Adds visual polish and interactivity to pages
  */
-const MouseFollower = ({ size = '96px', color = 'pink.500', blur = '3xl', opacity = 0.2 }) => {
+const MouseFollower = ({ size = '96px', color = 'brand.primary', blur = '3xl', opacity = 0.2 }) => {
   useEffect(() => {
     const handleMouseMove = (e) => {
       const follower = document.getElementById('mouse-follower');

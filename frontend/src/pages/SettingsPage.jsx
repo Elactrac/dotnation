@@ -180,10 +180,10 @@ const SettingsPage = () => {
             >
               <Button
                 size="sm"
-                bg="pink.500"
+                bg="brand.primary"
                 color="white"
                 opacity={0.2}
-                _hover={{ bg: 'pink.600', opacity: 0.3 }}
+                _hover={{ bg: 'brand.primary', opacity: 0.3 }}
               >
                 Manage
               </Button>
@@ -198,10 +198,10 @@ const SettingsPage = () => {
             >
               <Button
                 size="sm"
-                bg="pink.500"
+                bg="brand.primary"
                 color="white"
                 opacity={0.2}
-                _hover={{ bg: 'pink.600', opacity: 0.3 }}
+                _hover={{ bg: 'brand.primary', opacity: 0.3 }}
               >
                 Change
               </Button>
@@ -214,7 +214,7 @@ const SettingsPage = () => {
               <Switch
                 isChecked={twoFactorAuth}
                 onChange={(e) => setTwoFactorAuth(e.target.checked)}
-                colorScheme="pink"
+                colorScheme="blue"
                 size="lg"
               />
             </SettingRow>
@@ -228,10 +228,10 @@ const SettingsPage = () => {
             >
               <Button
                 size="sm"
-                bg="pink.500"
+                bg="brand.primary"
                 color="white"
                 opacity={0.2}
-                _hover={{ bg: 'pink.600', opacity: 0.3 }}
+                _hover={{ bg: 'brand.primary', opacity: 0.3 }}
               >
                 View
               </Button>
@@ -243,10 +243,10 @@ const SettingsPage = () => {
             >
               <Button
                 size="sm"
-                bg="pink.500"
+                bg="brand.primary"
                 color="white"
                 opacity={0.2}
-                _hover={{ bg: 'pink.600', opacity: 0.3 }}
+                _hover={{ bg: 'brand.primary', opacity: 0.3 }}
               >
                 Learn More
               </Button>

@@ -15,7 +15,7 @@ const theme = extendTheme({
   },
   colors: {
     brand: {
-      primary: '#E6007A', // --primary-accent (Polkadot Pink)
+      primary: '#3874ff', // --primary-accent (New Blue)
       secondary: '#00EAD3', // --secondary-accent
       background: '#0A0B1A', // --bg-color
       card: 'rgba(23, 25, 48, 0.7)', // --card-bg
@@ -41,7 +41,7 @@ const theme = extendTheme({
                 color: 'white',
                 _hover: {
                     transform: 'translateY(-2px)',
-                    boxShadow: '0 10px 20px rgba(230, 0, 122, 0.2)',
+                    boxShadow: '0 10px 20px rgba(56, 116, 255, 0.2)',
                 }
             }
         }

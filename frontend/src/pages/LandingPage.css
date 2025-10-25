@@ -6,7 +6,7 @@
     --bg-color: #0A0B1A;
     --primary-text: #F0F2F5;
     --secondary-text: #A0AEC0;
-    --primary-accent: #E6007A; /* Polkadot Pink */
+    --primary-accent: #3874ff; /* Polkadot Blue */
     --secondary-accent: #00EAD3;
     --card-bg: rgba(23, 25, 48, 0.7); /* Slightly more opaque for readability over canvas */
     --border-color: rgba(255, 255, 255, 0.1);
@@ -344,7 +344,7 @@ p {
 
 /* 8. FINAL CTA SECTION */
 .cta-section {
-    background: linear-gradient(45deg, rgba(230, 0, 122, 0.2), rgba(0, 234, 211, 0.2));
+    background: linear-gradient(45deg, rgba(56, 116, 255, 0.2), rgba(0, 234, 211, 0.2));
     text-align: center;
     padding: 100px 0;
     border-radius: 15px;

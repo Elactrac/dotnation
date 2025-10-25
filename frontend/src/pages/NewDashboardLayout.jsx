@@ -35,7 +35,7 @@ const NewDashboardLayout = () => {
 
       {/* Background Gradient */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(238,43,140,0.1)_0%,transparent_50%)] animate-pulse-slow" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(56,116,255,0.1)_0%,transparent_50%)] animate-pulse-slow" />
       </div>
 
       {/* Main Layout Container */}
@@ -113,7 +113,7 @@ const NewDashboardLayout = () => {
               {selectedAccount ? (
                 <div className="relative group">
                   <button className="flex items-center gap-2 rounded-full h-10 px-4 bg-white/10 text-white text-sm font-medium hover:bg-white/20 transition-colors duration-300">
-                    <span className="w-6 h-6 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500" />
+                    <span className="w-6 h-6 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-500" />
                     <span>{formatAddress(selectedAccount.address)}</span>
                     <svg
                       className="w-4 h-4 text-white/70"

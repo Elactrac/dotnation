@@ -138,7 +138,7 @@ const DashboardPage = () => {
                   as={Link}
                   to="/dashboard/browse"
                   variant="link"
-                  color="pink.500"
+                  color="brand.primary"
                   fontSize="sm"
                   fontWeight="medium"
                 >
@@ -194,7 +194,7 @@ const DashboardPage = () => {
 
                           <Button
                             size="md"
-                            bg="pink.500"
+                            bg="brand.primary"
                             color="white"
                             opacity={0.2}
                             _hover={{ opacity: 0.3 }}
@@ -224,9 +224,9 @@ const DashboardPage = () => {
                       as={Link}
                       to="/dashboard/create-campaign"
                       mt={4}
-                      bg="pink.500"
+                      bg="brand.primary"
                       color="white"
-                      _hover={{ bg: 'pink.600' }}
+                      _hover={{ bg: 'brand.primary' }}
                     >
                       Create Campaign
                     </Button>
@@ -259,7 +259,7 @@ const DashboardPage = () => {
                             <Text color={textColor} fontWeight="medium">
                               {contrib.project}
                             </Text>
-                            <Text color="pink.500" fontWeight="bold">
+                            <Text color="brand.primary" fontWeight="bold">
                               {contrib.amount}
                             </Text>
                           </Flex>
@@ -313,7 +313,7 @@ const DashboardPage = () => {
                       px={3}
                       py={1}
                       borderRadius="full"
-                      bg={index === 0 ? 'pink.500' : 'whiteAlpha.100'}
+                      bg={index === 0 ? 'brand.primary' : 'whiteAlpha.100'}
                       color={index === 0 ? 'white' : 'whiteAlpha.800'}
                       opacity={index === 0 ? 0.2 : 1}
                       fontWeight="medium"
