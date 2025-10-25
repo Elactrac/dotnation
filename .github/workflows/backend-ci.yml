@@ -1,5 +1,9 @@
+# .github/workflows/backend-ci.yml
+
 name: Gemini Backend CI
 
+# This workflow runs on pushes to the main, master, or develop branches,
+# but only if files in the gemini-backend directory have changed.
 on:
   push:
     branches: [ master, main, develop ]
@@ -16,8 +20,10 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+    # Checks out the repository's code.
     - uses: actions/checkout@v4
     
+    # Sets up Node.js version 18.
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
@@ -25,19 +31,23 @@ jobs:
         cache: 'npm'
         cache-dependency-path: gemini-backend/package-lock.json
     
+    # Installs the backend's dependencies.
     - name: Install dependencies
       working-directory: ./gemini-backend
       run: npm ci
     
+    # Checks for syntax errors in the server.js file.
     - name: Check for syntax errors
       working-directory: ./gemini-backend
       run: node -c server.js
     
+    # Runs tests, if they are configured.
     - name: Run tests (if configured)
       working-directory: ./gemini-backend
       run: npm test || echo "No tests configured yet"
       continue-on-error: true
     
+    # Checks for the presence of a .env file.
     - name: Check environment variables setup
       working-directory: ./gemini-backend
       run: |
@@ -46,6 +56,7 @@ jobs:
           echo "Make sure to set GEMINI_API_KEY in your deployment environment"
         fi
     
+    # Runs a security audit of the backend's dependencies.
     - name: Security audit
       working-directory: ./gemini-backend
       run: npm audit --audit-level=moderate

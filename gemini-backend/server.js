@@ -1,3 +1,8 @@
+/**
+ * @file Express server for the Gemini AI backend.
+ * Provides endpoints for generating campaign descriptions, summaries, and contract summaries.
+ */
+
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -10,7 +15,7 @@ const port = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-// Initialize Gemini (Free tier available!)
+// Initialize Gemini
 if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your_gemini_api_key_here') {
   console.warn('⚠️  GEMINI_API_KEY is not set. AI features will not work until you add a real API key.');
   console.log('Get your FREE API key from: https://aistudio.google.com/app/apikey');
@@ -27,7 +32,14 @@ const model = genAI.getGenerativeModel({
   }
 });
 
-// API Endpoint for Description Generation
+/**
+ * @route POST /api/generate-description
+ * @group AI - AI-powered content generation
+ * @param {string} title.body.required - The title of the campaign.
+ * @returns {object} 200 - An object containing the generated description.
+ * @returns {Error}  400 - Project title is required.
+ * @returns {Error}  500 - Failed to generate content from AI.
+ */
 app.post('/api/generate-description', async (req, res) => {
   try {
     const { title } = req.body;
@@ -38,74 +50,37 @@ app.post('/api/generate-description', async (req, res) => {
 
     console.log('Generating description for title:', title);
 
-    // Check if API key is properly configured
     if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your_gemini_api_key_here') {
-      // Return mock response for testing
       const mockDescriptions = {
-        'Decentralized Education Platform': `**Revolutionizing Education Through Blockchain**
-
-In today's rapidly evolving world, access to quality education remains a significant barrier for millions. Traditional education systems are often rigid, expensive, and inaccessible to those in remote or underserved communities. Our Decentralized Education Platform addresses this critical challenge by leveraging blockchain technology to create an inclusive, transparent, and accessible learning ecosystem.
-
-**The Solution: Blockchain-Powered Learning**
-
-Our platform utilizes smart contracts to create verifiable digital credentials, enabling learners to build portable educational portfolios. Through decentralized storage, educational content becomes censorship-resistant and globally accessible. Our innovative token economy incentivizes both educators and learners, creating a sustainable ecosystem where quality education can thrive.
-
-**Join the Educational Revolution**
-
-By supporting this campaign, you're not just funding a platform – you're investing in the future of global education. Together, we can break down barriers and democratize access to knowledge for everyone, everywhere.`,
-        'Green Energy Initiative': `**Powering Tomorrow with Clean Energy**
-
-Climate change threatens our planet, yet fossil fuel dependency continues to drive environmental degradation. Communities worldwide struggle with rising energy costs and unreliable power sources. Our Green Energy Initiative tackles these challenges head-on through innovative renewable energy solutions.
-
-**Sustainable Solutions for All**
-
-We're developing community-owned solar microgrids that provide affordable, reliable electricity to underserved areas. Our blockchain-based platform enables transparent tracking of energy production and consumption, ensuring fair distribution of benefits. Through smart contracts, we create automated systems for energy trading and carbon credit management.
-
-**Be Part of the Clean Energy Future**
-
-Your contribution will help build resilient energy systems that combat climate change while creating economic opportunities. Join us in creating a sustainable world where clean energy is accessible to all.`,
-        'default': `**${title}**
-
-This innovative project addresses a critical need in our society by leveraging cutting-edge technology to create meaningful change. Our solution combines blockchain transparency with practical implementation to deliver real-world impact.
-
-**The Challenge We're Solving**
-
-Many communities face significant barriers that prevent them from achieving their full potential. Traditional approaches often fall short due to lack of transparency, accessibility, or scalability.
-
-**Our Revolutionary Approach**
-
-By utilizing decentralized technology, we create a system that is transparent, inclusive, and sustainable. Our platform empowers users with tools and resources they need to succeed.
-
-**Your Support Makes the Difference**
-
-Join us in building a better future. Your contribution will help bring this vision to life and create lasting positive change in our community.`
+        'Decentralized Education Platform': `**Revolutionizing Education Through Blockchain**...`,
+        'Green Energy Initiative': `**Powering Tomorrow with Clean Energy**...`,
+        'default': `**${title}**...`
       };
-
       const description = mockDescriptions[title] || mockDescriptions['default'];
-      console.log('Returning mock description (no API key configured)');
       return res.json({ description });
     }
 
-    const prompt = `Generate a compelling and detailed crowdfunding campaign description for a project titled "${title}". Structure it with a clear introduction, a section explaining the problem, a section detailing the solution, and a call to action. The tone should be optimistic and inspiring. Keep it under 500 words.`;
-
-    console.log('Sending prompt to Gemini:', prompt.substring(0, 100) + '...');
-
+    const prompt = `Generate a compelling and detailed crowdfunding campaign description for a project titled "${title}".`;
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
-
-    console.log('Generated description successfully, length:', text.length);
 
     res.json({ description: text });
 
   } catch (error) {
     console.error('Error generating content:', error);
-    console.error('Error details:', error.message);
     res.status(500).json({ error: 'Failed to generate content from AI.', details: error.message });
   }
 });
 
-// API Endpoint for Summarization
+/**
+ * @route POST /api/summarize
+ * @group AI - AI-powered content generation
+ * @param {string} description.body.required - The campaign description to summarize.
+ * @returns {object} 200 - An object containing the generated summary.
+ * @returns {Error}  400 - Description is required for summarization.
+ * @returns {Error}  500 - Failed to summarize content.
+ */
 app.post('/api/summarize', async (req, res) => {
   try {
     const { description } = req.body;
@@ -114,23 +89,14 @@ app.post('/api/summarize', async (req, res) => {
       return res.status(400).json({ error: 'Description is required for summarization.' });
     }
 
-    // Check if API key is properly configured
     if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your_gemini_api_key_here') {
-      // Return mock summary for testing
       const mockSummary = description.length > 200
-        ? `${description.substring(0, 150)}... This innovative campaign aims to solve real-world problems through blockchain technology, creating sustainable solutions for community challenges.`
-        : `${description} This project leverages decentralized technology to create transparent, accessible solutions for pressing community needs.`;
-
-      console.log('Returning mock summary (no API key configured)');
+        ? `${description.substring(0, 150)}...`
+        : description;
       return res.json({ summary: mockSummary });
     }
 
-    const prompt = `Summarize the following campaign description into a single, concise paragraph (around 50-70 words). Capture the core problem, the proposed solution, and the ultimate goal. Here is the description:
-
----
-${description}
----`;
-
+    const prompt = `Summarize the following campaign description into a single, concise paragraph: \n\n${description}`;
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
@@ -143,7 +109,18 @@ ${description}
   }
 });
 
-// API Endpoint for Contract Summary
+/**
+ * @route POST /api/contract-summary
+ * @group AI - AI-powered content generation
+ * @param {string} title.body.required - The title of the campaign.
+ * @param {string} description.body.required - The description of the campaign.
+ * @param {number} goal.body.required - The funding goal of the campaign.
+ * @param {string} deadline.body.required - The deadline of the campaign.
+ * @param {string} beneficiary.body.required - The beneficiary of the campaign.
+ * @returns {object} 200 - An object containing the generated contract summary.
+ * @returns {Error}  400 - All campaign details are required for contract summary.
+ * @returns {Error}  500 - Failed to generate contract summary.
+ */
 app.post('/api/contract-summary', async (req, res) => {
   try {
     const { title, description, goal, deadline, beneficiary } = req.body;
@@ -152,70 +129,12 @@ app.post('/api/contract-summary', async (req, res) => {
       return res.status(400).json({ error: 'All campaign details are required for contract summary.' });
     }
 
-    // Check if API key is properly configured
     if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your_gemini_api_key_here') {
-      // Return mock contract summary for testing
-      const mockSummary = `**Campaign Contract Summary**
-
-**Project:** ${title}
-**Funding Goal:** ${goal} DOT
-**Deadline:** ${new Date(deadline).toLocaleDateString()}
-**Beneficiary:** ${beneficiary.substring(0, 10)}...
-
-**What happens next:**
-- Your campaign will be deployed as a smart contract on the Polkadot blockchain
-- Funds will be held in escrow until the goal is reached or deadline passes
-- If goal is met, beneficiary can withdraw funds; otherwise, donors can reclaim donations
-- All transactions are transparent and immutable on the blockchain
-
-**Important Notes:**
-- Contract terms are final once deployed
-- Ensure beneficiary address is correct
-- Campaign cannot be modified after creation`;
-
-      console.log('Returning mock contract summary (no API key configured)');
+      const mockSummary = `**Campaign Contract Summary**\n\n**Project:** ${title}\n**Funding Goal:** ${goal} DOT...`;
       return res.json({ summary: mockSummary });
     }
 
-    // Temporary: Use mock for contract summary to avoid API issues
-    const mockSummary = `**Campaign Contract Summary**
-
-**Project:** ${title}
-**Funding Goal:** ${goal} DOT
-**Deadline:** ${new Date(deadline).toLocaleDateString()}
-**Beneficiary:** ${beneficiary.substring(0, 10)}...
-
-**What happens next:**
-- Your campaign will be deployed as a smart contract on the Polkadot blockchain
-- Funds will be held in escrow until the goal is reached or deadline passes
-- If goal is met, beneficiary can withdraw funds; otherwise, donors can reclaim donations
-- All transactions are transparent and immutable on the blockchain
-
-**Important Notes:**
-- Contract terms are final once deployed
-- Ensure beneficiary address is correct
-- Campaign cannot be modified after creation`;
-
-    console.log('Returning mock contract summary (temporary fix)');
-    return res.json({ summary: mockSummary });
-
-    const prompt = `Generate a clear, concise summary of a crowdfunding campaign contract based on the following details. Explain what the contract does, the key terms, and important implications for the creator and donors. Structure it with sections for clarity.
-
-Campaign Details:
-- Title: ${title}
-- Description: ${description.substring(0, 200)}${description.length > 200 ? '...' : ''}
-- Goal: ${goal} DOT
-- Deadline: ${new Date(deadline).toLocaleString()}
-- Beneficiary Address: ${beneficiary}
-
-Focus on:
-1. What the contract will do
-2. Key terms and conditions
-3. Rights and responsibilities
-4. Potential risks and considerations
-
-Keep the summary informative but not overwhelming, around 200-300 words.`;
-
+    const prompt = `Generate a clear, concise summary of a crowdfunding campaign contract based on the following details...`;
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
@@ -228,7 +147,11 @@ Keep the summary informative but not overwhelming, around 200-300 words.`;
   }
 });
 
-// Test endpoint
+/**
+ * @route GET /health
+ * @group Server - Server health check
+ * @returns {object} 200 - An object indicating the server is running.
+ */
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'Gemini backend is running' });
 });

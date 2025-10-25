@@ -1,5 +1,12 @@
+/**
+ * @file Renders the About page for DotNation.
+ * @exports AboutPage
+ */
 
-
+/**
+ * A simple page component that displays information about the DotNation platform.
+ * @returns {JSX.Element} The About page component.
+ */
 const AboutPage = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center container-padding">

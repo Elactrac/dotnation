@@ -9,40 +9,84 @@ A decentralized crowdfunding platform built on Polkadot, enabling transparent an
 
 ## Features
 
-- **Trustless Fundraising**: Campaign rules enforced by robust ink! smart contracts
-- **Direct Fund Flow**: Funds go directly from donors to beneficiaries via escrow
-- **On-Chain Transparency**: All transactions are verifiable on the blockchain with comprehensive events
-- **Goal-Based Campaigns**: Automatic success/failure based on funding goals with overflow protection
-- **Time-Bound Campaigns**: Deadlines with enforced state transitions and validation
-- **Multi-Network Support**: Compatible with Polkadot parachains like Astar (Shibuya testnet)
-- **Security First**: Reentrancy protection, input validation, and access controls
-- **Modern UI**: Built with React 18, Tailwind CSS, and Vite with seamless navigation
-- **Scalable Architecture**: Pagination, caching, and error handling for performance
+- **Trustless Fundraising**: Campaign rules enforced by robust ink! smart contracts.
+- **Direct Fund Flow**: Funds go directly from donors to beneficiaries via escrow.
+- **On-Chain Transparency**: All transactions are verifiable on the blockchain with comprehensive events.
+- **Goal-Based Campaigns**: Automatic success/failure based on funding goals with overflow protection.
+- **Time-Bound Campaigns**: Deadlines with enforced state transitions and validation.
+- **Multi-Network Support**: Compatible with Polkadot parachains like Astar (Shibuya testnet).
+- **Security First**: Reentrancy protection, input validation, and access controls.
+- **Modern UI**: Built with React 18, Tailwind CSS, and Vite with seamless navigation.
+- **Scalable Architecture**: Pagination, caching, and error handling for performance.
+
+---
+
+## Project Structure
+
+The repository is organized into three main parts: the smart contract, the frontend, and the AI-powered backend.
+
+- **`donation_platform/`**: The ink! smart contract that manages all on-chain campaign logic.
+- **`frontend/`**: The React + Vite application that provides the user interface.
+- **`gemini-backend/`**: A Node.js + Express server for Gemini AI integration.
+- **`.github/workflows/`**: Automated CI/CD pipelines for testing and deployment.
+- **`CONTRIBUTING.md`**: Guidelines for contributing to the project.
+- **`CI_CD_SETUP.md`**: Detailed information about the CI/CD setup.
+
+---
+
+## Architecture
+
+DotNation's architecture is composed of three key components that work together to provide a seamless and decentralized crowdfunding experience.
+
+### 1. Smart Contract (`donation_platform/`)
+
+The core of the platform is the ink! smart contract, which runs on a Polkadot-compatible blockchain. It is responsible for:
+- **Campaign Management**: Creating, managing, and tracking the state of all fundraising campaigns.
+- **Secure Fund Handling**: Holding donated funds in escrow and ensuring they are only released to the beneficiary if the campaign is successful.
+- **State Machine**: Enforcing the campaign lifecycle from `Active` to `Successful` or `Failed`, and finally to `Withdrawn`.
+- **Event Logging**: Emitting on-chain events for all significant actions, which allows the frontend to monitor and display real-time updates.
+
+### 2. Frontend (`frontend/`)
+
+The frontend is a modern Single Page Application (SPA) built with React and Vite. It interacts with the smart contract and provides a user-friendly interface for:
+- **Wallet Integration**: Connecting to the Polkadot.js browser extension to enable users to interact with the blockchain.
+- **Campaign Interaction**: Browsing, creating, and donating to campaigns.
+- **Real-Time Updates**: Using the smart contract's events to display up-to-date information about campaign progress and status.
+- **State Management**: Using React's Context API to manage the application's state, including wallet connection, API status, and campaign data.
+
+### 3. Gemini Backend (`gemini-backend/`)
+
+The Gemini backend is a Node.js server that provides AI-powered features to enhance the user experience. It offers a RESTful API for:
+- **Content Generation**: Generating compelling campaign descriptions and summaries using the Google Gemini AI.
+- **Campaign Assistance**: Providing users with suggestions and optimizations for their campaign content.
+- **Scalability**: Offloading AI-related tasks from the frontend to a dedicated server, which can be scaled independently.
+
+---
 
 ## Quick Start
 
 ### Prerequisites
 
-- Node.js v18+
-- Polkadot.js browser extension (for wallet functionality)
-- Rust with WASM target (for contract development)
-- cargo-contract v5.0.3+ (for contract deployment)
+- **Node.js**: v18+
+- **Polkadot.js Extension**: A browser extension for managing Polkadot accounts.
+- **Rust**: The Rust toolchain with the `wasm32-unknown-unknown` target for smart contract development.
+- **cargo-contract**: v5.0.3+ for building and deploying ink! smart contracts.
 
 ### Setup
 
-1. Clone the repo:
+1. **Clone the repository**:
    ```bash
    git clone https://github.com/Elactrac/dotnation.git
    cd dotnation
    ```
 
-2. Install frontend dependencies:
+2. **Install frontend dependencies**:
    ```bash
    cd frontend
    npm install
    ```
 
-3. Set up Rust (for contract development):
+3. **Set up the Rust environment** (for smart contract development):
    ```bash
    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
    rustup target add wasm32-unknown-unknown
@@ -51,205 +95,105 @@ A decentralized crowdfunding platform built on Polkadot, enabling transparent an
 
 ### Development
 
-1. **Quick Start with Mock Data** (Recommended):
-   ```bash
-   cd frontend
-   npm run dev
-   # Visit http://localhost:5173
-   ```
-   The app runs with mock data for immediate testing of UI/UX.
+#### 1. Quick Start with Mock Data (Recommended)
 
-2. **Full Blockchain Development**:
-   - **Start Local Node**:
-     ```bash
-     # Download substrate-contracts-node
-     curl -L https://github.com/paritytech/substrate-contracts-node/releases/download/v0.27.0/substrate-contracts-node-linux -o substrate-contracts-node
-     chmod +x substrate-contracts-node
-     ./substrate-contracts-node --dev --tmp
-     ```
+For a quick start, you can run the frontend with mock data, which allows you to test the UI/UX without needing a running blockchain.
 
-   - **Deploy Contract**:
-     ```bash
-     cd donation_platform
-     cargo contract build --release
-     cargo contract instantiate --constructor new --suri //Alice --url ws://localhost:9944 --skip-confirm
-     ```
+```bash
+cd frontend
+npm run dev
+```
+The application will be available at `http://localhost:5173`.
 
-   - **Configure Frontend**:
-     ```bash
-     cd frontend
-     cp .env.example .env.local
-     # Add VITE_CONTRACT_ADDRESS=your_deployed_address
-     npm run dev
-     ```
+#### 2. Full Blockchain Development
 
-## Project Structure
+For end-to-end testing, you will need to run a local blockchain node, deploy the smart contract, and configure the frontend to connect to it.
 
-- `donation_platform/`: ink! smart contract for on-chain campaign management
-- `frontend/`: React + Vite application with Tailwind CSS
-- `gemini-backend/`: Node.js + Express server for Gemini AI integration
-- `.github/workflows/`: Automated CI/CD pipelines (see [WORKFLOWS.md](.github/WORKFLOWS.md))
-- Documentation files (CONTRIBUTING.md, CI_CD_SETUP.md, etc.)
+- **Start a local blockchain node**:
+  ```bash
+  # Download and run a substrate-contracts-node
+  curl -L https://github.com/paritytech/substrate-contracts-node/releases/download/v0.27.0/substrate-contracts-node-linux -o substrate-contracts-node
+  chmod +x substrate-contracts-node
+  ./substrate-contracts-node --dev --tmp
+  ```
 
-## Architecture
+- **Deploy the smart contract**:
+  ```bash
+  cd donation_platform
+  cargo contract build --release
+  cargo contract instantiate --constructor new --suri //Alice --url ws://localhost:9944 --skip-confirm
+  ```
 
-### Smart Contract (ink!)
+- **Configure the frontend**:
+  Create a `.env.local` file in the `frontend` directory and add the following, replacing `your_deployed_address` with the address of your deployed contract:
+  ```
+  VITE_CONTRACT_ADDRESS=your_deployed_address
+  ```
+  Then, start the frontend development server:
+  ```bash
+  cd frontend
+  npm run dev
+  ```
 
-Robust campaign management with security features:
-- **State Machine**: Active → Successful/Failed → Withdrawn
-- **Security**: Reentrancy guards, overflow checks, input validation
-- **Events**: Comprehensive logging for monitoring (CampaignStateChanged, etc.)
-- **Pagination**: Efficient data retrieval for large datasets
-
-**Key Methods**:
-- `create_campaign`: Create with validation (title, goal, deadline, beneficiary)
-- `donate`: Secure donations with amount limits
-- `withdraw_funds`: Owner-only withdrawal with state checks
-- `get_campaigns_paginated`: Efficient listing
-- `get_campaign_details`: Full campaign data with donations
-
-### Frontend (React + Vite)
-
-Modern SPA with advanced features:
-- **Routing**: React Router v6 with active states and 404 handling
-- **State Management**: Context API for wallet, campaigns, and API
-- **UI/UX**: Tailwind CSS with responsive design and animations
-- **Error Handling**: User-friendly messages with retry logic
-- **Caching**: Async caching for performance
-- **Mock Mode**: Development mode with sample data
-
-**Key Components**:
-- Wallet integration (Polkadot.js + EVM support)
-- Campaign dashboard with real-time updates
-- Progressive enhancement and accessibility
+---
 
 ## Testing
 
-### Contract
+### Smart Contract
+
+To run the smart contract's unit tests:
 ```bash
 cd donation_platform
-cargo test  # 5 unit tests covering validation, creation, donation, withdrawal
-cargo contract build --release  # Build verification
+cargo test
 ```
 
 ### Frontend
+
+To run the frontend's linter and build verification:
 ```bash
 cd frontend
-npm run lint  # ESLint with React rules
-npm run build  # Production build verification
-npm run dev  # Development server with hot reload
+npm run lint
+npm run build
 ```
 
-### Current Test Status
-- ✅ Contract: 5/5 tests passing
-- ✅ Frontend: Build successful, lint warnings addressed
-- ✅ Integration: Mock data mode functional
+---
 
 ## Deployment
 
-### Testnet (Shibuya - Astar)
-1. **Get Test Tokens**: Visit [Astar Faucet](https://faucet.astar.network/) for SBY tokens
-2. **Build Contract**:
+### Testnet (Shibuya)
+
+1. **Get test tokens**: Visit the [Astar Faucet](https://faucet.astar.network/) to get SBY tokens for the Shibuya testnet.
+2. **Build the contract**:
    ```bash
    cd donation_platform
    cargo contract build --release
    ```
 3. **Deploy via Polkadot.js Apps**:
-   - Go to [Polkadot.js Apps](https://polkadot.js.org/apps/)
-   - Switch to Shibuya network
-   - Contracts > Upload & Instantiate
-   - Upload `donation_platform.contract`
-   - Instantiate with endowment: 1000 SBY
-4. **Configure Frontend**:
+   - Open [Polkadot.js Apps](https://polkadot.js.org/apps/).
+   - Switch to the Shibuya network.
+   - Navigate to **Contracts > Upload & Instantiate**.
+   - Upload the `donation_platform.contract` file and instantiate it with an endowment.
+4. **Configure the frontend**:
+   Create a `.env.production` file in the `frontend` directory with the deployed contract address.
+   ```
+   VITE_CONTRACT_ADDRESS=your_deployed_address
+   ```
+   Then, build the frontend for production:
    ```bash
    cd frontend
-   echo "VITE_CONTRACT_ADDRESS=your_deployed_address" > .env.production
    npm run build
    ```
 
 ### Production (Vercel)
-- **Frontend**: Auto-deployed via Vercel (GitHub integration)
-- **Status**: ✅ Deployed with mock data
-- **URL**: Check Vercel dashboard for live URL
 
-### Local Development
-- **Mock Mode**: `npm run dev` (immediate testing)
-- **Full Mode**: Deploy local contract, update `.env.local`
+The frontend is automatically deployed to Vercel from the `main` branch.
 
-## Tech Stack
-
-- **Smart Contract**: Rust, ink! 5.0.2, cargo-contract 5.0.3+
-- **Frontend**: React 18, Vite 5, Tailwind CSS 3, Polkadot.js API, Chakra UI 3
-- **Backend**: Node.js 18+, Express 5, Google Gemini AI API
-- **Infrastructure**: Substrate, GitHub Actions, Vercel
-- **Security**: Sentry (error monitoring), custom validation, npm/cargo audit
-- **Development**: ESLint, Prettier, Husky (pre-commit hooks), Vitest
-
-## Components
-
-### 1. Smart Contract (donation_platform/)
-- **Language**: Rust + ink! 5.0.2
-- **Features**: Campaign state machine, secure fund transfers, event logging
-- **Security**: Reentrancy guards, overflow protection, access controls
-- **Testing**: Unit tests + e2e tests with ink! test environment
-
-### 2. Frontend (frontend/)
-- **Framework**: React 18 + Vite 5
-- **Styling**: Tailwind CSS 3 + Chakra UI 3
-- **Blockchain**: Polkadot.js extension integration
-- **Features**: Campaign browsing, creation, donations, wallet management
-- **State**: React Context API (Wallet, API, Campaign contexts)
-
-### 3. Gemini Backend (gemini-backend/)
-- **Purpose**: AI-powered campaign assistance and content generation
-- **Stack**: Node.js + Express + Google Generative AI
-- **API**: RESTful endpoints for campaign suggestions and optimization
-- **Deployment**: Railway, Render, Fly.io compatible
-
-## CI/CD Workflows
-
-DotNation uses GitHub Actions for automated testing and deployment. See [.github/WORKFLOWS.md](.github/WORKFLOWS.md) for details.
-
-**Active Workflows:**
-- ✅ Smart Contract CI - Build, test, and validate contract on every push
-- ✅ Frontend CI - Lint, test, and build frontend application
-- ✅ Gemini Backend CI - Test and audit backend server
-- ✅ Security Audit - Weekly dependency vulnerability scans
-- ✅ Deploy - Manual deployment to testnet/mainnet with environment configs
-
-## Current Status
-
-- ✅ **Frontend**: Fully functional with routing, navigation, and mock data
-- ✅ **Backend**: Robust contract with security, validation, and events
-- ✅ **Testing**: All tests passing, build successful
-- ✅ **Deployment**: Frontend deployed to Vercel
-- 🔄 **Contract**: Ready for testnet deployment (Shibuya/Astar)
-- 📋 **Next Steps**: Deploy contract, integrate real addresses, enable live transactions
-
-## Recent Improvements
-
-### Backend Enhancements
-- **Security**: Added reentrancy guards, overflow protection, and access controls
-- **Validation**: Comprehensive input validation for all contract methods
-- **Events**: Enhanced event logging for better monitoring and analytics
-- **Performance**: Pagination support and efficient storage usage
-- **Error Handling**: Granular error types with user-friendly messages
-
-### Frontend Enhancements
-- **Navigation**: Complete routing system with active states and 404 handling
-- **UI/UX**: Modern design with responsive layout and smooth animations
-- **Integration**: Robust API error handling with retry logic and caching
-- **Development**: Mock data mode for immediate testing and development
-
-### Infrastructure
-- **CI/CD**: Automated testing and deployment pipelines
-- **Monitoring**: Error tracking and performance metrics
-- **Documentation**: Comprehensive setup and deployment guides
+---
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribute to this project.
 
 ## License
 
-MIT
+This project is licensed under the MIT License.

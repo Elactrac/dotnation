@@ -1,99 +1,133 @@
 #![cfg_attr(not(feature = "std"), no_std, no_main)]
 #![allow(clippy::arithmetic_side_effects)]
 
+/// A decentralized crowdfunding platform built with ink!.
+///
+/// This contract allows users to create and manage fundraising campaigns,
+/// donate to campaigns, and withdraw funds securely.
 #[ink::contract]
 mod donation_platform {
     use ink::prelude::vec::Vec;
     use ink::prelude::string::String;
     use ink::storage::Mapping;
 
-
-
+    /// Errors that can occur during contract execution.
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub enum Error {
-        /// Campaign does not exist
+        /// The requested campaign does not exist.
         CampaignNotFound,
-        /// Campaign is not active
+        /// The campaign is not currently active and cannot be donated to.
         CampaignNotActive,
-        /// Campaign goal already reached
+        /// The campaign has already reached its funding goal.
         GoalReached,
-        /// Campaign deadline has passed
+        /// The campaign's deadline has passed.
         DeadlinePassed,
-        /// Only campaign owner can perform this action
+        /// The caller is not the owner of the campaign.
         NotCampaignOwner,
-        /// Campaign goal not reached yet
+        /// The campaign has not yet reached its funding goal.
         GoalNotReached,
-        /// Withdrawal failed
+        /// An error occurred during the withdrawal of funds.
         WithdrawalFailed,
-        /// Donation amount must be greater than zero
+        /// The donation amount must be greater than zero.
         InvalidDonationAmount,
-        /// Invalid title (empty or too long)
+        /// The campaign title is invalid (e.g., empty or too long).
         InvalidTitle,
-        /// Invalid description (too long)
+        /// The campaign description is invalid (e.g., too long).
         InvalidDescription,
-        /// Invalid goal (zero or too high)
+        /// The funding goal is invalid (e.g., zero or too large).
         InvalidGoal,
-        /// Invalid beneficiary (zero address)
+        /// The beneficiary account is invalid (e.g., a zero address).
         InvalidBeneficiary,
-        /// Invalid deadline (too soon or too far)
+        /// The campaign deadline is invalid (e.g., in the past or too far in the future).
         InvalidDeadline,
-        /// Funds already withdrawn
+        /// The funds for this campaign have already been withdrawn.
         FundsAlreadyWithdrawn,
-        /// Insufficient funds for withdrawal
+        /// The campaign has insufficient funds for withdrawal.
         InsufficientFunds,
     }
 
+    /// Represents the state of a fundraising campaign.
     #[derive(Debug, PartialEq, Eq, Clone, Copy, scale::Encode, scale::Decode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     #[cfg_attr(feature = "std", derive(::ink::storage::traits::StorageLayout))]
     pub enum CampaignState {
+        /// The campaign is active and accepting donations.
         Active,
+        /// The campaign has successfully reached its funding goal.
         Successful,
+        /// The campaign has failed to reach its funding goal by the deadline.
         Failed,
+        /// The funds for the campaign have been withdrawn by the beneficiary.
         Withdrawn,
     }
 
+    /// Represents a single donation to a campaign.
     #[derive(Debug, Clone, scale::Encode, scale::Decode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub struct Donation {
+        /// The account that made the donation.
         donor: AccountId,
+        /// The amount of the donation.
         amount: Balance,
+        /// The timestamp of the donation.
         timestamp: Timestamp,
     }
 
+    /// Represents a fundraising campaign.
     #[derive(Debug, scale::Encode, scale::Decode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     #[cfg_attr(feature = "std", derive(::ink::storage::traits::StorageLayout))]
     pub struct Campaign {
+        /// A unique identifier for the campaign.
         id: u32,
+        /// The account that owns the campaign.
         owner: AccountId,
+        /// The title of the campaign.
         title: String,
+        /// A description of the campaign.
         description: String,
+        /// The funding goal of the campaign.
         goal: Balance,
+        /// The amount of funds raised so far.
         raised: Balance,
+        /// The deadline for the campaign.
         deadline: Timestamp,
+        /// The current state of the campaign.
         state: CampaignState,
+        /// The account that will receive the funds if the campaign is successful.
         beneficiary: AccountId,
     }
 
+    /// Contains the details of a campaign, including all its donations.
     #[derive(Debug, scale::Encode, scale::Decode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub struct CampaignDetails {
+        /// The campaign's main data.
         campaign: Campaign,
+        /// A list of all donations made to the campaign.
         donations: Vec<Donation>,
     }
 
+    /// The main storage struct for the donation platform contract.
     #[ink(storage)]
     pub struct DonationPlatform {
+        /// A mapping from campaign ID to campaign data.
         campaigns: Mapping<u32, Campaign>,
+        /// A mapping from campaign ID to a list of its donations.
         campaign_donations: Mapping<u32, Vec<Donation>>,
+        /// The total number of campaigns created.
         campaign_count: u32,
+        /// The administrator of the contract.
         admin: AccountId,
-        locked: bool, // Reentrancy guard
+        /// A lock to prevent reentrant calls.
+        locked: bool,
     }
 
     impl DonationPlatform {
+        /// Creates a new instance of the donation platform contract.
+        ///
+        /// The caller of this constructor becomes the administrator.
         #[ink(constructor)]
         pub fn new() -> Self {
             Self {
@@ -105,16 +139,34 @@ mod donation_platform {
             }
         }
 
-        // Reentrancy guard
+        /// A guard function to prevent reentrant calls.
+        ///
+        /// # Panics
+        ///
+        /// Panics if the contract is already locked.
         fn guard(&mut self) {
             assert!(!self.locked, "Reentrant call");
             self.locked = true;
         }
 
+        /// Releases the reentrancy guard.
         fn unguard(&mut self) {
             self.locked = false;
         }
 
+        /// Creates a new fundraising campaign.
+        ///
+        /// # Arguments
+        ///
+        /// * `title` - The title of the campaign.
+        /// * `description` - A description of the campaign.
+        /// * `goal` - The funding goal in the chain's native currency.
+        /// * `deadline` - The timestamp at which the campaign ends.
+        /// * `beneficiary` - The account that will receive the funds.
+        ///
+        /// # Returns
+        ///
+        /// Returns the ID of the newly created campaign, or an error if input validation fails.
         #[ink(message)]
         pub fn create_campaign(
             &mut self,
@@ -178,6 +230,15 @@ mod donation_platform {
             Ok(campaign_id)
         }
 
+        /// Donates to a campaign.
+        ///
+        /// # Arguments
+        ///
+        /// * `campaign_id` - The ID of the campaign to donate to.
+        ///
+        /// # Returns
+        ///
+        /// Returns `Ok(())` if the donation was successful, or an error otherwise.
         #[ink(message, payable)]
         pub fn donate(&mut self, campaign_id: u32) -> Result<(), Error> {
             self.guard();
@@ -258,6 +319,18 @@ mod donation_platform {
             result
         }
 
+        /// Withdraws the funds from a successful or failed campaign.
+        ///
+        /// If the campaign was successful, the funds are transferred to the beneficiary.
+        /// If the campaign failed, this function can be called to mark it as closed (no funds are moved).
+        ///
+        /// # Arguments
+        ///
+        /// * `campaign_id` - The ID of the campaign to withdraw funds from.
+        ///
+        /// # Returns
+        ///
+        /// Returns `Ok(())` if the withdrawal was successful, or an error otherwise.
         #[ink(message)]
         pub fn withdraw_funds(&mut self, campaign_id: u32) -> Result<(), Error> {
             self.guard();
@@ -332,11 +405,29 @@ mod donation_platform {
             result
         }
 
+        /// Retrieves a campaign by its ID.
+        ///
+        /// # Arguments
+        ///
+        /// * `campaign_id` - The ID of the campaign to retrieve.
+        ///
+        /// # Returns
+        ///
+        /// Returns the campaign data if found, otherwise `None`.
         #[ink(message)]
         pub fn get_campaign(&self, campaign_id: u32) -> Option<Campaign> {
             self.campaigns.get(campaign_id)
         }
 
+        /// Retrieves the details of a campaign, including its donations.
+        ///
+        /// # Arguments
+        ///
+        /// * `campaign_id` - The ID of the campaign to retrieve details for.
+        ///
+        /// # Returns
+        ///
+        /// Returns the campaign details if the campaign is found, otherwise `None`.
         #[ink(message)]
         pub fn get_campaign_details(&self, campaign_id: u32) -> Option<CampaignDetails> {
             let campaign = self.campaigns.get(campaign_id)?;
@@ -348,6 +439,17 @@ mod donation_platform {
             })
         }
 
+        /// Retrieves a paginated list of donations for a campaign.
+        ///
+        /// # Arguments
+        ///
+        /// * `campaign_id` - The ID of the campaign.
+        /// * `offset` - The starting index for pagination.
+        /// * `limit` - The maximum number of donations to return.
+        ///
+        /// # Returns
+        ///
+        /// Returns a vector of donations.
         #[ink(message)]
         pub fn get_campaign_donations_paginated(&self, campaign_id: u32, offset: u32, limit: u32) -> Vec<Donation> {
             let donations = self.campaign_donations.get(campaign_id).unwrap_or_default();
@@ -357,6 +459,11 @@ mod donation_platform {
             donations[start..end].to_vec()
         }
 
+        /// Retrieves all campaigns.
+        ///
+        /// # Returns
+        ///
+        /// Returns a vector containing all campaigns.
         #[ink(message)]
         pub fn get_all_campaigns(&self) -> Vec<Campaign> {
             let mut all_campaigns = Vec::with_capacity(self.campaign_count as usize);
@@ -370,6 +477,16 @@ mod donation_platform {
             all_campaigns
         }
 
+        /// Retrieves a paginated list of all campaigns.
+        ///
+        /// # Arguments
+        ///
+        /// * `offset` - The starting index for pagination.
+        /// * `limit` - The maximum number of campaigns to return.
+        ///
+        /// # Returns
+        ///
+        /// Returns a vector of campaigns.
         #[ink(message)]
         pub fn get_campaigns_paginated(&self, offset: u32, limit: u32) -> Vec<Campaign> {
             let mut campaigns = Vec::new();
@@ -385,6 +502,11 @@ mod donation_platform {
             campaigns
         }
 
+        /// Retrieves all active campaigns.
+        ///
+        /// # Returns
+        ///
+        /// Returns a vector of all campaigns with the `Active` state.
         #[ink(message)]
         pub fn get_active_campaigns(&self) -> Vec<Campaign> {
             let mut active_campaigns = Vec::new();
@@ -402,39 +524,56 @@ mod donation_platform {
     }
 
     // Events
+    /// Emitted when a new campaign is created.
     #[ink(event)]
     pub struct CampaignCreated {
+        /// The ID of the created campaign.
         #[ink(topic)]
         campaign_id: u32,
+        /// The owner of the campaign.
         #[ink(topic)]
         owner: AccountId,
+        /// The funding goal of the campaign.
         goal: Balance,
+        /// The deadline of the campaign.
         deadline: Timestamp,
     }
 
+    /// Emitted when a donation is received.
     #[ink(event)]
     pub struct DonationReceived {
+        /// The ID of the campaign that received the donation.
         #[ink(topic)]
         campaign_id: u32,
+        /// The account that made the donation.
         #[ink(topic)]
         donor: AccountId,
+        /// The amount of the donation.
         amount: Balance,
     }
 
+    /// Emitted when funds are withdrawn from a campaign.
     #[ink(event)]
     pub struct FundsWithdrawn {
+        /// The ID of the campaign.
         #[ink(topic)]
         campaign_id: u32,
+        /// The beneficiary who received the funds.
         #[ink(topic)]
         beneficiary: AccountId,
+        /// The amount of funds withdrawn.
         amount: Balance,
     }
 
+    /// Emitted when a campaign's state changes.
     #[ink(event)]
     pub struct CampaignStateChanged {
+        /// The ID of the campaign.
         #[ink(topic)]
         campaign_id: u32,
+        /// The previous state of the campaign.
         old_state: CampaignState,
+        /// The new state of the campaign.
         new_state: CampaignState,
     }
 

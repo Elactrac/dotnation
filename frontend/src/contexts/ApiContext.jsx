@@ -4,8 +4,27 @@ import { ApiPromise, WsProvider } from '@polkadot/api';
 import { ContractPromise } from '@polkadot/api-contract';
 import contractMetadata from '../contracts/donation_platform.json';
 
+/**
+ * @typedef {object} ApiContextType
+ * @property {ApiPromise | null} api - The Polkadot API instance.
+ * @property {ContractPromise | null} contract - The smart contract instance.
+ * @property {boolean} isReady - True if the API and contract are ready to be used.
+ * @property {string | null} error - An error message if the connection failed.
+ */
+
+/**
+ * React context for managing the connection to the Polkadot API and smart contract.
+ * @type {React.Context<ApiContextType>}
+ */
 const ApiContext = createContext({});
 
+/**
+ * Provider component for the ApiContext.
+ * It initializes the Polkadot API and the smart contract, and provides them to its children.
+ * @param {object} props - The component props.
+ * @param {React.ReactNode} props.children - The child components to render.
+ * @returns {JSX.Element} The API provider component.
+ */
 export const ApiProvider = ({ children }) => {
   const [api, setApi] = useState(null);
   const [contract, setContract] = useState(null);
@@ -75,6 +94,11 @@ export const ApiProvider = ({ children }) => {
   );
 };
 
+/**
+ * Custom hook to access the ApiContext.
+ * @returns {ApiContextType} The API context value.
+ * @throws {Error} If used outside of an ApiProvider.
+ */
 export const useApi = () => {
   const context = useContext(ApiContext);
   if (context === undefined) {
