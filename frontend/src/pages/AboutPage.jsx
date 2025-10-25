@@ -2,17 +2,9 @@
  * @file Renders the About page for DotNation.
  * @exports AboutPage
  */
-
-/**
- * @file Renders the About page for DotNation.
- * @exports AboutPage
- */
-import Header from '../components/Header';
-
 const AboutPage = () => {
   return (
     <div className="min-h-screen bg-background-dark text-white">
-      <Header />
       {/* Hero Section */}
       <section className="relative py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
@@ -56,8 +48,8 @@ const AboutPage = () => {
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-secondary/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <svg className="w-6 h-6 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <svg className="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                   </div>
@@ -104,8 +96,8 @@ const AboutPage = () => {
               </p>
             </div>
             <div className="text-center">
-              <div className="w-16 h-16 bg-secondary/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-secondary">2</span>
+              <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl font-bold text-green-400">2</span>
               </div>
               <h3 className="text-xl font-semibold text-white mb-3">Community Support</h3>
               <p className="text-white/70">
@@ -141,7 +133,7 @@ const AboutPage = () => {
                   <span className="text-white/80">Substrate-based smart contracts</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-secondary rounded-full"></div>
+                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                   <span className="text-white/80">Cross-chain compatibility</span>
                 </div>
                 <div className="flex items-center gap-3">
@@ -163,7 +155,7 @@ const AboutPage = () => {
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-white/10">
                   <span className="text-white/80">Blockchain</span>
-                  <span className="text-secondary font-medium">Polkadot</span>
+                   <span className="text-green-400 font-medium">Polkadot</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-white/10">
                   <span className="text-white/80">Wallet Integration</span>
@@ -198,8 +190,8 @@ const AboutPage = () => {
               <p className="text-white/70 text-sm">Join discussions, get support, and connect with fellow innovators.</p>
             </div>
             <div className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10">
-              <div className="w-12 h-12 bg-secondary/20 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <svg className="w-6 h-6 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <svg className="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
               </div>
@@ -237,7 +229,7 @@ const AboutPage = () => {
             <div className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10">
               <h3 className="text-lg font-semibold text-white mb-3">Partnerships</h3>
               <p className="text-white/70 mb-4">Interested in collaborating with us?</p>
-              <a href="mailto:partnerships@dotnation.io" className="text-secondary hover:text-secondary/80 transition-colors">
+              <a href="mailto:partnerships@dotnation.io" className="text-green-400 hover:text-green-300 transition-colors">
                 partnerships@dotnation.io
               </a>
             </div>

@@ -64,3 +64,14 @@ coverage/
 .cache/
 .vercel
 substrate-contracts-node*
+
+# R files
+.Rhistory
+.RData
+.Rproj.user/
+
+# Demo and test files
+Demo/
+dummy*.html
+*copy*.html
+page.html

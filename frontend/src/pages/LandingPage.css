@@ -232,11 +232,11 @@ p {
 }
 
 .why-us-card {
-    background: var(--card-bg);
+    background: rgba(23, 25, 48, 0.9);
     padding: 40px 30px;
     border-radius: 12px;
     border: 1px solid var(--border-color);
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(10px);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -264,10 +264,11 @@ p {
     align-items: center;
 }
 .trust-card {
-    background: var(--card-bg);
+    background: rgba(23, 25, 48, 0.9);
     padding: 30px;
     border-radius: 12px;
     border: 1px solid var(--border-color);
+    backdrop-filter: blur(10px);
 }
 .trust-card h3 {
     color: var(--secondary-accent);
@@ -327,11 +328,11 @@ p {
     gap: 30px;
 }
 .feature-card {
-    background: var(--card-bg);
+    background: rgba(23, 25, 48, 0.9);
     padding: 30px;
     border-radius: 12px;
     border: 1px solid var(--border-color);
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(10px);
     transition: transform 0.3s ease;
 }
 .feature-card:hover {

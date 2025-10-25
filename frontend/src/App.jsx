@@ -93,10 +93,13 @@ const router = createBrowserRouter([
        { index: true, element: <NewSettingsPage /> },
      ],
    },
-   {
-     path: '/about',
-     element: <AboutPage />,
-   },
+    {
+      path: '/about',
+      element: <NewDashboardLayout />,
+      children: [
+        { index: true, element: <AboutPage /> },
+      ],
+    },
    {
      path: '/contact',
      element: <ContactPage />,
