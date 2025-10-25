@@ -238,12 +238,39 @@ const NewLandingPage = () => {
             </div>
           </section>
 
+          {/* Trust Signals Section */}
+          <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white/5">
+            <div className="max-w-6xl mx-auto">
+              <div className="text-center mb-12">
+                <h2 className="text-3xl font-bold font-display mb-4 text-white">Trusted by Innovators Worldwide</h2>
+                <div className="flex justify-center items-center gap-8 mt-8">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-primary font-display">$2.4M+</div>
+                    <div className="text-white/60 text-sm">Funds Raised</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-secondary font-display">1,200+</div>
+                    <div className="text-white/60 text-sm">Successful Campaigns</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-green-400 font-display">15,000+</div>
+                    <div className="text-white/60 text-sm">Community Members</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-purple-400 font-display">98%</div>
+                    <div className="text-white/60 text-sm">Success Rate</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
           {/* Features Section */}
           <section id="features" className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-4xl lg:text-5xl font-bold tracking-tight font-display">An Engine for Trust</h2>
+              <h2 className="text-4xl lg:text-5xl font-bold tracking-tight font-display">Built for Real People, Real Impact</h2>
               <p className="mt-4 max-w-2xl mx-auto text-lg text-white/70 font-body">
-                We leverage Polkadot&apos;s blockchain to create a secure, transparent, and community-driven approach to crowdfunding.
+                We believe crowdfunding should be simple, secure, and human-centered. That&apos;s why we built DotNation on principles of transparency, community, and trust.
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
