@@ -212,9 +212,9 @@ const NewLandingPage = () => {
         <main className="flex-1 flex flex-col">
            <section className="py-32 sm:py-40 lg:py-48 relative">
              <div className="relative isolate px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-               <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,rgba(56,116,255,0.15)_0%,transparent_70%)] animate-subtle-float pointer-events-none"></div>
+                <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,rgba(56,116,255,0.25)_0%,transparent_50%)] animate-subtle-float pointer-events-none"></div>
               <div className="text-center">
-                <h1 className="text-6xl md:text-8xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-white to-white/70 font-display">
+                <h1 className="text-6xl md:text-8xl font-bold tracking-tighter text-white font-display">
                   Trustless Funding for Visionary Ideas.
                 </h1>
                 <p className="mt-6 max-w-3xl mx-auto text-lg text-white/70 font-body">

@@ -9,15 +9,25 @@ A decentralized crowdfunding platform built on Polkadot, enabling transparent an
 
 ## Features
 
+### Core Functionality
 - **Trustless Fundraising**: Campaign rules enforced by robust ink! smart contracts.
 - **Direct Fund Flow**: Funds go directly from donors to beneficiaries via escrow.
 - **On-Chain Transparency**: All transactions are verifiable on the blockchain with comprehensive events.
 - **Goal-Based Campaigns**: Automatic success/failure based on funding goals with overflow protection.
 - **Time-Bound Campaigns**: Deadlines with enforced state transitions and validation.
 - **Multi-Network Support**: Compatible with Polkadot parachains like Astar (Shibuya testnet).
+
+### Upgradability & Scalability ✨ NEW
+- **🔄 Upgradable Contracts**: Proxy pattern allows bug fixes and feature additions without data migration
+- **📦 Batch Operations**: Create multiple campaigns or withdraw from multiple campaigns in a single transaction
+- **⚡ Optimized Pagination**: Efficient data fetching for thousands of campaigns and millions of donations
+- **🎯 Version Tracking**: Track contract versions and manage migrations seamlessly
+- **🔒 Admin Controls**: Secure upgrade locks and admin transfer capabilities
+
+### Security & Performance
 - **Security First**: Reentrancy protection, input validation, and access controls.
 - **Modern UI**: Built with React 18, Tailwind CSS, and Vite with seamless navigation.
-- **Scalable Architecture**: Pagination, caching, and error handling for performance.
+- **Scalable Architecture**: Pagination, caching, error handling, and batch processing for performance.
 
 ---
 
@@ -26,6 +36,11 @@ A decentralized crowdfunding platform built on Polkadot, enabling transparent an
 The repository is organized into three main parts: the smart contract, the frontend, and the AI-powered backend.
 
 - **`donation_platform/`**: The ink! smart contract that manages all on-chain campaign logic.
+  - `lib.rs`: Original contract (V1)
+  - `lib_v2.rs`: Upgraded contract with batch operations and scalability improvements
+  - `proxy.rs`: Proxy contract for upgradability
+  - `UPGRADE_GUIDE.md`: Complete guide for implementing upgradable contracts
+  - `SCALABILITY_GUIDE.md`: Strategies for scaling to millions of users
 - **`frontend/`**: The React + Vite application that provides the user interface.
 - **`gemini-backend/`**: A Node.js + Express server for Gemini AI integration.
 - **`.github/workflows/`**: Automated CI/CD pipelines for testing and deployment.
@@ -45,6 +60,27 @@ The core of the platform is the ink! smart contract, which runs on a Polkadot-co
 - **Secure Fund Handling**: Holding donated funds in escrow and ensuring they are only released to the beneficiary if the campaign is successful.
 - **State Machine**: Enforcing the campaign lifecycle from `Active` to `Successful` or `Failed`, and finally to `Withdrawn`.
 - **Event Logging**: Emitting on-chain events for all significant actions, which allows the frontend to monitor and display real-time updates.
+
+#### Upgradable Architecture (V2)
+
+The V2 implementation introduces a **proxy pattern** for seamless upgrades:
+
+```
+User → Proxy Contract (Fixed Address) → Logic Contract V1/V2 (Upgradable)
+              ↓
+        Storage (Persistent)
+```
+
+**Key Benefits:**
+- ✅ Fix bugs without redeploying or migrating data
+- ✅ Add new features while maintaining backward compatibility
+- ✅ Batch operations: Create 50 campaigns or withdraw from 50 campaigns in one transaction
+- ✅ Improved pagination: Handle millions of donations efficiently
+- ✅ Version tracking for managing upgrades
+
+**Learn More:**
+- [UPGRADE_GUIDE.md](donation_platform/UPGRADE_GUIDE.md) - Complete implementation guide
+- [SCALABILITY_GUIDE.md](donation_platform/SCALABILITY_GUIDE.md) - Scaling to millions of users
 
 ### 2. Frontend (`frontend/`)
 

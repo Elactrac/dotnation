@@ -4,6 +4,7 @@ import { ChakraProvider } from '@chakra-ui/react';
 import { ApiProvider } from './contexts/ApiContext.jsx';
 import { WalletProvider } from './contexts/WalletContext.jsx';
 import { CampaignProvider } from './contexts/CampaignContext.jsx';
+import { BatchOperationsProvider } from './contexts/BatchOperationsContext.jsx';
 import ErrorBoundary from './components/ErrorBoundary';
 import { initSentry } from './utils/sentry';
 import theme from './theme';
@@ -24,6 +25,8 @@ const ContactPage = React.lazy(() => import('./pages/ContactPage.jsx'));
 const LoginPage = React.lazy(() => import('./pages/LoginPage.jsx'));
 const SignupPage = React.lazy(() => import('./pages/SignupPage.jsx'));
 const NotFoundPage = React.lazy(() => import('./pages/NotFoundPage.jsx'));
+const BatchCampaignCreator = React.lazy(() => import('./components/BatchCampaignCreator.jsx'));
+const BatchWithdrawal = React.lazy(() => import('./components/BatchWithdrawal.jsx'));
 
 const router = createBrowserRouter([
   {
@@ -70,6 +73,20 @@ const router = createBrowserRouter([
     element: <NewDashboardLayout />,
     children: [
       { index: true, element: <MyDonationsPage /> },
+    ],
+  },
+  {
+    path: '/batch-create',
+    element: <NewDashboardLayout />,
+    children: [
+      { index: true, element: <BatchCampaignCreator /> },
+    ],
+  },
+  {
+    path: '/batch-withdraw',
+    element: <NewDashboardLayout />,
+    children: [
+      { index: true, element: <BatchWithdrawal /> },
     ],
   },
   {
@@ -149,9 +166,11 @@ function App() {
         <ApiProvider>
           <WalletProvider>
             <CampaignProvider>
-              <Suspense fallback={<SuspenseFallback />}>
-                <RouterProvider router={router} />
-              </Suspense>
+              <BatchOperationsProvider>
+                <Suspense fallback={<SuspenseFallback />}>
+                  <RouterProvider router={router} />
+                </Suspense>
+              </BatchOperationsProvider>
             </CampaignProvider>
           </WalletProvider>
         </ApiProvider>

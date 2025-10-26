@@ -72,7 +72,12 @@ export const CreateCampaignForm = ({ onSuccess }) => {
       });
       if (!response.ok) throw new Error('Failed to get a response from the AI service.');
       const data = await response.json();
-      setFormData(prev => ({ ...prev, description: data.description }));
+      console.log('AI response:', data);
+      setFormData(prev => {
+        const newFormData = { ...prev, description: data.description };
+        console.log('New form data:', newFormData);
+        return newFormData;
+      });
       toast.success('Description generated!');
     } catch (error) {
       console.error("AI generation error:", error);

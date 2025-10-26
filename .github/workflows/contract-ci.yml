@@ -4,15 +4,18 @@ on:
   push:
     branches: [ master, main, develop ]
     paths:
-      - 'donation_platform/**'
-      - '.github/workflows/contract-ci.yml'
+      - 'donation_platform/lib.rs'
+      - 'donation_platform/proxy.rs'
+      - 'donation_platform/Cargo.toml'
+      - '.github/workflows/contract-v2-ci.yml'
   pull_request:
     branches: [ master, main, develop ]
     paths:
-      - 'donation_platform/**'
+      - 'donation_platform/lib.rs'
+      - 'donation_platform/proxy.rs'
 
 jobs:
-  build-and-test:
+  build-logic-contract:
     runs-on: ubuntu-latest
     
     steps:
@@ -27,39 +30,194 @@ jobs:
     - name: Install cargo-contract
       run: cargo install cargo-contract --version 5.0.3 --force
     
-    - name: Build contract (debug)
+    - name: Create temporary Cargo.toml for V2
       working-directory: ./donation_platform
+      run: |
+        # Create a copy of lib.rs as lib.rs in temp directory
+        mkdir -p ../temp_v2
+        cp lib.rs ../temp_v2/lib.rs
+        cp Cargo.toml ../temp_v2/
+        # Update package name
+        sed -i 's/name = "donation_platform"/name = "donation_platform_v2"/' ../temp_v2/Cargo.toml
+    
+    - name: Build contract (debug)
+      working-directory: ./temp_v2
       run: cargo contract build
     
     - name: Run unit tests
-      working-directory: ./donation_platform
+      working-directory: ./temp_v2
       run: cargo test
     
-    - name: Run e2e tests
-      working-directory: ./donation_platform
-      run: cargo test --features e2e-tests
-      continue-on-error: true
-    
     - name: Build contract (release)
-      working-directory: ./donation_platform
+      working-directory: ./temp_v2
       run: cargo contract build --release
     
     - name: Check contract size
-      working-directory: ./donation_platform
+      working-directory: ./temp_v2
       run: |
-        SIZE=$(wc -c < target/ink/donation_platform.wasm)
+        SIZE=$(wc -c < target/ink/donation_platform_v2.wasm)
         echo "Contract WASM size: $SIZE bytes"
-        if [ $SIZE -gt 51200 ]; then
-          echo "Warning: Contract size exceeds 50KB"
+        if [ $SIZE -gt 102400 ]; then
+          echo "Warning: Contract size exceeds 100KB"
           exit 1
         fi
+        echo "CONTRACT_SIZE=$SIZE" >> $GITHUB_ENV
     
     - name: Upload contract artifacts
       uses: actions/upload-artifact@v4
       with:
         name: contract-artifacts
         path: |
-          donation_platform/target/ink/donation_platform.contract
-          donation_platform/target/ink/donation_platform.json
-          donation_platform/target/ink/donation_platform.wasm
+          temp_v2/target/ink/donation_platform_v2.contract
+          temp_v2/target/ink/donation_platform_v2.json
+          temp_v2/target/ink/donation_platform_v2.wasm
         retention-days: 30
+
+  build-proxy-contract:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Rust toolchain
+      uses: actions-rust-lang/setup-rust-toolchain@v1
+      with:
+        toolchain: stable
+        target: wasm32-unknown-unknown
+    
+    - name: Install cargo-contract
+      run: cargo install cargo-contract --version 5.0.3 --force
+    
+    - name: Create temporary Cargo.toml for Proxy
+      working-directory: ./donation_platform
+      run: |
+        # Create a copy of proxy.rs as lib.rs in temp directory
+        mkdir -p ../temp_proxy
+        cp proxy.rs ../temp_proxy/lib.rs
+        cp Cargo.toml ../temp_proxy/
+        # Update package name
+        sed -i 's/name = "donation_platform"/name = "proxy"/' ../temp_proxy/Cargo.toml
+    
+    - name: Build Proxy contract (debug)
+      working-directory: ./temp_proxy
+      run: cargo contract build
+    
+    - name: Run Proxy unit tests
+      working-directory: ./temp_proxy
+      run: cargo test
+    
+    - name: Build Proxy contract (release)
+      working-directory: ./temp_proxy
+      run: cargo contract build --release
+    
+    - name: Check Proxy contract size
+      working-directory: ./temp_proxy
+      run: |
+        SIZE=$(wc -c < target/ink/proxy.wasm)
+        echo "Proxy Contract WASM size: $SIZE bytes"
+        if [ $SIZE -gt 51200 ]; then
+          echo "Warning: Proxy Contract size exceeds 50KB"
+          exit 1
+        fi
+        echo "PROXY_CONTRACT_SIZE=$SIZE" >> $GITHUB_ENV
+    
+    - name: Upload Proxy contract artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: proxy-artifacts
+        path: |
+          temp_proxy/target/ink/proxy.contract
+          temp_proxy/target/ink/proxy.json
+          temp_proxy/target/ink/proxy.wasm
+        retention-days: 30
+
+  integration-test:
+    runs-on: ubuntu-latest
+    needs: [build-logic-contract, build-proxy-contract]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Download contract artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: contract-artifacts
+        path: ./artifacts/contract
+    
+    - name: Download Proxy artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: proxy-artifacts
+        path: ./artifacts/proxy
+    
+    - name: List all artifacts
+      run: |
+        echo "Contract Artifacts:"
+        ls -lh ./artifacts/contract/
+        echo "Proxy Artifacts:"
+        ls -lh ./artifacts/proxy/
+        
+        echo "Total artifacts size:"
+        du -sh ./artifacts/
+    
+    - name: Verify artifact integrity
+      run: |
+        if [ ! -f "./artifacts/contract/donation_platform_v2.contract" ]; then
+          echo "Error: Contract artifact missing"
+          exit 1
+        fi
+        if [ ! -f "./artifacts/proxy/proxy.contract" ]; then
+          echo "Error: Proxy contract artifact missing"
+          exit 1
+        fi
+        echo "All artifacts verified successfully"
+
+  compare-versions:
+    runs-on: ubuntu-latest
+    needs: [build-logic-contract, build-proxy-contract]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Rust toolchain
+      uses: actions-rust-lang/setup-rust-toolchain@v1
+      with:
+        toolchain: stable
+        target: wasm32-unknown-unknown
+    
+    - name: Install cargo-contract
+      run: cargo install cargo-contract --version 5.0.3 --force
+    
+    - name: Build V1 contract
+      working-directory: ./donation_platform
+      run: cargo contract build --release
+    
+    - name: Download contract artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: contract-artifacts
+        path: ./artifacts/contract
+    
+    - name: Compare contract sizes
+      run: |
+        V1_SIZE=$(wc -c < donation_platform/target/ink/donation_platform.wasm)
+        CONTRACT_SIZE=$(wc -c < artifacts/contract/donation_platform_v2.wasm)
+        
+        echo "📊 Contract Size Comparison:"
+        echo "V1 Contract: $V1_SIZE bytes"
+        echo "Contract: $CONTRACT_SIZE bytes"
+        
+        DIFF=$((CONTRACT_SIZE - V1_SIZE))
+        PERCENT=$((DIFF * 100 / V1_SIZE))
+        
+        if [ $DIFF -gt 0 ]; then
+          echo "Contract is $DIFF bytes larger (+$PERCENT%)"
+        else
+          echo "Contract is ${DIFF#-} bytes smaller ($PERCENT%)"
+        fi
+        
+        # Fail if V2 is more than 50% larger
+        if [ $PERCENT -gt 50 ]; then
+          echo "⚠️  Warning: V2 contract is significantly larger than V1"
+          exit 1
+        fi

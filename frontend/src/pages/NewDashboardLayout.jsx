@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useWallet } from '../contexts/WalletContext';
+import VersionBanner from '../components/VersionBanner';
 
 const NewDashboardLayout = () => {
   const { accounts, selectedAccount, connectWallet, selectAccount, disconnectWallet } = useWallet();
@@ -90,6 +91,28 @@ const NewDashboardLayout = () => {
                >
                  My Campaigns
                </NavLink>
+               <div className="relative group">
+                 <button className="text-white/80 hover:text-white transition-colors duration-300 flex items-center gap-1">
+                   Batch Ops
+                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+                   </svg>
+                 </button>
+                 <div className="absolute top-full left-0 mt-2 w-48 rounded-lg bg-background-dark/95 backdrop-blur-lg border border-white/10 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                   <NavLink
+                     to="/batch-create"
+                     className="block px-4 py-2 text-sm text-white/80 hover:text-white hover:bg-white/5 rounded-t-lg transition-colors"
+                   >
+                     Batch Create Campaigns
+                   </NavLink>
+                   <NavLink
+                     to="/batch-withdraw"
+                     className="block px-4 py-2 text-sm text-white/80 hover:text-white hover:bg-white/5 rounded-b-lg transition-colors"
+                   >
+                     Batch Withdraw
+                   </NavLink>
+                 </div>
+               </div>
                <NavLink
                  to="/about"
                  className={({ isActive }) =>
@@ -187,6 +210,9 @@ const NewDashboardLayout = () => {
             </div>
           </div>
         </header>
+
+        {/* Version Banner */}
+        <VersionBanner />
 
         {/* Main Content */}
         <main className="flex-1 flex flex-col items-center pb-16">
