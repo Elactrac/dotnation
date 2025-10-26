@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Alert,
@@ -113,7 +113,7 @@ const VersionBanner = () => {
             </Text>
 
             <Box>
-              <Text fontWeight="bold" mb={2}>What's New:</Text>
+              <Text fontWeight="bold" mb={2}>What&apos;s New:</Text>
               <List spacing={2}>
                 {versionInfo.improvements.map((improvement, index) => (
                   <ListItem key={index} fontSize="sm">

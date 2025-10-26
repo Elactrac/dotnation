@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -153,7 +153,7 @@ const BatchWithdrawal = () => {
             <Box>
               <AlertTitle>No Eligible Campaigns</AlertTitle>
               <AlertDescription>
-                You don't have any successful campaigns ready for withdrawal.
+                You don&apos;t have any successful campaigns ready for withdrawal.
                 Campaigns must reach their funding goal before funds can be withdrawn.
               </AlertDescription>
             </Box>

@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import { useApi } from './ApiContext';
 import { useWallet } from './WalletContext';
 import { useToast } from '@chakra-ui/react';
@@ -300,4 +301,8 @@ export const BatchOperationsProvider = ({ children }) => {
       {children}
     </BatchOperationsContext.Provider>
   );
+};
+
+BatchOperationsProvider.propTypes = {
+  children: PropTypes.node.isRequired,
 };
