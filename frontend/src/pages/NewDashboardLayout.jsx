@@ -112,17 +112,7 @@ const NewDashboardLayout = () => {
                      Batch Withdraw
                    </NavLink>
                  </div>
-               </div>
-               <NavLink
-                 to="/about"
-                 className={({ isActive }) =>
-                   isActive
-                     ? "text-white font-bold"
-                     : "text-white/80 hover:text-white transition-colors duration-300"
-                 }
-               >
-                 About
-               </NavLink>
+                </div>
              </nav>
 
             <div className="flex gap-4">
@@ -227,10 +217,13 @@ const NewDashboardLayout = () => {
                 <a href="#terms" className="text-white/60 hover:text-white transition-colors text-sm">
                   Terms of Service
                 </a>
-                <a href="#privacy" className="text-white/60 hover:text-white transition-colors text-sm">
+                <a href="/privacy" className="text-white/60 hover:text-white transition-colors text-sm">
                   Privacy Policy
                 </a>
-                <a href="#contact" className="text-white/60 hover:text-white transition-colors text-sm">
+                <a href="/about" className="text-white/60 hover:text-white transition-colors text-sm">
+                  About
+                </a>
+                <a href="/contact" className="text-white/60 hover:text-white transition-colors text-sm">
                   Contact Us
                 </a>
               </div>

@@ -172,13 +172,15 @@ const BrowseCampaignsPage = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="space-y-8">
           {/* Header */}
-          <div className="text-left">
-            <h1 className="text-4xl font-bold font-display text-white mb-2">Browse Campaigns</h1>
-            <p className="text-white/60">Discover and support amazing causes from around the world</p>
+          <div className="text-left animate-fade-in">
+            <h1 className="text-5xl font-bold font-display bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent mb-3">
+              Browse Campaigns
+            </h1>
+            <p className="text-lg text-white/70 font-body">Discover and support amazing causes from around the world</p>
           </div>
 
           {/* Search and Filters */}
-          <div className="bg-white/5 border border-white/10 rounded-xl backdrop-blur-lg p-6">
+          <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-xl rounded-2xl border-2 border-gray-700 p-6 hover:border-primary/50 transition-all duration-300">
             <div className="space-y-4">
               {/* Search Bar */}
               <div className="relative">
@@ -190,7 +192,7 @@ const BrowseCampaignsPage = () => {
                   placeholder="Search campaigns by title or description..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/40 focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-300"
+                  className="w-full pl-12 pr-4 py-3 bg-gray-900/50 border-2 border-gray-700 rounded-xl text-white placeholder-white/40 font-body focus:ring-2 focus:ring-primary focus:border-primary hover:border-gray-600 transition-all duration-300"
                 />
               </div>
 
@@ -199,10 +201,10 @@ const BrowseCampaignsPage = () => {
                 <div className="flex items-center gap-4">
                   <button
                     onClick={() => setIsFiltersOpen(!isFiltersOpen)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all duration-300 ${
+                    className={`flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 font-body transition-all duration-300 ${
                       activeFiltersCount > 0
-                        ? 'bg-primary/20 border-primary/30 text-primary'
-                        : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
+                        ? 'bg-gradient-to-r from-primary/20 to-secondary/20 border-primary/50 text-primary hover:border-primary'
+                        : 'bg-gray-900/50 border-gray-700 text-white/70 hover:bg-gray-800/50 hover:border-gray-600'
                     } md:hidden`}
                   >
                     <FiSliders className="w-4 h-4" />
@@ -212,19 +214,19 @@ const BrowseCampaignsPage = () => {
                   {activeFiltersCount > 0 && (
                     <button
                       onClick={clearFilters}
-                      className="px-3 py-1 text-sm bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors duration-300"
+                      className="px-4 py-2 text-sm bg-white/10 text-white rounded-xl hover:bg-white/20 font-body transition-all duration-300"
                     >
                       Clear All
                     </button>
                   )}
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-white/60 whitespace-nowrap">Sort by:</span>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-white/60 whitespace-nowrap font-body font-semibold uppercase">Sort by:</span>
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
-                    className="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-300"
+                    className="px-4 py-2 bg-gray-900/50 border-2 border-gray-700 rounded-xl text-white text-sm font-body focus:ring-2 focus:ring-primary focus:border-primary hover:border-gray-600 transition-all duration-300"
                   >
                     <option value="newest">Newest First</option>
                     <option value="oldest">Oldest First</option>
@@ -241,12 +243,12 @@ const BrowseCampaignsPage = () => {
           </div>
 
           {/* Results Summary */}
-          <div className="flex justify-between items-center flex-wrap gap-4">
-            <p className="text-white/60">
-              Showing {filteredCampaigns.length} of {campaigns?.length || 0} campaigns
+          <div className="flex justify-between items-center flex-wrap gap-4 animate-fade-in">
+            <p className="text-white/70 font-body">
+              Showing <span className="text-white font-bold">{filteredCampaigns.length}</span> of <span className="text-white font-bold">{campaigns?.length || 0}</span> campaigns
             </p>
             {activeFiltersCount > 0 && (
-              <span className="px-3 py-1 bg-primary/20 text-primary text-sm rounded-full">
+              <span className="px-4 py-2 bg-gradient-to-r from-primary/20 to-secondary/20 border-2 border-primary/40 text-primary text-sm rounded-full font-body font-semibold">
                 {activeFiltersCount} filter{activeFiltersCount !== 1 ? 's' : ''} active
               </span>
             )}
@@ -254,11 +256,11 @@ const BrowseCampaignsPage = () => {
 
           {/* Campaigns Grid */}
           {filteredCampaigns.length === 0 ? (
-            <div className="bg-white/5 border border-white/10 rounded-xl backdrop-blur-lg p-12 text-center">
+            <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-xl rounded-2xl border-2 border-gray-700 p-12 text-center hover:border-primary/30 transition-all duration-300">
               <div className="space-y-4">
-                <FiSearch className="w-12 h-12 text-white/40 mx-auto" />
-                <h3 className="text-xl font-bold text-white/70">No Campaigns Found</h3>
-                <p className="text-white/50 max-w-md mx-auto">
+                <FiSearch className="w-16 h-16 text-white/40 mx-auto" />
+                <h3 className="text-2xl font-bold font-display text-white/70">No Campaigns Found</h3>
+                <p className="text-white/60 font-body max-w-md mx-auto">
                   {activeFiltersCount > 0
                     ? "Try adjusting your filters or search terms to find more campaigns."
                     : "There are no campaigns available at the moment. Check back later!"
@@ -267,7 +269,7 @@ const BrowseCampaignsPage = () => {
                 {activeFiltersCount > 0 && (
                   <button
                     onClick={clearFilters}
-                    className="px-6 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors duration-300"
+                    className="px-8 py-3 bg-gradient-to-r from-primary to-secondary text-white rounded-xl hover:scale-105 font-body font-semibold transition-all duration-300 shadow-lg shadow-primary/20"
                   >
                     Clear Filters
                   </button>
@@ -277,7 +279,7 @@ const BrowseCampaignsPage = () => {
           ) : isLoading ? (
             <CampaignCardSkeleton count={6} />
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-fade-in">
               {filteredCampaigns.map((campaign) => (
                 <CampaignCard
                   key={campaign.id}
@@ -291,26 +293,26 @@ const BrowseCampaignsPage = () => {
           {/* Mobile Filters Panel */}
           {isFiltersOpen && (
             <div className="fixed inset-0 z-50 md:hidden">
-              <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setIsFiltersOpen(false)} />
-              <div className="absolute right-0 top-0 h-full w-80 bg-background-dark border-l border-white/10 p-6 overflow-y-auto">
+              <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setIsFiltersOpen(false)} />
+              <div className="absolute right-0 top-0 h-full w-80 bg-background-dark border-l-2 border-gray-700 p-6 overflow-y-auto">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-bold text-white">Filters</h3>
+                  <h3 className="text-2xl font-bold font-display text-white">Filters</h3>
                   <button
                     onClick={() => setIsFiltersOpen(false)}
-                    className="p-2 text-white/60 hover:text-white"
+                    className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300"
                   >
-                    <FiX className="w-5 h-5" />
+                    <FiX className="w-6 h-6" />
                   </button>
                 </div>
 
                 <div className="space-y-6">
                   {/* Status Filter */}
                   <div>
-                    <label className="block text-sm font-semibold text-white/70 mb-2">Status</label>
+                    <label className="block text-sm font-semibold font-body uppercase text-white/70 mb-3">Status</label>
                     <select
                       value={statusFilter}
                       onChange={(e) => setStatusFilter(e.target.value)}
-                      className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-300"
+                      className="w-full px-4 py-3 bg-gray-900/50 border-2 border-gray-700 rounded-xl text-white font-body focus:ring-2 focus:ring-primary focus:border-primary hover:border-gray-600 transition-all duration-300"
                     >
                       <option value="all">All Campaigns</option>
                       <option value="Active">Active</option>
@@ -321,11 +323,11 @@ const BrowseCampaignsPage = () => {
 
                   {/* Sort Options */}
                   <div>
-                    <label className="block text-sm font-semibold text-white/70 mb-2">Sort By</label>
+                    <label className="block text-sm font-semibold font-body uppercase text-white/70 mb-3">Sort By</label>
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
-                      className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-300"
+                      className="w-full px-4 py-3 bg-gray-900/50 border-2 border-gray-700 rounded-xl text-white font-body focus:ring-2 focus:ring-primary focus:border-primary hover:border-gray-600 transition-all duration-300"
                     >
                       <option value="newest">Newest First</option>
                       <option value="oldest">Oldest First</option>
@@ -337,7 +339,7 @@ const BrowseCampaignsPage = () => {
 
                   {/* Goal Range */}
                   <div>
-                    <label className="block text-sm font-semibold text-white/70 mb-2">
+                    <label className="block text-sm font-semibold font-body uppercase text-white/70 mb-3">
                       Goal Range: {formatDOT(goalRange[0])} - {formatDOT(goalRange[1])} DOT
                     </label>
                     <input
@@ -347,7 +349,7 @@ const BrowseCampaignsPage = () => {
                       step="1000"
                       value={goalRange[0]}
                       onChange={(e) => setGoalRange([Number(e.target.value), goalRange[1]])}
-                      className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer"
+                      className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary"
                     />
                     <input
                       type="range"
@@ -356,13 +358,13 @@ const BrowseCampaignsPage = () => {
                       step="1000"
                       value={goalRange[1]}
                       onChange={(e) => setGoalRange([goalRange[0], Number(e.target.value)])}
-                      className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer mt-2"
+                      className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary mt-2"
                     />
                   </div>
 
                   {/* Progress Range */}
                   <div>
-                    <label className="block text-sm font-semibold text-white/70 mb-2">
+                    <label className="block text-sm font-semibold font-body uppercase text-white/70 mb-3">
                       Progress: {progressRange[0]}% - {progressRange[1]}%
                     </label>
                     <input
@@ -371,7 +373,7 @@ const BrowseCampaignsPage = () => {
                       max="100"
                       value={progressRange[0]}
                       onChange={(e) => setProgressRange([Number(e.target.value), progressRange[1]])}
-                      className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer"
+                      className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary"
                     />
                     <input
                       type="range"
@@ -379,22 +381,22 @@ const BrowseCampaignsPage = () => {
                       max="100"
                       value={progressRange[1]}
                       onChange={(e) => setProgressRange([progressRange[0], Number(e.target.value)])}
-                      className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer mt-2"
+                      className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary mt-2"
                     />
                   </div>
 
                   {/* Categories */}
                   <div>
-                    <label className="block text-sm font-semibold text-white/70 mb-2">Categories</label>
+                    <label className="block text-sm font-semibold font-body uppercase text-white/70 mb-3">Categories</label>
                     <div className="flex flex-wrap gap-2">
                       {availableCategories.map((category) => (
                         <button
                           key={category}
                           onClick={() => handleCategoryToggle(category)}
-                          className={`px-3 py-1 text-sm rounded-full transition-all duration-300 ${
+                          className={`px-4 py-2 text-sm font-body rounded-full transition-all duration-300 ${
                             selectedCategories.includes(category)
-                              ? 'bg-primary text-white'
-                              : 'bg-white/10 text-white/70 hover:bg-white/20'
+                              ? 'bg-gradient-to-r from-primary to-secondary text-white border-2 border-primary'
+                              : 'bg-gray-900/50 border-2 border-gray-700 text-white/70 hover:bg-gray-800/50 hover:border-gray-600'
                           }`}
                         >
                           {category}
@@ -410,7 +412,7 @@ const BrowseCampaignsPage = () => {
                   {activeFiltersCount > 0 && (
                     <button
                       onClick={clearFilters}
-                      className="w-full px-4 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors duration-300"
+                      className="w-full px-6 py-3 bg-gradient-to-r from-primary to-secondary text-white rounded-xl hover:scale-105 font-body font-semibold transition-all duration-300 shadow-lg shadow-primary/20"
                     >
                       Clear All Filters
                     </button>

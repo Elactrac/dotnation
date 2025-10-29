@@ -38,6 +38,30 @@
 @keyframes subtle-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 .animate-subtle-float { animation: subtle-float 6s ease-in-out infinite; }
 
+/* Captcha Modal Animations */
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.animate-scale-in {
+  animation: scale-in 0.3s ease-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
+  20%, 40%, 60%, 80% { transform: translateX(8px); }
+}
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
 .card { transition: all 0.3s ease-in-out; }
 .card:hover {
      transform: translateY(-5px);
@@ -59,10 +83,154 @@
     color: white !important;
 }
 
-.fade-in-section { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
-.fade-in-section.is-visible { opacity: 1; transform: translateY(0); }
+/* Enhanced Scroll Animations */
+.fade-in-section { 
+    opacity: 0; 
+    transform: translateY(40px); 
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out; 
+}
+.fade-in-section.is-visible { 
+    opacity: 1; 
+    transform: translateY(0); 
+}
+
+/* Fade in from bottom */
+.fade-in-up {
+    opacity: 0;
+    transform: translateY(60px);
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+.fade-in-up.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Fade in from left */
+.fade-in-left {
+    opacity: 0;
+    transform: translateX(-60px);
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+.fade-in-left.is-visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Fade in from right */
+.fade-in-right {
+    opacity: 0;
+    transform: translateX(60px);
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+.fade-in-right.is-visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Scale in animation */
+.scale-in {
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+.scale-in.is-visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Staggered animations for children */
+.stagger-children > * {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+.stagger-children.is-visible > *:nth-child(1) { 
+    animation: fadeInUp 0.6s ease-out 0.1s forwards; 
+}
+.stagger-children.is-visible > *:nth-child(2) { 
+    animation: fadeInUp 0.6s ease-out 0.2s forwards; 
+}
+.stagger-children.is-visible > *:nth-child(3) { 
+    animation: fadeInUp 0.6s ease-out 0.3s forwards; 
+}
+.stagger-children.is-visible > *:nth-child(4) { 
+    animation: fadeInUp 0.6s ease-out 0.4s forwards; 
+}
+.stagger-children.is-visible > *:nth-child(5) { 
+    animation: fadeInUp 0.6s ease-out 0.5s forwards; 
+}
+.stagger-children.is-visible > *:nth-child(6) { 
+    animation: fadeInUp 0.6s ease-out 0.6s forwards; 
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Parallax effect for background elements */
+.parallax-slow {
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Reveal animation with blur effect */
+.reveal-blur {
+    opacity: 0;
+    filter: blur(10px);
+    transform: translateY(40px);
+    transition: opacity 0.8s ease-out, filter 0.8s ease-out, transform 0.8s ease-out;
+}
+.reveal-blur.is-visible {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+}
+
+/* Step-by-step reveal animation for How It Works section */
+.step-item.is-visible {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+}
+
 header { transition: transform 0.3s ease-in-out; }
 
+/* Accessibility: Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    
+    /* Disable parallax and transforms for reduced motion */
+    .parallax-slow,
+    .fade-in-section,
+    .fade-in-up,
+    .fade-in-left,
+    .fade-in-right,
+    .scale-in,
+    .reveal-blur,
+    .stagger-children > *,
+    .step-item {
+        opacity: 1 !important;
+        transform: none !important;
+        filter: none !important;
+    }
+    
+    /* Still allow hover effects but without transforms */
+    .card:hover {
+        transform: none;
+    }
+}
 
 /* CSS VARIABLES (Color Palette) */
 :root {

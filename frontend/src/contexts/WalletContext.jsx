@@ -4,6 +4,7 @@ import { web3Accounts, web3Enable } from '@polkadot/extension-dapp';
 import { metrics } from '../utils/metrics';
 import { setUserContext, trackEvent, trackError } from '../utils/sentry';
 import { useApi } from './ApiContext';
+import CaptchaModal from '../components/CaptchaModal';
 
 const WalletContext = createContext({});
 
@@ -13,6 +14,8 @@ export const WalletProvider = ({ children }) => {
   const [selectedAccount, setSelectedAccount] = useState(null);
   const [error, setError] = useState(null);
   const [balance, setBalance] = useState(null);
+  const [showCaptcha, setShowCaptcha] = useState(false);
+  const [captchaVerified, setCaptchaVerified] = useState(false);
 
   useEffect(() => {
     const getBalance = async () => {
@@ -41,6 +44,75 @@ export const WalletProvider = ({ children }) => {
   }, [api, selectedAccount, isApiReady]);
 
   const connectWallet = async () => {
+    // Show captcha first if not already verified
+    if (!captchaVerified) {
+      setShowCaptcha(true);
+      return;
+    }
+
+    const startTime = Date.now();
+
+    try {
+      const extensions = await web3Enable('DotNation');
+      if (extensions.length === 0) {
+        const error = new Error('No extension installed, or the user did not accept the authorization');
+        metrics.recordError(error, 'error', { operation: 'connectWallet' });
+        throw error;
+      }
+
+      const accounts = await web3Accounts();
+      setAccounts(accounts);
+
+      if (accounts.length > 0) {
+        setSelectedAccount(accounts[0]);
+        metrics.recordWalletConnection(true);
+        metrics.recordApiCall('connectWallet', Date.now() - startTime, true);
+
+        // Set user context for error tracking
+        setUserContext(accounts[0]);
+
+        // Track successful wallet connection
+        trackEvent('wallet_connected', {
+          accountCount: accounts.length,
+          selectedAccount: accounts[0].address,
+        });
+
+        console.log(`Wallet connected with ${accounts.length} accounts`);
+      }
+    } catch (err) {
+      setError(err.message);
+      console.error('Failed to connect wallet:', err);
+      metrics.recordApiCall('connectWallet', Date.now() - startTime, false);
+      metrics.recordError('WALLET_ERROR', err.message, { operation: 'connectWallet' });
+
+      // Track wallet connection error
+      trackError(err, {
+        tags: {
+          operation: 'connect_wallet',
+          error_type: 'wallet_connection',
+        },
+        extra: {
+          extensionCount: 0,
+        },
+      });
+    }
+  };
+
+  const handleCaptchaVerify = (verified) => {
+    if (verified) {
+      setCaptchaVerified(true);
+      // Track captcha verification
+      trackEvent('captcha_verified', {
+        timestamp: new Date().toISOString(),
+      });
+      // Automatically proceed with wallet connection after captcha is verified
+      setTimeout(() => {
+        connectWalletAfterCaptcha();
+      }, 100);
+    }
+  };
+
+  const connectWalletAfterCaptcha = async () => {
     const startTime = Date.now();
 
     try {
@@ -106,6 +178,7 @@ export const WalletProvider = ({ children }) => {
 
     setSelectedAccount(null);
     setBalance(null);
+    setCaptchaVerified(false); // Reset captcha verification on disconnect
   };
 
   const switchAccount = (account) => {
@@ -133,6 +206,11 @@ export const WalletProvider = ({ children }) => {
       }}
     >
       {children}
+      <CaptchaModal
+        isOpen={showCaptcha}
+        onClose={() => setShowCaptcha(false)}
+        onVerify={handleCaptchaVerify}
+      />
     </WalletContext.Provider>
   );
 };

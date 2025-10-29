@@ -2,11 +2,35 @@
  * @file Renders the About page for DotNation.
  * @exports AboutPage
  */
+import { useEffect } from 'react';
+
 const AboutPage = () => {
+  useEffect(() => {
+    // Intersection Observer for scroll animations
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -100px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+        }
+      });
+    }, observerOptions);
+
+    // Observe all elements with animation classes
+    const animatedElements = document.querySelectorAll('.fade-in-section, .fade-in-up, .fade-in-left, .fade-in-right, .scale-in, .reveal-blur');
+    animatedElements.forEach(el => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="min-h-screen bg-background-dark text-white">
       {/* Hero Section */}
-      <section className="relative py-20 px-4 sm:px-6 lg:px-8">
+      <section className="relative py-20 px-4 sm:px-6 lg:px-8 fade-in-section">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-5xl md:text-6xl font-bold font-display mb-6 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
             About DotNation
@@ -21,7 +45,7 @@ const AboutPage = () => {
       <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
+            <div className="fade-in-left">
               <h2 className="text-3xl font-bold font-display mb-6 text-white">Our Mission</h2>
               <p className="text-lg text-white/80 leading-relaxed mb-6">
                 At DotNation, we believe that great ideas shouldn&apos;t be limited by traditional funding barriers.
@@ -31,10 +55,10 @@ const AboutPage = () => {
               <p className="text-lg text-white/80 leading-relaxed">
                 By leveraging the power of blockchain technology and smart contracts, we ensure that every
                 contribution is tracked, every project is accountable, and every success story is celebrated
-                by the community that made it possible.
+                 by the community that made it possible.
               </p>
             </div>
-            <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-8 border border-white/10">
+            <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-8 border border-white/10 fade-in-right">
               <div className="space-y-6">
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-primary/20 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -78,7 +102,7 @@ const AboutPage = () => {
       {/* How It Works */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white/5">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
+          <div className="text-center mb-12 fade-in-up">
             <h2 className="text-3xl font-bold font-display mb-4 text-white">How It Works</h2>
             <p className="text-lg text-white/80 max-w-2xl mx-auto">
               Our platform combines the best of traditional crowdfunding with the security and transparency of blockchain technology.
@@ -86,7 +110,7 @@ const AboutPage = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
+            <div className="text-center scale-in">
               <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-primary">1</span>
               </div>
@@ -95,7 +119,7 @@ const AboutPage = () => {
                 Set your funding goal, timeline, and project details. Our AI assistant helps craft compelling campaign descriptions.
               </p>
             </div>
-            <div className="text-center">
+            <div className="text-center scale-in" style={{ transitionDelay: '0.2s' }}>
               <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-green-400">2</span>
               </div>
@@ -104,7 +128,7 @@ const AboutPage = () => {
                 Share your vision with the community. Receive contributions directly to your smart contract wallet.
               </p>
             </div>
-            <div className="text-center">
+            <div className="text-center scale-in" style={{ transitionDelay: '0.4s' }}>
               <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-green-400">3</span>
               </div>
@@ -121,7 +145,7 @@ const AboutPage = () => {
       <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
+            <div className="fade-in-left">
               <h2 className="text-3xl font-bold font-display mb-6 text-white">Built on Polkadot</h2>
               <p className="text-lg text-white/80 leading-relaxed mb-6">
                 DotNation leverages the Polkadot ecosystem to provide unparalleled security, scalability, and interoperability.
@@ -146,7 +170,7 @@ const AboutPage = () => {
                 </div>
               </div>
             </div>
-            <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-8 border border-white/10">
+            <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-8 border border-white/10 fade-in-right">
               <h3 className="text-xl font-semibold text-white mb-4">Technical Features</h3>
               <div className="space-y-3">
                 <div className="flex justify-between items-center py-2 border-b border-white/10">
@@ -173,14 +197,14 @@ const AboutPage = () => {
 
       {/* Community Section */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white/5">
-        <div className="max-w-4xl mx-auto text-center">
+        <div className="max-w-4xl mx-auto text-center fade-in-up">
           <h2 className="text-3xl font-bold font-display mb-6 text-white">Join Our Community</h2>
           <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto">
             DotNation is more than a platform—it&apos;s a community of innovators, supporters, and blockchain enthusiasts
             working together to fund the future.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10">
+            <div className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10 scale-in">
               <div className="w-12 h-12 bg-primary/20 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -189,7 +213,7 @@ const AboutPage = () => {
               <h3 className="text-lg font-semibold text-white mb-2">Discord Community</h3>
               <p className="text-white/70 text-sm">Join discussions, get support, and connect with fellow innovators.</p>
             </div>
-            <div className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10">
+            <div className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10 scale-in" style={{ transitionDelay: '0.2s' }}>
               <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <svg className="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -198,7 +222,7 @@ const AboutPage = () => {
               <h3 className="text-lg font-semibold text-white mb-2">GitHub</h3>
               <p className="text-white/70 text-sm">Contribute to the codebase and help shape the future of crowdfunding.</p>
             </div>
-            <div className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10">
+            <div className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10 scale-in" style={{ transitionDelay: '0.4s' }}>
               <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <svg className="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -213,20 +237,20 @@ const AboutPage = () => {
 
       {/* Contact Section */}
       <section className="py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto text-center">
+        <div className="max-w-4xl mx-auto text-center fade-in-up">
           <h2 className="text-3xl font-bold font-display mb-6 text-white">Get In Touch</h2>
           <p className="text-lg text-white/80 mb-8">
             Have questions, feedback, or want to contribute? We&apos;d love to hear from you.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10">
+            <div className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10 scale-in">
               <h3 className="text-lg font-semibold text-white mb-3">Support</h3>
               <p className="text-white/70 mb-4">Need help with your campaign or account?</p>
               <a href="mailto:support@dotnation.io" className="text-primary hover:text-primary/80 transition-colors">
                 support@dotnation.io
               </a>
             </div>
-            <div className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10">
+            <div className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10 scale-in" style={{ transitionDelay: '0.2s' }}>
               <h3 className="text-lg font-semibold text-white mb-3">Partnerships</h3>
               <p className="text-white/70 mb-4">Interested in collaborating with us?</p>
               <a href="mailto:partnerships@dotnation.io" className="text-green-400 hover:text-green-300 transition-colors">

@@ -22,6 +22,7 @@ const BrowseCampaignsPage = React.lazy(() => import('./pages/BrowseCampaignsPage
 const UserProfilePage = React.lazy(() => import('./pages/UserProfilePage.jsx'));
 const AboutPage = React.lazy(() => import('./pages/AboutPage.jsx'));
 const ContactPage = React.lazy(() => import('./pages/ContactPage.jsx'));
+const PrivacyPolicyPage = React.lazy(() => import('./pages/PrivacyPolicyPage.jsx'));
 const LoginPage = React.lazy(() => import('./pages/LoginPage.jsx'));
 const SignupPage = React.lazy(() => import('./pages/SignupPage.jsx'));
 const NotFoundPage = React.lazy(() => import('./pages/NotFoundPage.jsx'));
@@ -120,6 +121,13 @@ const router = createBrowserRouter([
    {
      path: '/contact',
      element: <ContactPage />,
+   },
+   {
+     path: '/privacy',
+     element: <NewDashboardLayout />,
+     children: [
+       { index: true, element: <PrivacyPolicyPage /> },
+     ],
    },
    {
      path: '/login',

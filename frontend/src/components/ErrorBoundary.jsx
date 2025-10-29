@@ -1,14 +1,5 @@
 import { Component, useState } from 'react';
 import PropTypes from 'prop-types';
-import {
-  Box,
-  Button,
-  Container,
-  Heading,
-  Text,
-  VStack,
-  Code,
-} from '@chakra-ui/react';
 import { trackError, addBreadcrumb } from '../utils/sentry';
 
 /**
@@ -123,115 +114,87 @@ const ErrorFallback = ({
   showDetails 
 }) => {
   const [showStack, setShowStack] = useState(false);
-  const bgColor = 'gray.50';
-  const borderColor = 'red.200';
 
   return (
-    <Container maxW="container.md" py={10}>
-      <VStack spacing={6} align="stretch">
-        <Box textAlign="center">
-          <Text fontSize="6xl" mb={4}>⚠️</Text>
-          <Heading size="xl" mb={2}>
+    <div className="w-full max-w-4xl mx-auto px-4 py-10">
+      <div className="space-y-6">
+        <div className="text-center">
+          <p className="text-6xl mb-4">⚠️</p>
+          <h1 className="text-4xl font-bold font-display text-gray-100 mb-2">
             Oops! Something went wrong
-          </Heading>
-          <Text fontSize="lg" color="gray.600">
+          </h1>
+          <p className="text-lg text-gray-400 font-body">
             We&apos;re sorry for the inconvenience. The application encountered an error.
-          </Text>
-        </Box>
+          </p>
+        </div>
 
         {showDetails && error && (
-          <Box
-            p={4}
-            bg={bgColor}
-            borderRadius="md"
-            borderWidth="1px"
-            borderColor={borderColor}
-          >
-            <Heading size="sm" mb={2}>
+          <div className="p-4 bg-gray-900/80 backdrop-blur-xl rounded-xl border-2 border-red-500/30">
+            <h2 className="text-lg font-bold font-display text-gray-100 mb-2">
               Error Details
-            </Heading>
-            <Text fontSize="sm" color="red.600" fontWeight="bold">
+            </h2>
+            <p className="text-sm text-red-400 font-mono font-semibold">
               {error.toString()}
-            </Text>
+            </p>
             
             {errorInfo && (
-              <Box mt={2}>
-                <Button
-                  size="sm"
-                  variant="ghost"
+              <div className="mt-2">
+                <button
+                  className="px-3 py-1 text-sm text-gray-300 hover:text-gray-100 transition-colors font-body"
                   onClick={() => setShowStack(!showStack)}
                 >
                   {showStack ? 'Hide' : 'Show'} Stack Trace
-                </Button>
+                </button>
                 
                 {showStack && (
-                  <Code
-                    display="block"
-                    whiteSpace="pre-wrap"
-                    fontSize="xs"
-                    p={2}
-                    mt={2}
-                    maxH="300px"
-                    overflowY="auto"
-                  >
+                  <pre className="block whitespace-pre-wrap text-xs font-mono p-2 mt-2 max-h-[300px] overflow-y-auto bg-gray-800/50 rounded border border-gray-700">
                     {errorInfo.componentStack}
-                  </Code>
+                  </pre>
                 )}
-              </Box>
+              </div>
             )}
-          </Box>
+          </div>
         )}
 
-        <VStack spacing={3}>
-          <Button
-            colorScheme="blue"
-            size="lg"
+        <div className="space-y-3">
+          <button
+            className="w-full px-6 py-3 bg-gradient-to-r from-primary to-secondary text-white font-body font-bold rounded-xl hover:shadow-glow transition-all duration-200"
             onClick={onReset}
-            width="full"
           >
             Try Again
-          </Button>
+          </button>
           
           {errorCount > 1 && (
-            <Button
-              colorScheme="red"
-              variant="outline"
-              size="lg"
+            <button
+              className="w-full px-6 py-3 bg-red-500/20 hover:bg-red-500/30 text-red-400 border-2 border-red-500/30 font-body font-bold rounded-xl transition-all duration-200"
               onClick={onReload}
-              width="full"
             >
               Reload Page
-            </Button>
+            </button>
           )}
           
-          <Button
-            as="a"
+          <a
             href="/"
-            variant="ghost"
-            size="md"
+            className="block text-center px-6 py-3 text-gray-300 hover:text-gray-100 font-body transition-colors"
           >
             Return to Home
-          </Button>
-        </VStack>
+          </a>
+        </div>
 
-        <Box 
-          p={4} 
-          bg="blue.50" 
-          borderRadius="md"
-        >
-          <Heading size="xs" mb={2}>
+        <div className="p-4 bg-blue-500/10 backdrop-blur-xl rounded-xl border border-blue-500/30">
+          <h3 className="text-sm font-bold font-display text-gray-100 mb-2">
             What can you do?
-          </Heading>
-          <VStack align="start" spacing={1} fontSize="sm">
-            <Text>• Try refreshing the page</Text>
-            <Text>• Check your internet connection</Text>
-            <Text>• Make sure Polkadot.js extension is installed</Text>
-            <Text>• Try connecting to a different network</Text>
-            <Text>• Contact support if the problem persists</Text>
-          </VStack>
-        </Box>
-      </VStack>
-    </Container>
+          </h3>
+          <div className="space-y-1 text-sm text-gray-300 font-body">
+            <p>• Try refreshing the page</p>
+            <p>• Check your internet connection</p>
+            <p>• Make sure Polkadot.js extension is installed</p>
+            <p>• Try connecting to a different network</p>
+            <p>• Contact support if the problem persists</p>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

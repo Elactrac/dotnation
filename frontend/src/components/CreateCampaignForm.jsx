@@ -4,18 +4,21 @@ import toast from 'react-hot-toast';
 import { useWallet } from '../contexts/WalletContext';
 
 // Reusable form components for consistent styling
-const FormField = ({ label, name, error, children }) => (
+const FormField = ({ label, name, error, children, required }) => (
     <div className="space-y-2">
-        <label htmlFor={name} className="block text-sm font-medium text-gray-200">{label}</label>
+        <label htmlFor={name} className="block text-sm font-bold font-display text-gray-100">
+          {label}
+          {required && <span className="text-primary ml-1">*</span>}
+        </label>
         {children}
-        {error && <p className="text-red-400 text-sm mt-1">{error}</p>}
+        {error && <p className="text-red-400 text-sm mt-1 font-body">{error}</p>}
     </div>
 );
-FormField.propTypes = { label: PropTypes.string, name: PropTypes.string, error: PropTypes.string, children: PropTypes.node };
+FormField.propTypes = { label: PropTypes.string, name: PropTypes.string, error: PropTypes.string, children: PropTypes.node, required: PropTypes.bool };
 
-const InputField = (props) => <input {...props} className={`input-primary ${props.className || ''}`} />;
+const InputField = (props) => <input {...props} className={`w-full px-4 py-3 bg-gray-800/50 border-2 border-gray-700 rounded-xl text-gray-100 font-body placeholder-gray-500 transition-all duration-200 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 hover:border-gray-600 ${props.className || ''}`} />;
 InputField.propTypes = { className: PropTypes.string };
-const TextareaField = (props) => <textarea {...props} className={`input-primary ${props.className || ''}`} />;
+const TextareaField = (props) => <textarea {...props} className={`w-full px-4 py-3 bg-gray-800/50 border-2 border-gray-700 rounded-xl text-gray-100 font-body placeholder-gray-500 transition-all duration-200 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 hover:border-gray-600 resize-none ${props.className || ''}`} />;
 TextareaField.propTypes = { className: PropTypes.string };
 
 
@@ -34,7 +37,10 @@ export const CreateCampaignForm = ({ onSuccess }) => {
     imageUrl: '',
     website: '',
     socialLinks: '',
+    tags: [],
   });
+
+  const [tagInput, setTagInput] = useState('');
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -164,86 +170,199 @@ export const CreateCampaignForm = ({ onSuccess }) => {
     if (errors[name]) setErrors(prev => ({ ...prev, [name]: undefined }));
   };
 
+  const handleAddTag = (e) => {
+    if (e.key === 'Enter' || e.type === 'click') {
+      e.preventDefault();
+      const trimmedTag = tagInput.trim().toLowerCase();
+      if (trimmedTag && !formData.tags.includes(trimmedTag) && formData.tags.length < 5) {
+        setFormData(prev => ({ ...prev, tags: [...prev.tags, trimmedTag] }));
+        setTagInput('');
+      } else if (formData.tags.length >= 5) {
+        toast.error('Maximum 5 tags allowed');
+      }
+    }
+  };
+
+  const handleRemoveTag = (tagToRemove) => {
+    setFormData(prev => ({ ...prev, tags: prev.tags.filter(tag => tag !== tagToRemove) }));
+  };
+
   return (
     <form onSubmit={handleSubmit} className="w-full max-w-4xl mx-auto">
-      <div className="space-y-8">
-        <FormField label="Campaign Title" name="title" error={errors.title}>
-          <InputField name="title" value={formData.title} onChange={handleChange} placeholder="My Awesome Project" />
+      <div className="space-y-6">
+        {/* Title */}
+        <FormField label="Campaign Title" name="title" error={errors.title} required>
+          <InputField 
+            name="title" 
+            value={formData.title} 
+            onChange={handleChange} 
+            placeholder="Enter a compelling campaign title" 
+          />
         </FormField>
 
-        <div>
-           <div className="flex justify-between items-center mb-3">
-             <label htmlFor="description" className="block text-sm font-medium text-gray-200">Description</label>
-             <button
-               type="button"
-               onClick={handleGenerateDescription}
-               disabled={isGenerating || !formData.title}
-               className="px-3 py-1.5 text-xs bg-primary/20 hover:bg-primary/30 text-primary rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-             >
-               {isGenerating ? 'Generating...' : '✨ Generate with AI'}
-             </button>
-           </div>
-           <TextareaField
-             name="description"
-             value={formData.description}
-             onChange={handleChange}
-             placeholder="Describe your campaign, or generate one with AI after entering a title."
-             rows={8}
-           />
-           {errors.description && <p className="text-red-400 text-sm mt-2">{errors.description}</p>}
-         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-           <FormField label="Funding Goal (DOT)" name="goal" error={errors.goal}>
-             <InputField name="goal" type="number" value={formData.goal} onChange={handleChange} placeholder="1000" />
-           </FormField>
-           <FormField label="Campaign Deadline" name="deadline" error={errors.deadline}>
-             <InputField name="deadline" type="datetime-local" value={formData.deadline} onChange={handleChange} min={new Date().toISOString().slice(0, 16)} />
-           </FormField>
-         </div>
-
-        <FormField label="Beneficiary Address" name="beneficiary" error={errors.beneficiary}>
-          <InputField name="beneficiary" value={formData.beneficiary} onChange={handleChange} placeholder="Enter the beneficiary's Polkadot address" />
+        {/* Description with AI */}
+        <FormField label="Description" name="description" error={errors.description} required>
+          <div className="relative">
+            <TextareaField
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              placeholder="Tell your story... or use AI to generate a compelling description based on your title"
+              rows={8}
+              className="pr-32"
+            />
+            <button
+              type="button"
+              onClick={handleGenerateDescription}
+              disabled={isGenerating || !formData.title}
+              className="absolute bottom-3 right-3 px-4 py-2 text-sm font-body bg-gradient-to-r from-primary/20 to-secondary/20 hover:from-primary/30 hover:to-secondary/30 text-primary border border-primary/30 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              <span>{isGenerating ? '⏳' : '✨'}</span>
+              {isGenerating ? 'Generating...' : 'Generate AI'}
+            </button>
+          </div>
         </FormField>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Goal and Deadline */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+           <FormField label="Funding Goal (DOT)" name="goal" error={errors.goal} required>
+             <InputField 
+               name="goal" 
+               type="number" 
+               value={formData.goal} 
+               onChange={handleChange} 
+               placeholder="1000" 
+               step="0.01"
+               min="0"
+             />
+           </FormField>
+           <FormField label="Campaign Deadline" name="deadline" error={errors.deadline} required>
+             <InputField 
+               name="deadline" 
+               type="datetime-local" 
+               value={formData.deadline} 
+               onChange={handleChange} 
+               min={new Date().toISOString().slice(0, 16)} 
+             />
+           </FormField>
+         </div>
+
+        {/* Beneficiary */}
+        <FormField label="Beneficiary Address" name="beneficiary" error={errors.beneficiary} required>
+          <InputField 
+            name="beneficiary" 
+            value={formData.beneficiary} 
+            onChange={handleChange} 
+            placeholder="Enter the beneficiary's Polkadot address" 
+          />
+        </FormField>
+
+        {/* Category and Image */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
            <FormField label="Category" name="category">
-             <InputField name="category" value={formData.category} onChange={handleChange} placeholder="e.g., Technology, Healthcare" />
+             <InputField 
+               name="category" 
+               value={formData.category} 
+               onChange={handleChange} 
+               placeholder="e.g., Technology, Healthcare" 
+             />
            </FormField>
            <FormField label="Campaign Image URL" name="imageUrl">
-             <InputField name="imageUrl" value={formData.imageUrl} onChange={handleChange} placeholder="https://example.com/image.png" />
+             <InputField 
+               name="imageUrl" 
+               value={formData.imageUrl} 
+               onChange={handleChange} 
+               placeholder="https://example.com/image.png" 
+             />
            </FormField>
          </div>
 
-        <FormField label="Website (Optional)" name="website">
-          <InputField name="website" value={formData.website} onChange={handleChange} placeholder="https://myproject.com" />
+        {/* Tags */}
+        <FormField label="Tags" name="tags">
+          <div className="space-y-3">
+            <div className="flex gap-2">
+              <InputField
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={handleAddTag}
+                placeholder="Add tags (press Enter)"
+                className="flex-1"
+              />
+              <button
+                type="button"
+                onClick={handleAddTag}
+                className="px-6 py-3 bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 rounded-xl transition-all duration-200 font-body font-medium"
+              >
+                Add
+              </button>
+            </div>
+            {formData.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {formData.tags.map((tag, index) => (
+                  <span
+                    key={index}
+                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-primary/20 to-secondary/20 border border-primary/30 rounded-full text-sm font-body text-gray-100"
+                  >
+                    {tag}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveTag(tag)}
+                      className="hover:text-red-400 transition-colors"
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+            <p className="text-xs text-gray-400 font-body">Add up to 5 tags to help people discover your campaign</p>
+          </div>
         </FormField>
 
+        {/* Website */}
+        <FormField label="Website" name="website">
+          <InputField 
+            name="website" 
+            value={formData.website} 
+            onChange={handleChange} 
+            placeholder="https://myproject.com" 
+          />
+        </FormField>
+
+        {/* Submit Button */}
         <button
           type="submit"
           disabled={isSubmitting || isGeneratingSummary}
-          className="btn-primary w-full h-12 text-base font-bold disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+          className="w-full h-14 text-lg font-bold font-display bg-gradient-to-r from-primary to-secondary hover:shadow-glow text-white rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none hover:scale-[1.02] active:scale-[0.98]"
         >
-          {isGeneratingSummary ? 'Generating Summary...' : isSubmitting ? 'Creating Campaign...' : 'Create Campaign'}
+          {isGeneratingSummary ? '⏳ Generating Summary...' : isSubmitting ? '🚀 Creating Campaign...' : '✨ Create Campaign'}
         </button>
-        {!selectedAccount && <p className="text-center text-orange-500 text-sm">Note: Wallet connection required for actual deployment.</p>}
+        {!selectedAccount && (
+          <div className="text-center">
+            <p className="text-orange-400 text-sm font-body bg-orange-500/10 border border-orange-500/30 rounded-lg px-4 py-3">
+              ⚠️ Wallet connection required for actual deployment
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Contract Summary Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-900 border border-gray-700 rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-            <div className="p-6">
-              <h2 className="text-xl font-bold mb-4 text-gray-100">Campaign Contract Summary</h2>
-              <div className="mb-6">
-                <div className="whitespace-pre-wrap text-sm text-gray-300 bg-gray-800 p-4 rounded-lg border border-gray-600">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-fade-in">
+          <div className="bg-gray-900/95 border-2 border-gray-700 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto backdrop-blur-lg animate-scale-in">
+            <div className="p-8">
+              <h2 className="text-2xl font-bold font-display mb-6 text-gray-100 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                Campaign Contract Summary
+              </h2>
+              <div className="mb-8">
+                <div className="whitespace-pre-wrap text-sm font-body text-gray-300 bg-gray-800/70 p-6 rounded-xl border border-gray-600">
                   {contractSummary}
                 </div>
               </div>
               <div className="flex gap-4 justify-end">
                 <button
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 border border-gray-600 rounded-lg text-gray-300 hover:bg-gray-800 transition-colors disabled:opacity-50"
+                  className="px-6 py-3 border-2 border-gray-600 rounded-xl text-gray-300 font-body font-medium hover:bg-gray-800 hover:border-gray-500 transition-all duration-200 disabled:opacity-50"
                   disabled={isSubmitting}
                 >
                   Cancel
@@ -251,9 +370,9 @@ export const CreateCampaignForm = ({ onSuccess }) => {
                 <button
                   onClick={handleConfirmCreate}
                   disabled={isSubmitting}
-                  className="px-4 py-2 bg-primary text-gray-100 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
+                  className="px-6 py-3 bg-gradient-to-r from-primary to-secondary text-white font-body font-bold rounded-xl hover:shadow-glow transition-all duration-200 disabled:opacity-50 hover:scale-105 active:scale-95"
                 >
-                  {isSubmitting ? 'Creating...' : 'Confirm & Create Campaign'}
+                  {isSubmitting ? '⏳ Creating...' : '✅ Confirm & Create Campaign'}
                 </button>
               </div>
             </div>

@@ -1,55 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
-import {
-  Container,
-  Heading,
-  Text,
-  Card,
-  CardBody,
-  CardHeader,
-  VStack,
-  HStack,
-  Icon,
-  Stat,
-  StatLabel,
-  StatNumber,
-  StatHelpText,
-  SimpleGrid,
-  Flex,
-  Alert,
-  AlertIcon,
-  Button,
-  Avatar,
-  Badge,
-  FormControl,
-  FormLabel,
-  Input,
-  Textarea,
-  Switch,
-  Tabs,
-  TabList,
-  TabPanels,
-  Tab,
-  TabPanel,
-  Progress,
-  Divider
-} from '@chakra-ui/react';
 import toast from 'react-hot-toast';
-import {
-  FiUser,
-  FiTrendingUp,
-  FiHeart,
-  FiSettings,
-  FiSave,
-  FiEdit,
-  FiAward,
-  FiTarget,
-  FiUsers,
-  FiCalendar
-} from 'react-icons/fi';
 import { useWallet } from '../contexts/WalletContext';
 import { useCampaign } from '../contexts/CampaignContext.jsx';
 import { formatDOT, shortenAddress } from '../utils/formatters';
-import PageErrorBoundary from '../components/PageErrorBoundary';
 
 const UserProfilePage = () => {
   const { selectedAccount, balance } = useWallet();
@@ -69,22 +22,29 @@ const UserProfilePage = () => {
 
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState('contributions');
 
-
+  // Mock contributions data
+  const contributions = [
+    { project: 'DeFi For Good', amount: '500 DOT', date: '2024-01-15', status: 'Completed' },
+    { project: 'Ocean Cleanup DAO', amount: '250 DOT', date: '2024-02-20', status: 'Completed' },
+    { project: 'Open Source Education', amount: '100 DOT', date: '2024-03-25', status: 'Completed' },
+    { project: 'Community Garden', amount: '75 DOT', date: '2024-04-10', status: 'Active' },
+  ];
 
   // Calculate user statistics
   const userStats = useMemo(() => {
     if (!selectedAccount || !campaigns) return null;
 
     const myCampaigns = campaigns.filter(c => c.owner === selectedAccount.address);
-    const totalRaised = myCampaigns.reduce((sum, c) => sum + c.raised, 0n);
-    const totalGoal = myCampaigns.reduce((sum, c) => sum + c.goal, 0n);
+    const totalRaised = myCampaigns.reduce((sum, c) => sum + (c.raised || 0n), 0n);
+    const totalGoal = myCampaigns.reduce((sum, c) => sum + (c.goal || 0n), 0n);
     const successfulCampaigns = myCampaigns.filter(c => c.state === 'Successful').length;
     const activeCampaigns = myCampaigns.filter(c => c.state === 'Active').length;
 
-    // Mock donation stats (in real app, this would come from API)
-    const totalDonated = 5000000000000n; // 5 DOT
-    const campaignsSupported = 3;
+    // Mock donation stats
+    const totalDonated = 925n * 1000000000000n; // 925 DOT
+    const campaignsSupported = 4;
 
     return {
       campaignsCreated: myCampaigns.length,
@@ -95,18 +55,17 @@ const UserProfilePage = () => {
       successRate: myCampaigns.length > 0 ? (successfulCampaigns / myCampaigns.length) * 100 : 0,
       totalDonated,
       campaignsSupported,
-      accountAge: 45, // days since first transaction
-      reputation: 4.8 // out of 5
+      accountAge: 45,
+      reputation: 4.8
     };
   }, [selectedAccount, campaigns]);
 
-  // Load profile data (mock implementation)
+  // Load profile data
   useEffect(() => {
     if (selectedAccount) {
-      // In a real app, this would fetch from API
       const mockProfile = {
         displayName: `User ${shortenAddress(selectedAccount.address)}`,
-        bio: 'Passionate about supporting innovative projects and making a positive impact in the community.',
+        bio: 'Passionate about supporting innovative projects and making a positive impact in the Polkadot ecosystem.',
         website: '',
         twitter: '',
         avatar: null,
@@ -121,14 +80,11 @@ const UserProfilePage = () => {
   const handleSaveProfile = async () => {
     setIsSaving(true);
     try {
-      // In a real app, this would save to API
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Mock delay
-
-      toast.success('Profile Updated - Your profile has been saved successfully.');
-
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      toast.success('Profile updated successfully!');
       setIsEditing(false);
     } catch (error) {
-      toast.error('Save Failed - Failed to save profile. Please try again.');
+      toast.error('Failed to save profile. Please try again.');
     } finally {
       setIsSaving(false);
     }
@@ -143,384 +99,405 @@ const UserProfilePage = () => {
 
   if (!selectedAccount) {
     return (
-      <Container maxW="container.lg" py={10}>
-        <Alert status="warning" borderRadius="md">
-          <AlertIcon />
-          <VStack align="start" spacing={2}>
-            <Text fontWeight="bold">Wallet Not Connected</Text>
-            <Text>Please connect your wallet to view your profile.</Text>
-          </VStack>
-        </Alert>
-      </Container>
+      <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="bg-gradient-to-br from-orange-500/20 to-orange-600/20 backdrop-blur-xl rounded-2xl border-2 border-orange-500/30 p-8 text-center">
+          <div className="text-5xl mb-4">⚠️</div>
+          <h2 className="text-2xl font-bold font-display text-gray-100 mb-2">Wallet Not Connected</h2>
+          <p className="text-gray-300 font-body">Please connect your wallet to view your profile.</p>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Container maxW="container.xl" py={10}>
-      <VStack spacing={8} align="stretch">
-        {/* Header */}
-        <VStack align="start" spacing={1}>
-          <Heading size="xl">My Profile</Heading>
-          <Text color="white">
-            Manage your account settings and view your impact
-          </Text>
-        </VStack>
+    <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      {/* Header */}
+      <div className="mb-12 animate-fade-in">
+        <h1 className="text-5xl md:text-6xl font-bold font-display tracking-tight bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent mb-4">
+          My Profile
+        </h1>
+        <p className="text-lg md:text-xl text-gray-300 font-body">
+          Manage your account and view your impact on the ecosystem
+        </p>
+      </div>
 
-        <Tabs variant="enclosed" colorScheme="blue">
-          <TabList>
-            <Tab><Icon as={FiUser} mr={2} />Overview</Tab>
-            <Tab><Icon as={FiSettings} mr={2} />Settings</Tab>
-            <Tab><Icon as={FiAward} mr={2} />Achievements</Tab>
-          </TabList>
+      {/* Profile Card */}
+      <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-xl rounded-3xl border-2 border-gray-700 p-8 mb-8 animate-slide-up">
+        <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
+          {/* Avatar */}
+          <div className="relative">
+            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-5xl font-bold font-display text-white ring-4 ring-primary/30">
+              {profile.displayName.charAt(0).toUpperCase()}
+            </div>
+            <div className="absolute -bottom-2 -right-2 bg-green-500 rounded-full p-2 border-4 border-gray-900">
+              <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+            </div>
+          </div>
 
-          <TabPanels>
-            {/* Overview Tab */}
-            <TabPanel>
-              <VStack spacing={6} align="stretch">
-                {/* Profile Header */}
-                <Card>
-                  <CardBody>
-                    <Flex align="center" gap={6} wrap="wrap">
-                      <Avatar
-                        size="xl"
-                        name={profile.displayName}
-                        src={profile.avatar}
-                        bg="blue.500"
+          {/* Profile Info */}
+          <div className="flex-1 text-center md:text-left">
+            <h2 className="text-3xl font-bold font-display text-gray-100 mb-2">{profile.displayName}</h2>
+            <p className="text-sm font-mono text-gray-400 mb-3 bg-gray-800/50 inline-block px-3 py-1 rounded-lg border border-gray-700">
+              {shortenAddress(selectedAccount.address)}
+            </p>
+            {profile.bio && (
+              <p className="text-gray-300 font-body mb-4">{profile.bio}</p>
+            )}
+            <div className="flex flex-wrap gap-3 justify-center md:justify-start">
+              <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500/20 to-green-600/20 border border-green-500/30 rounded-full text-sm font-body text-green-400">
+                <span>⭐</span>
+                <span>{userStats?.reputation}/5 Reputation</span>
+              </span>
+              <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500/20 to-blue-600/20 border border-blue-500/30 rounded-full text-sm font-body text-blue-400">
+                <span>📅</span>
+                <span>{userStats?.accountAge} days active</span>
+              </span>
+            </div>
+          </div>
+
+          {/* Wallet Balance */}
+          <div className="text-center md:text-right">
+            <p className="text-sm text-gray-400 font-body mb-1">Wallet Balance</p>
+            <p className="text-3xl font-bold font-display text-green-400">
+              {balance ? formatDOT(BigInt(balance) * 1000000000000n) : '0'} DOT
+            </p>
+            <button
+              onClick={() => setIsEditing(!isEditing)}
+              className="mt-4 px-6 py-2 bg-gradient-to-r from-primary/20 to-secondary/20 hover:from-primary/30 hover:to-secondary/30 text-primary border border-primary/30 rounded-xl transition-all duration-200 font-body font-medium"
+            >
+              {isEditing ? '✏️ Editing...' : '✏️ Edit Profile'}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-xl rounded-2xl border-2 border-gray-700 p-6 hover:border-primary/50 transition-all duration-300">
+          <p className="text-sm font-bold font-display text-gray-400 uppercase tracking-wider mb-2">
+            Campaigns Created
+          </p>
+          <p className="text-4xl font-bold font-display text-primary mb-1">
+            {userStats?.campaignsCreated || 0}
+          </p>
+          <p className="text-sm text-gray-400 font-body">
+            {userStats?.activeCampaigns || 0} active
+          </p>
+        </div>
+
+        <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-xl rounded-2xl border-2 border-gray-700 p-6 hover:border-green-500/50 transition-all duration-300">
+          <p className="text-sm font-bold font-display text-gray-400 uppercase tracking-wider mb-2">
+            Total Raised
+          </p>
+          <p className="text-4xl font-bold font-display text-green-400 mb-1">
+            {formatDOT(userStats?.totalRaised || 0n)}
+          </p>
+          <p className="text-sm text-gray-400 font-body">
+            DOT from campaigns
+          </p>
+        </div>
+
+        <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-xl rounded-2xl border-2 border-gray-700 p-6 hover:border-purple-500/50 transition-all duration-300">
+          <p className="text-sm font-bold font-display text-gray-400 uppercase tracking-wider mb-2">
+            Success Rate
+          </p>
+          <p className="text-4xl font-bold font-display text-purple-400 mb-1">
+            {userStats?.successRate.toFixed(1)}%
+          </p>
+          <p className="text-sm text-gray-400 font-body">
+            {userStats?.successfulCampaigns || 0} successful
+          </p>
+        </div>
+
+        <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-xl rounded-2xl border-2 border-gray-700 p-6 hover:border-secondary/50 transition-all duration-300">
+          <p className="text-sm font-bold font-display text-gray-400 uppercase tracking-wider mb-2">
+            Total Donated
+          </p>
+          <p className="text-4xl font-bold font-display text-secondary mb-1">
+            {formatDOT(userStats?.totalDonated || 0n)}
+          </p>
+          <p className="text-sm text-gray-400 font-body">
+            to {userStats?.campaignsSupported || 0} campaigns
+          </p>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-xl rounded-3xl border-2 border-gray-700 overflow-hidden">
+        {/* Tab Headers */}
+        <div className="border-b border-gray-700">
+          <nav className="flex gap-8 px-8">
+            <button
+              onClick={() => setActiveTab('contributions')}
+              className={`py-4 px-1 border-b-2 transition-colors font-body font-medium ${
+                activeTab === 'contributions'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-gray-400 hover:text-gray-200'
+              }`}
+            >
+              📊 Contributions
+            </button>
+            <button
+              onClick={() => setActiveTab('projects')}
+              className={`py-4 px-1 border-b-2 transition-colors font-body font-medium ${
+                activeTab === 'projects'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-gray-400 hover:text-gray-200'
+              }`}
+            >
+              🚀 My Projects
+            </button>
+            <button
+              onClick={() => setActiveTab('settings')}
+              className={`py-4 px-1 border-b-2 transition-colors font-body font-medium ${
+                activeTab === 'settings'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-gray-400 hover:text-gray-200'
+              }`}
+            >
+              ⚙️ Settings
+            </button>
+          </nav>
+        </div>
+
+        {/* Tab Content */}
+        <div className="p-8">
+          {/* Contributions Tab */}
+          {activeTab === 'contributions' && (
+            <div className="space-y-6">
+              <h3 className="text-2xl font-bold font-display text-gray-100 mb-6">Your Contributions</h3>
+              
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-700">
+                      <th className="text-left py-4 px-6 text-xs font-bold font-display text-gray-400 uppercase tracking-wider">
+                        Project
+                      </th>
+                      <th className="text-left py-4 px-6 text-xs font-bold font-display text-gray-400 uppercase tracking-wider">
+                        Amount
+                      </th>
+                      <th className="text-left py-4 px-6 text-xs font-bold font-display text-gray-400 uppercase tracking-wider">
+                        Date
+                      </th>
+                      <th className="text-left py-4 px-6 text-xs font-bold font-display text-gray-400 uppercase tracking-wider">
+                        Status
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-700">
+                    {contributions.map((contrib, index) => (
+                      <tr key={index} className="hover:bg-gray-800/50 transition-colors">
+                        <td className="py-4 px-6 text-sm font-body font-medium text-gray-100">
+                          {contrib.project}
+                        </td>
+                        <td className="py-4 px-6 text-sm font-body text-primary font-bold">
+                          {contrib.amount}
+                        </td>
+                        <td className="py-4 px-6 text-sm font-body text-gray-400">
+                          {new Date(contrib.date).toLocaleDateString('en-US', { 
+                            year: 'numeric', 
+                            month: 'short', 
+                            day: 'numeric' 
+                          })}
+                        </td>
+                        <td className="py-4 px-6">
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-body font-medium ${
+                            contrib.status === 'Completed' 
+                              ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                              : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                          }`}>
+                            {contrib.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Projects Tab */}
+          {activeTab === 'projects' && (
+            <div className="space-y-6">
+              <h3 className="text-2xl font-bold font-display text-gray-100 mb-6">Your Campaigns</h3>
+              
+              {campaigns?.filter(c => c.owner === selectedAccount.address).length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {campaigns.filter(c => c.owner === selectedAccount.address).map((campaign, index) => (
+                    <div key={index} className="bg-gray-800/50 rounded-xl border border-gray-700 p-6 hover:border-primary/50 transition-all">
+                      <h4 className="text-xl font-bold font-display text-gray-100 mb-2">{campaign.title}</h4>
+                      <p className="text-sm text-gray-400 font-body mb-4 line-clamp-2">{campaign.description}</p>
+                      <div className="flex justify-between items-center">
+                        <span className="text-primary font-body font-bold">{formatDOT(campaign.raised || 0n)} DOT</span>
+                        <span className={`px-3 py-1 rounded-full text-xs font-body font-medium ${
+                          campaign.state === 'Active'
+                            ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                            : 'bg-gray-500/20 text-gray-400 border border-gray-500/30'
+                        }`}>
+                          {campaign.state}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <div className="text-6xl mb-4">📦</div>
+                  <p className="text-gray-400 font-body mb-6">You haven't created any campaigns yet</p>
+                  <a
+                    href="/dashboard/create-campaign"
+                    className="inline-block px-8 py-4 bg-gradient-to-r from-primary to-secondary text-white font-body font-bold rounded-xl hover:shadow-glow transition-all duration-200"
+                  >
+                    Create Your First Campaign
+                  </a>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Settings Tab */}
+          {activeTab === 'settings' && (
+            <div className="space-y-8">
+              <div>
+                <h3 className="text-2xl font-bold font-display text-gray-100 mb-6">Profile Settings</h3>
+                
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-bold font-display text-gray-100 mb-2">
+                        Display Name
+                      </label>
+                      <input
+                        type="text"
+                        value={profile.displayName}
+                        onChange={(e) => handleInputChange('displayName', e.target.value)}
+                        disabled={!isEditing}
+                        className="w-full px-4 py-3 bg-gray-800/50 border-2 border-gray-700 rounded-xl text-gray-100 font-body placeholder-gray-500 transition-all duration-200 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:opacity-50"
                       />
-                      <VStack align="start" spacing={2} flex={1} minW="200px">
-                        <Heading size="lg">{profile.displayName}</Heading>
-                        <Text color="gray.600" fontFamily="mono" fontSize="sm">
-                          {shortenAddress(selectedAccount.address)}
-                        </Text>
-                        {profile.bio && (
-                          <Text color="gray.700">{profile.bio}</Text>
-                        )}
-                        <HStack>
-                          <Badge colorScheme="green" variant="subtle">
-                            <Icon as={FiAward} mr={1} />
-                            {userStats?.reputation}/5 Reputation
-                          </Badge>
-                          <Badge colorScheme="blue" variant="subtle">
-                            <Icon as={FiCalendar} mr={1} />
-                            {userStats?.accountAge} days active
-                          </Badge>
-                        </HStack>
-                      </VStack>
-                      <VStack align="end">
-                        <Text fontSize="sm" color="gray.600">Wallet Balance</Text>
-                        <Text fontSize="xl" fontWeight="bold" color="green.500">
-                          {balance ? formatDOT(BigInt(balance) * 1000000000000n) : '0'} DOT
-                        </Text>
-                      </VStack>
-                    </Flex>
-                  </CardBody>
-                </Card>
+                    </div>
 
-                {/* Statistics Grid */}
-                <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6}>
-                  <Card>
-                    <CardBody>
-                      <Stat>
-                        <StatLabel>Campaigns Created</StatLabel>
-                        <StatNumber color="blue.500">{userStats?.campaignsCreated || 0}</StatNumber>
-                        <StatHelpText>
-                          {userStats?.activeCampaigns || 0} active
-                        </StatHelpText>
-                      </Stat>
-                    </CardBody>
-                  </Card>
+                    <div>
+                      <label className="block text-sm font-bold font-display text-gray-100 mb-2">
+                        Website
+                      </label>
+                      <input
+                        type="url"
+                        value={profile.website}
+                        onChange={(e) => handleInputChange('website', e.target.value)}
+                        disabled={!isEditing}
+                        placeholder="https://yourwebsite.com"
+                        className="w-full px-4 py-3 bg-gray-800/50 border-2 border-gray-700 rounded-xl text-gray-100 font-body placeholder-gray-500 transition-all duration-200 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:opacity-50"
+                      />
+                    </div>
+                  </div>
 
-                  <Card>
-                    <CardBody>
-                      <Stat>
-                        <StatLabel>Total Raised</StatLabel>
-                        <StatNumber color="green.500">
-                          {formatDOT(userStats?.totalRaised || 0n)} DOT
-                        </StatNumber>
-                        <StatHelpText>
-                          from {userStats?.campaignsCreated || 0} campaigns
-                        </StatHelpText>
-                      </Stat>
-                    </CardBody>
-                  </Card>
+                  <div>
+                    <label className="block text-sm font-bold font-display text-gray-100 mb-2">
+                      Bio
+                    </label>
+                    <textarea
+                      value={profile.bio}
+                      onChange={(e) => handleInputChange('bio', e.target.value)}
+                      disabled={!isEditing}
+                      placeholder="Tell us about yourself..."
+                      rows={4}
+                      className="w-full px-4 py-3 bg-gray-800/50 border-2 border-gray-700 rounded-xl text-gray-100 font-body placeholder-gray-500 transition-all duration-200 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none disabled:opacity-50"
+                    />
+                  </div>
 
-                  <Card>
-                    <CardBody>
-                      <Stat>
-                        <StatLabel>Success Rate</StatLabel>
-                        <StatNumber color="purple.500">
-                          {userStats?.successRate.toFixed(1)}%
-                        </StatNumber>
-                        <StatHelpText>
-                          {userStats?.successfulCampaigns || 0} successful
-                        </StatHelpText>
-                      </Stat>
-                    </CardBody>
-                  </Card>
+                  {isEditing && (
+                    <button
+                      onClick={handleSaveProfile}
+                      disabled={isSaving}
+                      className="w-full md:w-auto px-8 py-4 bg-gradient-to-r from-primary to-secondary text-white font-body font-bold rounded-xl hover:shadow-glow transition-all duration-200 disabled:opacity-50"
+                    >
+                      {isSaving ? '💾 Saving...' : '💾 Save Changes'}
+                    </button>
+                  )}
+                </div>
+              </div>
 
-                  <Card>
-                    <CardBody>
-                      <Stat>
-                        <StatLabel>Donations Made</StatLabel>
-                        <StatNumber color="orange.500">
-                          {formatDOT(userStats?.totalDonated || 0n)} DOT
-                        </StatNumber>
-                        <StatHelpText>
-                          to {userStats?.campaignsSupported || 0} campaigns
-                        </StatHelpText>
-                      </Stat>
-                    </CardBody>
-                  </Card>
-                </SimpleGrid>
+              <div className="h-px bg-gray-700"></div>
 
-                {/* Recent Activity */}
-                <Card>
-                  <CardHeader>
-                    <Heading size="md">Recent Activity</Heading>
-                  </CardHeader>
-                  <CardBody>
-                    <VStack spacing={4} align="stretch">
-                      <HStack justify="space-between">
-                        <HStack>
-                          <Icon as={FiTrendingUp} color="blue.500" />
-                          <Text>Created campaign &quot;Community Garden Project&quot;</Text>
-                        </HStack>
-                        <Text fontSize="sm" color="gray.600">2 days ago</Text>
-                      </HStack>
+              <div>
+                <h3 className="text-2xl font-bold font-display text-gray-100 mb-6">Notification Preferences</h3>
+                
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-gray-100 font-body font-medium">Email Notifications</p>
+                      <p className="text-sm text-gray-400 font-body">Receive email updates about your campaigns and donations</p>
+                    </div>
+                    <button
+                      onClick={() => handleInputChange('emailNotifications', !profile.emailNotifications)}
+                      disabled={!isEditing}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                        profile.emailNotifications ? 'bg-primary' : 'bg-gray-700'
+                      } disabled:opacity-50`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          profile.emailNotifications ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
+                  </div>
 
-                      <HStack justify="space-between">
-                        <HStack>
-                          <Icon as={FiHeart} color="red.500" />
-                          <Text>Donated to &quot;Education for All&quot;</Text>
-                        </HStack>
-                        <Text fontSize="sm" color="gray.600">1 week ago</Text>
-                      </HStack>
+                  <div className="h-px bg-gray-700"></div>
 
-                      <HStack justify="space-between">
-                        <HStack>
-                          <Icon as={FiTarget} color="green.500" />
-                          <Text>Campaign &quot;Tech Startup&quot; reached goal</Text>
-                        </HStack>
-                        <Text fontSize="sm" color="gray.600">2 weeks ago</Text>
-                      </HStack>
-                    </VStack>
-                  </CardBody>
-                </Card>
-              </VStack>
-            </TabPanel>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-gray-100 font-body font-medium">Campaign Updates</p>
+                      <p className="text-sm text-gray-400 font-body">Get notified when your campaigns receive donations</p>
+                    </div>
+                    <button
+                      onClick={() => handleInputChange('campaignUpdates', !profile.campaignUpdates)}
+                      disabled={!isEditing}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                        profile.campaignUpdates ? 'bg-primary' : 'bg-gray-700'
+                      } disabled:opacity-50`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          profile.campaignUpdates ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
+                  </div>
 
-            {/* Settings Tab */}
-            <TabPanel>
-              <VStack spacing={6} align="stretch">
-                <Card>
-                  <CardHeader>
-                    <Flex justify="space-between" align="center">
-                      <Heading size="md">Profile Information</Heading>
-                      <Button
-                        leftIcon={<Icon as={isEditing ? FiSave : FiEdit} />}
-                        colorScheme={isEditing ? 'green' : 'blue'}
-                        variant={isEditing ? 'solid' : 'outline'}
-                        onClick={isEditing ? handleSaveProfile : () => setIsEditing(true)}
-                        isLoading={isSaving}
-                        loadingText="Saving..."
-                      >
-                        {isEditing ? 'Save Changes' : 'Edit Profile'}
-                      </Button>
-                    </Flex>
-                  </CardHeader>
-                  <CardBody>
-                    <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
-                      <FormControl>
-                        <FormLabel>Display Name</FormLabel>
-                        <Input
-                          value={profile.displayName}
-                          onChange={(e) => handleInputChange('displayName', e.target.value)}
-                          isDisabled={!isEditing}
-                        />
-                      </FormControl>
+                  <div className="h-px bg-gray-700"></div>
 
-                      <FormControl>
-                        <FormLabel>Website</FormLabel>
-                        <Input
-                          value={profile.website}
-                          onChange={(e) => handleInputChange('website', e.target.value)}
-                          placeholder="https://yourwebsite.com"
-                          isDisabled={!isEditing}
-                        />
-                      </FormControl>
-
-                      <FormControl gridColumn={{ md: 'span 2' }}>
-                        <FormLabel>Bio</FormLabel>
-                        <Textarea
-                          value={profile.bio}
-                          onChange={(e) => handleInputChange('bio', e.target.value)}
-                          placeholder="Tell us about yourself..."
-                          isDisabled={!isEditing}
-                          rows={3}
-                        />
-                      </FormControl>
-                    </SimpleGrid>
-                  </CardBody>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <Heading size="md">Notification Preferences</Heading>
-                  </CardHeader>
-                  <CardBody>
-                    <VStack spacing={4} align="stretch">
-                      <Flex justify="space-between" align="center">
-                        <VStack align="start" spacing={1}>
-                          <Text fontWeight="medium">Email Notifications</Text>
-                          <Text fontSize="sm" color="gray.600">
-                            Receive email updates about your campaigns and donations
-                          </Text>
-                        </VStack>
-                        <Switch
-                          isChecked={profile.emailNotifications}
-                          onChange={(e) => handleInputChange('emailNotifications', e.target.checked)}
-                          isDisabled={!isEditing}
-                        />
-                      </Flex>
-
-                      <Divider />
-
-                      <Flex justify="space-between" align="center">
-                        <VStack align="start" spacing={1}>
-                          <Text fontWeight="medium">Campaign Updates</Text>
-                          <Text fontSize="sm" color="gray.600">
-                            Get notified when your campaigns receive donations
-                          </Text>
-                        </VStack>
-                        <Switch
-                          isChecked={profile.campaignUpdates}
-                          onChange={(e) => handleInputChange('campaignUpdates', e.target.checked)}
-                          isDisabled={!isEditing}
-                        />
-                      </Flex>
-
-                      <Divider />
-
-                      <Flex justify="space-between" align="center">
-                        <VStack align="start" spacing={1}>
-                          <Text fontWeight="medium">Donation Alerts</Text>
-                          <Text fontSize="sm" color="gray.600">
-                            Receive notifications for successful donations
-                          </Text>
-                        </VStack>
-                        <Switch
-                          isChecked={profile.donationAlerts}
-                          onChange={(e) => handleInputChange('donationAlerts', e.target.checked)}
-                          isDisabled={!isEditing}
-                        />
-                      </Flex>
-                    </VStack>
-                  </CardBody>
-                </Card>
-              </VStack>
-            </TabPanel>
-
-            {/* Achievements Tab */}
-            <TabPanel>
-              <VStack spacing={6} align="stretch">
-                <Card>
-                  <CardHeader>
-                    <Heading size="md">Achievements & Badges</Heading>
-                  </CardHeader>
-                  <CardBody>
-                    <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
-                      <Card variant="outline" borderColor="green.200">
-                        <CardBody textAlign="center">
-                          <Icon as={FiTarget} boxSize={8} color="green.500" mb={2} />
-                          <Text fontWeight="bold">First Campaign</Text>
-                          <Text fontSize="sm" color="gray.600">Created your first crowdfunding campaign</Text>
-                          <Badge colorScheme="green" mt={2}>Earned</Badge>
-                        </CardBody>
-                      </Card>
-
-                      <Card variant="outline" borderColor="blue.200">
-                        <CardBody textAlign="center">
-                          <Icon as={FiHeart} boxSize={8} color="blue.500" mb={2} />
-                          <Text fontWeight="bold">Generous Donor</Text>
-                          <Text fontSize="sm" color="gray.600">Donated to 5+ campaigns</Text>
-                          <Badge colorScheme="blue" mt={2}>Earned</Badge>
-                        </CardBody>
-                      </Card>
-
-                      <Card variant="outline" borderColor="purple.200">
-                        <CardBody textAlign="center">
-                          <Icon as={FiTrendingUp} boxSize={8} color="purple.500" mb={2} />
-                          <Text fontWeight="bold">Campaign Success</Text>
-                          <Text fontSize="sm" color="gray.600">Successfully funded a campaign</Text>
-                          <Badge colorScheme="gray" mt={2} variant="outline">In Progress</Badge>
-                        </CardBody>
-                      </Card>
-
-                      <Card variant="outline" borderColor="gray.300" opacity={0.6}>
-                        <CardBody textAlign="center">
-                          <Icon as={FiAward} boxSize={8} color="gray.500" mb={2} />
-                          <Text fontWeight="bold">Top Supporter</Text>
-                          <Text fontSize="sm" color="gray.600">Donated $1000+ total</Text>
-                          <Badge colorScheme="gray" mt={2} variant="outline">Locked</Badge>
-                        </CardBody>
-                      </Card>
-
-                      <Card variant="outline" borderColor="gray.300" opacity={0.6}>
-                        <CardBody textAlign="center">
-                          <Icon as={FiUsers} boxSize={8} color="gray.500" mb={2} />
-                          <Text fontWeight="bold">Community Builder</Text>
-                          <Text fontSize="sm" color="gray.600">Created 10+ campaigns</Text>
-                          <Badge colorScheme="gray" mt={2} variant="outline">Locked</Badge>
-                        </CardBody>
-                      </Card>
-                    </SimpleGrid>
-                  </CardBody>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <Heading size="md">Impact Statistics</Heading>
-                  </CardHeader>
-                  <CardBody>
-                    <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6}>
-                      <VStack>
-                        <Progress value={75} colorScheme="green" size="lg" width="100%" />
-                        <Text fontSize="sm" textAlign="center">
-                          75% of your campaigns reach at least 50% funding
-                        </Text>
-                      </VStack>
-
-                      <VStack>
-                        <Progress value={60} colorScheme="blue" size="lg" width="100%" />
-                        <Text fontSize="sm" textAlign="center">
-                          60% campaign success rate (above average)
-                        </Text>
-                      </VStack>
-
-                      <VStack>
-                        <Progress value={85} colorScheme="purple" size="lg" width="100%" />
-                        <Text fontSize="sm" textAlign="center">
-                          85% of donations come within first week
-                        </Text>
-                      </VStack>
-                    </SimpleGrid>
-                  </CardBody>
-                </Card>
-              </VStack>
-            </TabPanel>
-          </TabPanels>
-        </Tabs>
-      </VStack>
-    </Container>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-gray-100 font-body font-medium">Donation Alerts</p>
+                      <p className="text-sm text-gray-400 font-body">Receive notifications for successful donations</p>
+                    </div>
+                    <button
+                      onClick={() => handleInputChange('donationAlerts', !profile.donationAlerts)}
+                      disabled={!isEditing}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                        profile.donationAlerts ? 'bg-primary' : 'bg-gray-700'
+                      } disabled:opacity-50`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          profile.donationAlerts ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };
 
-const UserProfilePageWrapper = () => (
-  <PageErrorBoundary pageName="User Profile">
-    <UserProfilePage />
-  </PageErrorBoundary>
-);
-
-UserProfilePageWrapper.displayName = 'UserProfilePageWrapper';
-
-export default UserProfilePageWrapper;
+export default UserProfilePage;

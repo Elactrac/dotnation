@@ -9,11 +9,11 @@ export default {
     extend: {
       colors: {
         primary: "#3874ff",
-        secondary: "#7c3aed",
+        secondary: "#00EAD3",
         surface: "#ffffff",
         border: "#e5e7eb",
         "background-light": "#f8f6f7",
-        "background-dark": "#100811",
+        "background-dark": "#0A0B1A",
         text: {
           primary: "#1f2937",
           secondary: "#6b7280",
@@ -29,7 +29,7 @@ export default {
         medium: "0 4px 16px rgba(0, 0, 0, 0.15)",
         hard: "0 8px 32px rgba(0, 0, 0, 0.2)",
         glow: "0 0 20px rgba(56, 116, 255, 0.3)",
-        "glow-secondary": "0 0 20px rgba(124, 58, 237, 0.3)",
+        "glow-secondary": "0 0 20px rgba(0, 234, 211, 0.3)",
       },
       fontFamily: {
         display: ["Space Grotesk", "sans-serif"],
