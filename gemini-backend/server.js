@@ -489,12 +489,54 @@ app.post('/api/captcha/session', async (req, res) => {
 });
 
 /**
+ * @route POST /api/captcha/challenge
+ * @group Captcha - Captcha verification system
+ * @param {string} sessionToken.body.required - The session token.
+ * @param {string} captchaType.body.required - The type of captcha (math, image, slider, pattern).
+ * @param {number} difficulty.body - Difficulty level (0-2).
+ * @returns {object} 200 - Challenge data (without answer).
+ * @returns {Error}  400 - Missing required fields.
+ * @returns {Error}  500 - Failed to generate challenge.
+ */
+app.post('/api/captcha/challenge', validateMiddleware('captchaChallenge'), async (req, res) => {
+  try {
+    const { sessionToken, captchaType, difficulty } = req.body;
+    
+    const ip = getClientIP(req);
+    
+    logger.logCaptcha('challenge_generated', {
+      type: captchaType,
+      ip,
+      difficulty: difficulty || 0,
+      token: sessionToken.substring(0, 8) + '...'
+    });
+    
+    const challenge = await captchaVerification.generateChallenge(
+      sessionToken,
+      captchaType,
+      { difficulty: difficulty || 0 }
+    );
+    
+    res.json({
+      success: true,
+      ...challenge
+    });
+    
+  } catch (error) {
+    logger.logError(error, req);
+    res.status(500).json({
+      error: 'Failed to generate challenge',
+      details: sanitizeError(error)
+    });
+  }
+});
+
+/**
  * @route POST /api/captcha/verify
  * @group Captcha - Captcha verification system
  * @param {string} sessionToken.body.required - The session token.
  * @param {string} captchaType.body.required - The type of captcha (math, image, slider, pattern).
  * @param {any} userAnswer.body.required - The user's answer.
- * @param {any} expectedAnswer.body.required - The expected answer.
  * @param {number} timeTaken.body.required - Time taken to solve in seconds.
  * @param {object} options.body - Additional options (e.g., tolerance for slider).
  * @returns {object} 200 - Verification result.
@@ -503,7 +545,7 @@ app.post('/api/captcha/session', async (req, res) => {
  */
 app.post('/api/captcha/verify', validateMiddleware('captchaVerify'), async (req, res) => {
   try {
-    const { sessionToken, captchaType, userAnswer, expectedAnswer, timeTaken, options } = req.body;
+    const { sessionToken, captchaType, userAnswer, timeTaken, options } = req.body;
     
     const ip = getClientIP(req);
     
@@ -518,7 +560,6 @@ app.post('/api/captcha/verify', validateMiddleware('captchaVerify'), async (req,
       sessionToken,
       captchaType,
       userAnswer,
-      expectedAnswer,
       timeTaken,
       ip,
       options || {}

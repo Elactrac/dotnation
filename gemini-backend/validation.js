@@ -103,6 +103,24 @@ const schemas = {
     },
   },
 
+  captchaChallenge: {
+    sessionToken: {
+      required: true,
+      type: 'string',
+      pattern: /^[a-f0-9]{64}$/,
+    },
+    captchaType: {
+      required: true,
+      type: 'string',
+      enum: ['math', 'image', 'slider', 'pattern'],
+    },
+    difficulty: {
+      type: 'number',
+      min: 0,
+      max: 2,
+    },
+  },
+
   captchaVerify: {
     sessionToken: {
       required: true,
@@ -115,9 +133,6 @@ const schemas = {
       enum: ['math', 'image', 'slider', 'pattern'],
     },
     userAnswer: {
-      required: true,
-    },
-    expectedAnswer: {
       required: true,
     },
     timeTaken: {

@@ -165,6 +165,200 @@ async function createSession(ip) {
 }
 
 /**
+ * Generate a math challenge
+ * @param {number} difficulty - Difficulty level (0-2): 0=addition, 1=addition/subtraction, 2=all operations
+ * @returns {object} Challenge object with num1, num2, operation (without answer)
+ */
+function generateMathChallenge(difficulty = 0) {
+  const operations = difficulty === 0 ? ['+'] : difficulty === 1 ? ['+', '-'] : ['+', '-', '*'];
+  const operation = operations[Math.floor(Math.random() * operations.length)];
+  
+  let num1, num2;
+  
+  if (operation === '+') {
+    num1 = Math.floor(Math.random() * 10) + 1;
+    num2 = Math.floor(Math.random() * 10) + 1;
+  } else if (operation === '-') {
+    num1 = Math.floor(Math.random() * 15) + 6;
+    num2 = Math.floor(Math.random() * (num1 - 1)) + 1;
+  } else {
+    num1 = Math.floor(Math.random() * 10) + 1;
+    num2 = Math.floor(Math.random() * 10) + 1;
+  }
+  
+  // Calculate answer but don't return it
+  let answer;
+  if (operation === '+') {
+    answer = num1 + num2;
+  } else if (operation === '-') {
+    answer = num1 - num2;
+  } else {
+    answer = num1 * num2;
+  }
+  
+  return { 
+    challenge: { num1, num2, operation }, 
+    answer 
+  };
+}
+
+/**
+ * Generate an image challenge
+ * @returns {object} Challenge object with category and image grid (without correct indices)
+ */
+function generateImageChallenge() {
+  const categories = [
+    { name: 'traffic_lights', label: 'traffic lights' },
+    { name: 'crosswalks', label: 'crosswalks' },
+    { name: 'bicycles', label: 'bicycles' },
+    { name: 'cars', label: 'cars' },
+    { name: 'buses', label: 'buses' }
+  ];
+  
+  const category = categories[Math.floor(Math.random() * categories.length)];
+  
+  // Generate 9 images (3x3 grid)
+  // In production, these would be actual image URLs from a database
+  // For now, we'll use placeholders and randomly select correct indices
+  const totalImages = 9;
+  const correctCount = Math.floor(Math.random() * 2) + 2; // 2-3 correct images
+  const correctIndices = [];
+  
+  while (correctIndices.length < correctCount) {
+    const idx = Math.floor(Math.random() * totalImages);
+    if (!correctIndices.includes(idx)) {
+      correctIndices.push(idx);
+    }
+  }
+  
+  // Generate placeholder image URLs
+  const images = Array.from({ length: totalImages }, (_, i) => ({
+    id: i,
+    url: `https://via.placeholder.com/150?text=Image${i + 1}`,
+    isCorrect: correctIndices.includes(i)
+  }));
+  
+  return {
+    challenge: {
+      category: category.label,
+      images: images.map(img => ({ id: img.id, url: img.url })) // Don't expose isCorrect
+    },
+    answer: correctIndices.sort((a, b) => a - b)
+  };
+}
+
+/**
+ * Generate a slider challenge
+ * @returns {object} Challenge object with slider configuration (without target position)
+ */
+function generateSliderChallenge() {
+  // Generate a random target position between 20 and 80
+  const targetPosition = Math.floor(Math.random() * 60) + 20;
+  
+  return {
+    challenge: {
+      instruction: 'Slide to the correct position',
+      minValue: 0,
+      maxValue: 100
+    },
+    answer: targetPosition
+  };
+}
+
+/**
+ * Generate a pattern challenge
+ * @returns {object} Challenge object with grid size and pattern length (without pattern)
+ */
+function generatePatternChallenge() {
+  const gridSize = 9; // 3x3 grid
+  const patternLength = Math.floor(Math.random() * 2) + 4; // 4-5 cells
+  const pattern = [];
+  
+  while (pattern.length < patternLength) {
+    const idx = Math.floor(Math.random() * gridSize);
+    if (!pattern.includes(idx)) {
+      pattern.push(idx);
+    }
+  }
+  
+  return {
+    challenge: {
+      gridSize,
+      patternLength,
+      instruction: 'Remember and repeat the pattern'
+    },
+    answer: pattern
+  };
+}
+
+/**
+ * Create a challenge and store its answer in the session
+ * @param {string} sessionToken - The session token
+ * @param {string} captchaType - Type of captcha: 'math', 'image', 'slider', 'pattern'
+ * @param {object} options - Additional options (e.g., difficulty level)
+ * @returns {object} Challenge data (without answer)
+ */
+async function generateChallenge(sessionToken, captchaType, options = {}) {
+  // Get session
+  let session = null;
+  
+  if (isRedisAvailable()) {
+    try {
+      session = await sessionOps.getSession(sessionToken);
+    } catch (error) {
+      logger.error('Failed to get session from Redis', error);
+    }
+  }
+  
+  if (!session) {
+    session = sessionStore.get(sessionToken);
+  }
+  
+  if (!session) {
+    throw new Error('Invalid or expired session');
+  }
+  
+  // Generate challenge based on type
+  let challengeData;
+  
+  switch (captchaType) {
+    case 'math':
+      challengeData = generateMathChallenge(options.difficulty || 0);
+      break;
+    case 'image':
+      challengeData = generateImageChallenge();
+      break;
+    case 'slider':
+      challengeData = generateSliderChallenge();
+      break;
+    case 'pattern':
+      challengeData = generatePatternChallenge();
+      break;
+    default:
+      throw new Error('Invalid captcha type');
+  }
+  
+  // Store the answer in the session
+  session.captchaType = captchaType;
+  session.answer = challengeData.answer;
+  session.challengeGeneratedAt = Date.now();
+  
+  // Update session
+  await updateSession(sessionToken, session);
+  
+  logger.debug('Challenge generated', { 
+    type: captchaType, 
+    token: sessionToken.substring(0, 8) 
+  });
+  
+  // Return only the challenge (not the answer)
+  return {
+    type: captchaType,
+    challenge: challengeData.challenge
+  };
+}
+
+/**
  * Verify math captcha answer
  */
 function verifyMathCaptcha(sessionToken, userAnswer, expectedAnswer, timeTaken, ip) {
@@ -237,9 +431,10 @@ function verifyPatternCaptcha(sessionToken, userPattern, correctPattern, timeTak
 
 /**
  * Unified captcha verification with session management
+ * SECURE: Gets expected answer from session, not from client
  * @param {string} captchaType - Type of captcha: 'math', 'image', 'slider', 'pattern'
  */
-async function verifyCaptcha(sessionToken, captchaType, userAnswer, expectedAnswer, timeTaken, ip, options = {}) {
+async function verifyCaptcha(sessionToken, captchaType, userAnswer, timeTaken, ip, options = {}) {
   // Check rate limit
   const rateLimit = await checkRateLimit(ip);
   if (!rateLimit.allowed) {
@@ -273,6 +468,25 @@ async function verifyCaptcha(sessionToken, captchaType, userAnswer, expectedAnsw
       error: 'Invalid or expired session'
     };
   }
+  
+  // Validate that a challenge was generated for this session
+  if (!session.answer || !session.captchaType) {
+    return {
+      verified: false,
+      error: 'No challenge found for this session'
+    };
+  }
+  
+  // Validate captcha type matches
+  if (session.captchaType !== captchaType) {
+    return {
+      verified: false,
+      error: 'Captcha type mismatch'
+    };
+  }
+  
+  // Get expected answer from session (SECURE - not from client)
+  const expectedAnswer = session.answer;
   
   // Check session age
   const sessionAge = Date.now() - session.createdAt;
@@ -463,6 +677,7 @@ function getStats() {
 
 module.exports = {
   createSession,
+  generateChallenge,
   verifyCaptcha,
   verifyMathCaptcha,
   verifyImageCaptcha,

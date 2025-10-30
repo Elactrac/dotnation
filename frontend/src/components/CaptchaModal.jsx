@@ -3,15 +3,16 @@ import PropTypes from 'prop-types';
 import ImageCaptcha from './captcha/ImageCaptcha';
 import SliderCaptcha from './captcha/SliderCaptcha';
 import PatternCaptcha from './captcha/PatternCaptcha';
-import { createCaptchaSession, verifyCaptcha } from '../utils/captchaApi';
+import { createCaptchaSession, generateCaptchaChallenge, verifyCaptcha } from '../utils/captchaApi';
 
 /**
  * Advanced Multi-Type Captcha Modal with Progressive Difficulty
  * Supports 4 types: Math, Image Selection, Slider Puzzle, Pattern Memory
+ * SECURE: Challenges generated server-side, answers never exposed to client
  */
 const CaptchaModal = ({ isOpen, onClose, onVerify }) => {
   const [captchaType, setCaptchaType] = useState('math'); // math, image, slider, pattern
-  const [captchaQuestion, setCaptchaQuestion] = useState({ num1: 0, num2: 0, answer: 0 });
+  const [captchaQuestion, setCaptchaQuestion] = useState({ num1: 0, num2: 0, operation: '+' });
   const [userAnswer, setUserAnswer] = useState('');
   const [error, setError] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
@@ -27,32 +28,35 @@ const CaptchaModal = ({ isOpen, onClose, onVerify }) => {
     pattern: { label: 'Pattern Memory', icon: '🧠', difficulty: 4 }
   };
 
-  // Generate a math captcha
-  const generateMathCaptcha = useCallback(() => {
-    const operations = ['+', '-', '*'];
-    const operation = failureCount < 2 ? '+' : operations[Math.floor(Math.random() * operations.length)];
+  // Generate a math captcha from backend
+  const generateMathCaptcha = useCallback(async (token = null) => {
+    const sessionTokenToUse = token || sessionToken;
     
-    let num1, num2, answer;
-    
-    if (operation === '+') {
-      num1 = Math.floor(Math.random() * 10) + 1;
-      num2 = Math.floor(Math.random() * 10) + 1;
-      answer = num1 + num2;
-    } else if (operation === '-') {
-      num1 = Math.floor(Math.random() * 15) + 6;
-      num2 = Math.floor(Math.random() * (num1 - 1)) + 1;
-      answer = num1 - num2;
-    } else {
-      num1 = Math.floor(Math.random() * 10) + 1;
-      num2 = Math.floor(Math.random() * 10) + 1;
-      answer = num1 * num2;
+    if (!sessionTokenToUse) {
+      console.warn('[CaptchaModal] No session token available');
+      return;
     }
     
-    setCaptchaQuestion({ num1, num2, operation, answer });
-    setUserAnswer('');
-    setError('');
-    setStartTime(Date.now()); // Track start time for verification
-  }, [failureCount]);
+    try {
+      const difficulty = failureCount < 2 ? 0 : failureCount < 4 ? 1 : 2;
+      const challengeData = await generateCaptchaChallenge({
+        sessionToken: sessionTokenToUse,
+        captchaType: 'math',
+        difficulty
+      });
+      
+      // Set challenge (without answer - backend keeps it secret)
+      setCaptchaQuestion(challengeData.challenge);
+      setUserAnswer('');
+      setError('');
+      setStartTime(Date.now());
+      
+      console.log('[CaptchaModal] Math challenge generated:', challengeData.challenge);
+    } catch (error) {
+      console.error('[CaptchaModal] Failed to generate math challenge:', error);
+      setError('Failed to load captcha. Please try again.');
+    }
+  }, [sessionToken, failureCount]);
 
   // Initialize captcha session
   const initializeSession = useCallback(async () => {
@@ -60,9 +64,11 @@ const CaptchaModal = ({ isOpen, onClose, onVerify }) => {
       const session = await createCaptchaSession();
       setSessionToken(session.sessionToken);
       console.log('[CaptchaModal] Session created:', session.sessionToken.substring(0, 8) + '...');
+      return session.sessionToken;
     } catch (error) {
       console.error('[CaptchaModal] Failed to create session:', error);
       setError('Failed to initialize captcha. Please try again.');
+      return null;
     }
   }, []);
 
@@ -72,10 +78,17 @@ const CaptchaModal = ({ isOpen, onClose, onVerify }) => {
       setCaptchaType('math');
       setFailureCount(0);
       setSessionToken(null);
-      initializeSession();
-      generateMathCaptcha();
+      
+      // Initialize session then generate challenge
+      (async () => {
+        const token = await initializeSession();
+        if (token) {
+          // Pass token directly to avoid state timing issues
+          await generateMathCaptcha(token);
+        }
+      })();
     }
-  }, [isOpen, generateMathCaptcha, initializeSession]);
+  }, [isOpen, initializeSession, generateMathCaptcha]);
 
   // Progressive difficulty: escalate on failures
   useEffect(() => {
@@ -107,12 +120,11 @@ const CaptchaModal = ({ isOpen, onClose, onVerify }) => {
       // Calculate time taken
       const timeTaken = (Date.now() - startTime) / 1000; // Convert to seconds
 
-      // Verify with backend
+      // Verify with backend - SECURE: only send user's answer
       const result = await verifyCaptcha({
         sessionToken,
         captchaType: 'math',
         userAnswer: parseInt(userAnswer),
-        expectedAnswer: captchaQuestion.answer,
         timeTaken
       });
 
@@ -127,8 +139,10 @@ const CaptchaModal = ({ isOpen, onClose, onVerify }) => {
         setFailureCount(prev => prev + 1);
         
         // Create new session for next attempt
-        await initializeSession();
-        generateMathCaptcha();
+        const token = await initializeSession();
+        if (token) {
+          await generateMathCaptcha(token);
+        }
         setIsVerifying(false);
       }
     } catch (error) {
@@ -137,7 +151,10 @@ const CaptchaModal = ({ isOpen, onClose, onVerify }) => {
       setIsVerifying(false);
       
       // Create new session on error
-      await initializeSession();
+      const token = await initializeSession();
+      if (token) {
+        await generateMathCaptcha(token);
+      }
     }
   };
 

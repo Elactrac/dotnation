@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { verifyCaptcha } from '../../utils/captchaApi';
+import { generateCaptchaChallenge, verifyCaptcha } from '../../utils/captchaApi';
 
 /**
  * Image Selection Captcha Component
  * User must select all images matching a specific category
+ * SECURE: Challenge generated server-side, correct indices never exposed
  */
 const ImageCaptcha = ({ sessionToken, onVerify, onCancel }) => {
   const [selectedImages, setSelectedImages] = useState([]);
@@ -13,43 +14,30 @@ const ImageCaptcha = ({ sessionToken, onVerify, onCancel }) => {
   const [challenge, setChallenge] = useState(null);
   const [startTime, setStartTime] = useState(null);
 
-  // Available categories for image challenges
-  const categories = {
-    traffic_lights: { 
-      label: 'traffic lights',
-      emoji: '🚦',
-      correctIndices: [0, 3, 6]
-    },
-    crosswalks: { 
-      label: 'crosswalks',
-      emoji: '🚶',
-      correctIndices: [1, 4, 7]
-    },
-    buses: { 
-      label: 'buses',
-      emoji: '🚌',
-      correctIndices: [2, 5, 8]
-    },
-    bicycles: { 
-      label: 'bicycles',
-      emoji: '🚲',
-      correctIndices: [0, 2, 5, 7]
+  // Generate a new challenge from backend
+  const generateChallenge = useCallback(async () => {
+    if (!sessionToken) {
+      console.warn('[ImageCaptcha] No session token available');
+      return;
     }
-  };
 
-  // Generate a new challenge
-  const generateChallenge = useCallback(() => {
-    const categoryKeys = Object.keys(categories);
-    const randomCategory = categoryKeys[Math.floor(Math.random() * categoryKeys.length)];
-    setChallenge({
-      category: randomCategory,
-      data: categories[randomCategory]
-    });
-    setSelectedImages([]);
-    setError('');
-    setStartTime(Date.now()); // Track start time
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    try {
+      const challengeData = await generateCaptchaChallenge({
+        sessionToken,
+        captchaType: 'image'
+      });
+      
+      setChallenge(challengeData.challenge);
+      setSelectedImages([]);
+      setError('');
+      setStartTime(Date.now());
+      
+      console.log('[ImageCaptcha] Challenge generated:', challengeData.challenge.category);
+    } catch (error) {
+      console.error('[ImageCaptcha] Failed to generate challenge:', error);
+      setError('Failed to load captcha. Please try again.');
+    }
+  }, [sessionToken]);
 
   useEffect(() => {
     generateChallenge();
@@ -87,12 +75,11 @@ const ImageCaptcha = ({ sessionToken, onVerify, onCancel }) => {
       // Calculate time taken
       const timeTaken = (Date.now() - startTime) / 1000;
 
-      // Verify with backend
+      // Verify with backend - SECURE: only send user's selection
       const result = await verifyCaptcha({
         sessionToken,
         captchaType: 'image',
         userAnswer: selectedImages,
-        expectedAnswer: challenge.data.correctIndices,
         timeTaken
       });
 
@@ -118,14 +105,10 @@ const ImageCaptcha = ({ sessionToken, onVerify, onCancel }) => {
   return (
     <div className="space-y-4">
       {/* Instructions */}
-      <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4">
-        <div className="flex items-center gap-3">
-          <div className="text-4xl">{challenge.data.emoji}</div>
-          <div>
-            <p className="text-white font-semibold">Select all images with</p>
-            <p className="text-2xl font-bold text-primary">{challenge.data.label}</p>
-          </div>
-        </div>
+      <div className="bg-gray-800/50 rounded-lg p-4 border border-white/10">
+        <p className="text-white text-center font-medium">
+          Select all images with <span className="text-primary font-bold">{challenge.category}</span>
+        </p>
       </div>
 
       {/* Image Grid */}

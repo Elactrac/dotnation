@@ -41,12 +41,49 @@ export async function createCaptchaSession() {
 }
 
 /**
+ * Generate a captcha challenge
+ * @param {Object} params - Challenge parameters
+ * @param {string} params.sessionToken - The session token
+ * @param {string} params.captchaType - Type of captcha (math, image, slider, pattern)
+ * @param {number} params.difficulty - Difficulty level (0-2, optional)
+ * @returns {Promise<{success: boolean, type: string, challenge: Object}>}
+ */
+export async function generateCaptchaChallenge({
+  sessionToken,
+  captchaType,
+  difficulty = 0
+}) {
+  try {
+    const response = await fetch(`${BACKEND_URL}/api/captcha/challenge`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({
+        sessionToken,
+        captchaType,
+        difficulty
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `Failed to generate challenge: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('[Captcha API] Error generating challenge:', error);
+    throw error;
+  }
+}
+
+/**
  * Verify captcha answer
+ * SECURE: Only sends user's answer, NOT the expected answer
  * @param {Object} params - Verification parameters
  * @param {string} params.sessionToken - The session token
  * @param {string} params.captchaType - Type of captcha (math, image, slider, pattern)
  * @param {any} params.userAnswer - User's answer
- * @param {any} params.expectedAnswer - Expected answer
  * @param {number} params.timeTaken - Time taken in seconds
  * @param {Object} params.options - Additional options (e.g., tolerance for slider)
  * @returns {Promise<{verified: boolean, token?: string, error?: string}>}
@@ -55,7 +92,6 @@ export async function verifyCaptcha({
   sessionToken,
   captchaType,
   userAnswer,
-  expectedAnswer,
   timeTaken,
   options = {}
 }) {
@@ -67,7 +103,6 @@ export async function verifyCaptcha({
         sessionToken,
         captchaType,
         userAnswer,
-        expectedAnswer,
         timeTaken,
         options
       }),
