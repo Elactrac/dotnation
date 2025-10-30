@@ -1,0 +1,41 @@
+services:
+  # Backend Service
+  - type: web
+    name: dotnation-backend
+    runtime: node
+    rootDir: gemini-backend
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: ALLOWED_ORIGINS
+        sync: false
+    healthCheckPath: /health
+    autoDeploy: true
+
+  # Frontend Service
+  - type: web
+    name: dotnation-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_BACKEND_URL
+        sync: false
+      - key: VITE_NETWORK_NAME
+        value: Shibuya Testnet
+      - key: VITE_RPC_ENDPOINT
+        value: wss://shibuya.public.blastapi.io
+      - key: VITE_CONTRACT_ADDRESS
+        sync: false
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    autoDeploy: true
