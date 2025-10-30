@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 import toast from 'react-hot-toast';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useWallet } from '../contexts/WalletContext';
+import { generateDescription, generateTitles, detectFraud } from '../utils/aiApi';
 
 // Reusable form components for consistent styling
 const FormField = ({ label, name, error, children, required }) => (
@@ -60,6 +62,10 @@ export const CreateCampaignForm = ({ onSuccess }) => {
   const [showModal, setShowModal] = useState(false);
   const [contractSummary, setContractSummary] = useState('');
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
+  const [showTitleSuggestions, setShowTitleSuggestions] = useState(false);
+  const [titleSuggestions, setTitleSuggestions] = useState([]);
+  const [fraudCheckResult, setFraudCheckResult] = useState(null);
+  const [isCheckingFraud, setIsCheckingFraud] = useState(false);
 
   const validateForm = () => {
     const newErrors = {};
@@ -83,13 +89,7 @@ export const CreateCampaignForm = ({ onSuccess }) => {
     }
     setIsGenerating(true);
     try {
-      const response = await fetch('http://localhost:3001/api/generate-description', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: formData.title }),
-      });
-      if (!response.ok) throw new Error('Failed to get a response from the AI service.');
-      const data = await response.json();
+      const data = await generateDescription(formData.title);
       console.log('AI response:', data);
       setFormData(prev => {
         const newFormData = { ...prev, description: data.description };
@@ -102,6 +102,55 @@ export const CreateCampaignForm = ({ onSuccess }) => {
       toast.error(`AI Generation Failed: ${error.message}`);
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const handleGenerateTitles = async () => {
+    setIsGenerating(true);
+    try {
+      const keywords = formData.title || formData.category || 'help community';
+      const data = await generateTitles(keywords, formData.category);
+      setTitleSuggestions(data.titles);
+      setShowTitleSuggestions(true);
+      toast.success('Title suggestions generated!');
+    } catch (error) {
+      console.error("Title generation error:", error);
+      toast.error(`Title Generation Failed: ${error.message}`);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const selectTitle = (title) => {
+    setFormData(prev => ({ ...prev, title }));
+    setShowTitleSuggestions(false);
+    setErrors(prev => ({ ...prev, title: undefined }));
+  };
+
+  const handleFraudCheck = async () => {
+    if (!formData.title || !formData.description) {
+      toast.error('Please enter a title and description first.');
+      return;
+    }
+    setIsCheckingFraud(true);
+    try {
+      const result = await detectFraud({
+        title: formData.title,
+        description: formData.description,
+        goal: formData.goal,
+        beneficiary: formData.beneficiary,
+        category: formData.category,
+      });
+      setFraudCheckResult(result);
+      const statusType = result.riskLevel === 'low' ? 'success' : result.riskLevel === 'high' ? 'error' : 'warning';
+      toast[statusType === 'error' ? 'error' : statusType === 'warning' ? 'error' : 'success'](
+        `Risk Level: ${result.riskLevel.toUpperCase()} (Score: ${result.riskScore}/100)`
+      );
+    } catch (error) {
+      console.error("Fraud check error:", error);
+      toast.error(`Fraud Check Failed: ${error.message}`);
+    } finally {
+      setIsCheckingFraud(false);
     }
   };
 
@@ -202,14 +251,122 @@ export const CreateCampaignForm = ({ onSuccess }) => {
   return (
     <form onSubmit={handleSubmit} className="w-full max-w-4xl mx-auto">
       <div className="space-y-6">
+        {/* Fraud Check Result Banner */}
+        <AnimatePresence>
+          {fraudCheckResult && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className={`p-4 rounded-xl border ${
+                fraudCheckResult.riskLevel === 'low'
+                  ? 'bg-green-500/10 border-green-500/30 text-green-400'
+                  : fraudCheckResult.riskLevel === 'medium'
+                  ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400'
+                  : 'bg-red-500/10 border-red-500/30 text-red-400'
+              }`}
+            >
+              <div className="flex items-start justify-between mb-2">
+                <div className="font-bold text-lg">
+                  AI Fraud Analysis: {fraudCheckResult.riskLevel.toUpperCase()} Risk ({fraudCheckResult.riskScore}/100)
+                </div>
+                <button
+                  onClick={() => setFraudCheckResult(null)}
+                  className="text-gray-400 hover:text-white transition-colors"
+                  type="button"
+                >
+                  ×
+                </button>
+              </div>
+              {fraudCheckResult.flags.length > 0 && (
+                <div className="mb-2">
+                  <div className="font-semibold text-sm mb-1">Red Flags:</div>
+                  <ul className="text-xs space-y-1 ml-4">
+                    {fraudCheckResult.flags.map((flag, idx) => (
+                      <li key={idx} className="list-disc">{flag}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {fraudCheckResult.recommendations.length > 0 && (
+                <div>
+                  <div className="font-semibold text-sm mb-1">Recommendations:</div>
+                  <ul className="text-xs space-y-1 ml-4">
+                    {fraudCheckResult.recommendations.map((rec, idx) => (
+                      <li key={idx} className="list-disc">{rec}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Title */}
         <FormField label="Campaign Title" name="title" error={errors.title} required>
-          <InputField 
-            name="title" 
-            value={formData.title} 
-            onChange={handleChange} 
-            placeholder="Enter a compelling campaign title" 
-          />
+          <div className="space-y-2">
+            <div className="flex gap-2">
+              <InputField 
+                name="title" 
+                value={formData.title} 
+                onChange={handleChange} 
+                placeholder="Enter a compelling campaign title" 
+                className="flex-1"
+              />
+              <button
+                type="button"
+                onClick={handleGenerateTitles}
+                disabled={isGenerating}
+                className="px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 whitespace-nowrap"
+              >
+                {isGenerating ? (
+                  <>
+                    <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Generating...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>✨</span>
+                    <span>AI Titles</span>
+                  </>
+                )}
+              </button>
+            </div>
+            
+            {/* Title Suggestions */}
+            <AnimatePresence>
+              {showTitleSuggestions && titleSuggestions.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="space-y-2 overflow-hidden"
+                >
+                  <div className="text-sm text-gray-400 font-semibold">AI Suggestions (click to use):</div>
+                  {titleSuggestions.map((title, idx) => (
+                    <motion.button
+                      key={idx}
+                      type="button"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: idx * 0.05 }}
+                      onClick={() => selectTitle(title)}
+                      className="w-full text-left px-4 py-3 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 rounded-lg text-sm text-gray-300 transition-colors"
+                    >
+                      {title}
+                    </motion.button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => setShowTitleSuggestions(false)}
+                    className="text-xs text-gray-500 hover:text-gray-400 transition-colors"
+                  >
+                    Close suggestions
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </FormField>
 
         {/* Description with AI */}
@@ -340,6 +497,33 @@ export const CreateCampaignForm = ({ onSuccess }) => {
             placeholder="https://myproject.com" 
           />
         </FormField>
+
+        {/* AI Fraud Check Button */}
+        <div className="pt-4">
+          <button
+            type="button"
+            onClick={handleFraudCheck}
+            disabled={isCheckingFraud || !formData.title || !formData.description}
+            className="w-full px-6 py-4 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-bold rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            {isCheckingFraud ? (
+              <>
+                <span className="inline-block w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <span>Analyzing Campaign...</span>
+              </>
+            ) : (
+              <>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+                <span>Run AI Fraud Detection</span>
+              </>
+            )}
+          </button>
+          <p className="text-xs text-gray-400 text-center mt-2">
+            AI will analyze your campaign for potential fraud indicators before submission
+          </p>
+        </div>
 
         {/* Submit Button */}
         <button

@@ -156,6 +156,96 @@ app.post('/api/contract-summary', async (req, res) => {
 });
 
 /**
+ * @route POST /api/fraud-detection
+ * @group AI - AI-powered fraud detection
+ * @param {object} campaign.body.required - The campaign data to analyze.
+ * @returns {object} 200 - An object containing the fraud analysis results.
+ * @returns {Error}  400 - Campaign data is required.
+ * @returns {Error}  500 - Failed to analyze campaign for fraud.
+ */
+app.post('/api/fraud-detection', async (req, res) => {
+  try {
+    const { campaign } = req.body;
+
+    if (!campaign || !campaign.title || !campaign.description) {
+      return res.status(400).json({ error: 'Campaign title and description are required.' });
+    }
+
+    console.log('[Fraud Detection] Analyzing campaign:', campaign.title);
+
+    const fraudDetection = require('./fraudDetection');
+    
+    const result = await fraudDetection.detectFraud(campaign, {
+      apiKey: process.env.GEMINI_API_KEY,
+      skipAI: !process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your_gemini_api_key_here'
+    });
+
+    res.json(result);
+
+  } catch (error) {
+    console.error('[Fraud Detection] Error:', error);
+    res.status(500).json({ 
+      error: 'Failed to analyze campaign for fraud.', 
+      details: error.message 
+    });
+  }
+});
+
+/**
+ * @route POST /api/generate-title
+ * @group AI - AI-powered content generation
+ * @param {string} keywords.body - Keywords for the campaign.
+ * @param {string} category.body - Campaign category.
+ * @returns {object} 200 - An object containing generated title suggestions.
+ * @returns {Error}  500 - Failed to generate titles.
+ */
+app.post('/api/generate-title', async (req, res) => {
+  try {
+    const { keywords, category } = req.body;
+
+    console.log('[AI] Generating titles for:', { keywords, category });
+
+    if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your_gemini_api_key_here') {
+      const mockTitles = [
+        `Revolutionary ${category || 'Project'} Initiative`,
+        `Community-Driven ${keywords || 'Innovation'} Platform`,
+        `Decentralized ${keywords || 'Solution'} for Everyone`
+      ];
+      return res.json({ titles: mockTitles });
+    }
+
+    const prompt = `Generate 5 compelling and unique crowdfunding campaign titles for a ${category || 'general'} project about ${keywords || 'innovation'}. 
+    
+    Requirements:
+    - Each title should be 5-10 words
+    - Make them catchy and professional
+    - Focus on the impact and benefits
+    - Avoid generic buzzwords
+    - Be specific and memorable
+    
+    Return as a JSON array of strings: ["title1", "title2", "title3", "title4", "title5"]`;
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+    
+    // Extract JSON array from response
+    const jsonMatch = text.match(/\[[\s\S]*\]/);
+    if (jsonMatch) {
+      const titles = JSON.parse(jsonMatch[0]);
+      return res.json({ titles });
+    }
+
+    // Fallback
+    res.json({ titles: ['Create a Compelling Campaign Title'] });
+
+  } catch (error) {
+    console.error('[AI] Error generating titles:', error);
+    res.status(500).json({ error: 'Failed to generate titles.', details: error.message });
+  }
+});
+
+/**
  * Helper function to get client IP address
  */
 function getClientIP(req) {
