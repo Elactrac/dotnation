@@ -32,6 +32,9 @@ export const ApiProvider = ({ children }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    let isMounted = true;
+    let apiInstance = null;
+
     const initializeApi = async () => {
       try {
         // Connect to configured RPC endpoint
@@ -41,12 +44,18 @@ export const ApiProvider = ({ children }) => {
         console.log(`Connecting to ${rpcEndpoint}...`);
 
         // Use a shorter timeout and don't block the UI
-        const apiInstance = await Promise.race([
+        apiInstance = await Promise.race([
           ApiPromise.create({ provider: wsProvider }),
           new Promise((_, reject) => setTimeout(() => reject(new Error('Connection timeout')), 5000))
         ]);
 
         await apiInstance.isReady;
+        
+        if (!isMounted) {
+          apiInstance.disconnect();
+          return;
+        }
+        
         setApi(apiInstance);
 
         // Initialize contract if address is provided
@@ -77,11 +86,12 @@ export const ApiProvider = ({ children }) => {
 
     // Cleanup on unmount
     return () => {
-      if (api) {
-        api.disconnect();
+      isMounted = false;
+      if (apiInstance) {
+        apiInstance.disconnect();
       }
     };
-  }, [api]);
+  }, []); // Empty dependency array - only run once on mount
 
   return (
     <ApiContext.Provider
