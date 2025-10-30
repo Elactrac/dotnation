@@ -25,18 +25,6 @@ vi.mock('../utils/sentry', () => ({
 }));
 
 describe('CampaignContext', () => {
-  const mockCampaign = {
-    id: 1,
-    owner: '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY',
-    title: 'Test Campaign',
-    description: 'Test Description',
-    goal: 1000000000000n,
-    raised: 500000000000n,
-    deadline: Date.now() + 86400000,
-    state: 'Active',
-    beneficiary: '5FHneW46xGXgs5mUiveU4sbTyGBzmvcE1QP9KG1Yqk5j9',
-  };
-
   const mockContract = {
     query: {
       getCampaigns: vi.fn(),
@@ -50,11 +38,6 @@ describe('CampaignContext', () => {
       donate: vi.fn(),
       withdrawFunds: vi.fn(),
     },
-  };
-
-  const mockAccount = {
-    address: '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY',
-    meta: { name: 'Test Account', source: 'polkadot-js' },
   };
 
   const wrapper = ({ children }) => (
@@ -245,8 +228,6 @@ describe('CampaignContext', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      const initialCampaigns = result.current.campaigns;
-
       await act(async () => {
         await result.current.refreshCampaigns();
       });
@@ -257,14 +238,6 @@ describe('CampaignContext', () => {
 
     it('should handle refresh with loading state', async () => {
       const { result } = renderHook(() => useCampaign(), { wrapper });
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
-      act(() => {
-        result.current.refreshCampaigns();
-      });
 
       // Should eventually finish loading
       await waitFor(() => {

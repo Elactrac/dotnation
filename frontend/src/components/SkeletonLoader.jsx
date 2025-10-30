@@ -1,76 +1,59 @@
 import PropTypes from 'prop-types';
-import {
-  Box,
-  Skeleton,
-  SkeletonCircle,
-  VStack,
-  HStack,
-  SimpleGrid,
-  Card,
-  CardBody,
-  CardHeader,
-  CardFooter,
-  useColorModeValue
-} from '@chakra-ui/react';
 
 /**
  * Campaign Card Skeleton Loader
  */
 export const CampaignCardSkeleton = ({ count = 1 }) => {
-  const bgColor = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue('gray.200', 'gray.700');
-
   return (
-    <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {Array.from({ length: count }).map((_, index) => (
-        <Card
+        <div
           key={index}
-          bg={bgColor}
-          borderColor={borderColor}
-          borderWidth="1px"
-          borderRadius="lg"
-          overflow="hidden"
+          className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-md"
         >
-          <CardHeader p={0}>
-            <Skeleton height="200px" width="100%" borderRadius="none" />
-          </CardHeader>
+          {/* Card Header */}
+          <div className="p-0">
+            <div className="h-[200px] w-full bg-gray-200 animate-pulse" />
+          </div>
 
-          <CardBody>
-            <VStack spacing={4} align="stretch">
-              <HStack justify="space-between">
-                <Skeleton height="20px" width="80px" borderRadius="full" />
-                <Skeleton height="20px" width="60px" borderRadius="full" />
-              </HStack>
+          {/* Card Body */}
+          <div className="p-6">
+            <div className="flex flex-col gap-4">
+              <div className="flex justify-between">
+                <div className="h-5 w-20 bg-gray-200 rounded-full animate-pulse" />
+                <div className="h-5 w-15 bg-gray-200 rounded-full animate-pulse" />
+              </div>
 
-              <Skeleton height="24px" width="100%" />
-              <Skeleton height="16px" width="90%" />
-              <Skeleton height="16px" width="70%" />
+              <div className="h-6 w-full bg-gray-200 rounded animate-pulse" />
+              <div className="h-4 w-[90%] bg-gray-200 rounded animate-pulse" />
+              <div className="h-4 w-[70%] bg-gray-200 rounded animate-pulse" />
 
-              <Box>
-                <HStack justify="space-between" mb={2}>
-                  <Skeleton height="14px" width="100px" />
-                  <Skeleton height="14px" width="50px" />
-                </HStack>
-                <Skeleton height="8px" width="100%" borderRadius="full" />
-                <Skeleton height="12px" width="80px" mt={1} />
-              </Box>
+              <div>
+                <div className="flex justify-between mb-2">
+                  <div className="h-3.5 w-25 bg-gray-200 rounded animate-pulse" />
+                  <div className="h-3.5 w-12 bg-gray-200 rounded animate-pulse" />
+                </div>
+                <div className="h-2 w-full bg-gray-200 rounded-full animate-pulse" />
+                <div className="h-3 w-20 bg-gray-200 rounded animate-pulse mt-1" />
+              </div>
 
-              <HStack spacing={3}>
-                <Skeleton height="12px" width="60px" />
-                <Skeleton height="12px" width="80px" />
-              </HStack>
-            </VStack>
-          </CardBody>
+              <div className="flex gap-3">
+                <div className="h-3 w-15 bg-gray-200 rounded animate-pulse" />
+                <div className="h-3 w-20 bg-gray-200 rounded animate-pulse" />
+              </div>
+            </div>
+          </div>
 
-          <CardFooter pt={0}>
-            <HStack spacing={2} width="100%">
-              <Skeleton height="32px" flex={1} borderRadius="md" />
-              <Skeleton height="32px" flex={1} borderRadius="md" />
-            </HStack>
-          </CardFooter>
-        </Card>
+          {/* Card Footer */}
+          <div className="px-6 pb-6 pt-0">
+            <div className="flex gap-2 w-full">
+              <div className="h-8 flex-1 bg-gray-200 rounded-md animate-pulse" />
+              <div className="h-8 flex-1 bg-gray-200 rounded-md animate-pulse" />
+            </div>
+          </div>
+        </div>
       ))}
-    </SimpleGrid>
+    </div>
   );
 };
 
@@ -78,44 +61,40 @@ export const CampaignCardSkeleton = ({ count = 1 }) => {
  * Campaign List Skeleton Loader
  */
 export const CampaignListSkeleton = ({ count = 5 }) => {
-  const bgColor = useColorModeValue('white', 'gray.800');
-
   return (
-    <VStack spacing={4} align="stretch">
+    <div className="flex flex-col gap-4">
       {Array.from({ length: count }).map((_, index) => (
-        <Card key={index} bg={bgColor}>
-          <CardBody>
-            <HStack spacing={4} align="start">
-              <Skeleton height="80px" width="80px" borderRadius="md" />
+        <div key={index} className="bg-white rounded-lg shadow-md p-6">
+          <div className="flex gap-4 items-start">
+            <div className="h-20 w-20 bg-gray-200 rounded-md animate-pulse flex-shrink-0" />
 
-              <VStack flex={1} spacing={3} align="stretch">
-                <HStack justify="space-between">
-                  <Skeleton height="20px" width="120px" />
-                  <Skeleton height="20px" width="80px" borderRadius="full" />
-                </HStack>
+            <div className="flex-1 flex flex-col gap-3">
+              <div className="flex justify-between">
+                <div className="h-5 w-30 bg-gray-200 rounded animate-pulse" />
+                <div className="h-5 w-20 bg-gray-200 rounded-full animate-pulse" />
+              </div>
 
-                <Skeleton height="18px" width="100%" />
-                <Skeleton height="14px" width="80%" />
+              <div className="h-4.5 w-full bg-gray-200 rounded animate-pulse" />
+              <div className="h-3.5 w-[80%] bg-gray-200 rounded animate-pulse" />
 
-                <HStack spacing={4}>
-                  <Skeleton height="12px" width="60px" />
-                  <Skeleton height="12px" width="70px" />
-                  <Skeleton height="12px" width="50px" />
-                </HStack>
+              <div className="flex gap-4">
+                <div className="h-3 w-15 bg-gray-200 rounded animate-pulse" />
+                <div className="h-3 w-17 bg-gray-200 rounded animate-pulse" />
+                <div className="h-3 w-12 bg-gray-200 rounded animate-pulse" />
+              </div>
 
-                <Box>
-                  <HStack justify="space-between" mb={1}>
-                    <Skeleton height="12px" width="80px" />
-                    <Skeleton height="12px" width="40px" />
-                  </HStack>
-                  <Skeleton height="6px" width="100%" borderRadius="full" />
-                </Box>
-              </VStack>
-            </HStack>
-          </CardBody>
-        </Card>
+              <div>
+                <div className="flex justify-between mb-1">
+                  <div className="h-3 w-20 bg-gray-200 rounded animate-pulse" />
+                  <div className="h-3 w-10 bg-gray-200 rounded animate-pulse" />
+                </div>
+                <div className="h-1.5 w-full bg-gray-200 rounded-full animate-pulse" />
+              </div>
+            </div>
+          </div>
+        </div>
       ))}
-    </VStack>
+    </div>
   );
 };
 
@@ -123,23 +102,19 @@ export const CampaignListSkeleton = ({ count = 5 }) => {
  * Stats Card Skeleton Loader
  */
 export const StatsCardSkeleton = ({ count = 4 }) => {
-  const bgColor = useColorModeValue('white', 'gray.800');
-
   return (
-    <SimpleGrid columns={{ base: 1, md: 2, lg: count }} spacing={6}>
+    <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-${count} gap-6`}>
       {Array.from({ length: count }).map((_, index) => (
-        <Card key={index} bg={bgColor}>
-          <CardBody>
-            <VStack spacing={3} align="center" textAlign="center">
-              <SkeletonCircle size="40px" />
-              <Skeleton height="16px" width="80px" />
-              <Skeleton height="24px" width="60px" />
-              <Skeleton height="12px" width="100px" />
-            </VStack>
-          </CardBody>
-        </Card>
+        <div key={index} className="bg-white rounded-lg shadow-md p-6">
+          <div className="flex flex-col gap-3 items-center text-center">
+            <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse" />
+            <div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
+            <div className="h-6 w-15 bg-gray-200 rounded animate-pulse" />
+            <div className="h-3 w-25 bg-gray-200 rounded animate-pulse" />
+          </div>
+        </div>
       ))}
-    </SimpleGrid>
+    </div>
   );
 };
 
@@ -147,60 +122,52 @@ export const StatsCardSkeleton = ({ count = 4 }) => {
  * Profile Page Skeleton Loader
  */
 export const ProfileSkeleton = () => {
-  const bgColor = useColorModeValue('white', 'gray.800');
-
   return (
-    <VStack spacing={8} align="stretch">
+    <div className="flex flex-col gap-8">
       {/* Header Section */}
-      <Card bg={bgColor}>
-        <CardBody>
-          <HStack spacing={6} align="start">
-            <SkeletonCircle size="100px" />
-            <VStack flex={1} spacing={4} align="stretch">
-              <Skeleton height="32px" width="200px" />
-              <Skeleton height="16px" width="150px" />
-              <HStack spacing={4}>
-                <Skeleton height="20px" width="80px" borderRadius="full" />
-                <Skeleton height="20px" width="100px" borderRadius="full" />
-              </HStack>
-            </VStack>
-          </HStack>
-        </CardBody>
-      </Card>
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="flex gap-6 items-start">
+          <div className="w-25 h-25 bg-gray-200 rounded-full animate-pulse flex-shrink-0" />
+          <div className="flex-1 flex flex-col gap-4">
+            <div className="h-8 w-50 bg-gray-200 rounded animate-pulse" />
+            <div className="h-4 w-37 bg-gray-200 rounded animate-pulse" />
+            <div className="flex gap-4">
+              <div className="h-5 w-20 bg-gray-200 rounded-full animate-pulse" />
+              <div className="h-5 w-25 bg-gray-200 rounded-full animate-pulse" />
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Stats Section */}
       <StatsCardSkeleton count={3} />
 
       {/* Content Tabs */}
-      <Card bg={bgColor}>
-        <CardBody>
-          <VStack spacing={6} align="stretch">
-            <HStack spacing={4}>
-              <Skeleton height="32px" width="100px" borderRadius="md" />
-              <Skeleton height="32px" width="120px" borderRadius="md" />
-              <Skeleton height="32px" width="80px" borderRadius="md" />
-            </HStack>
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="flex flex-col gap-6">
+          <div className="flex gap-4">
+            <div className="h-8 w-25 bg-gray-200 rounded-md animate-pulse" />
+            <div className="h-8 w-30 bg-gray-200 rounded-md animate-pulse" />
+            <div className="h-8 w-20 bg-gray-200 rounded-md animate-pulse" />
+          </div>
 
-            <VStack spacing={4} align="stretch">
-              {Array.from({ length: 3 }).map((_, index) => (
-                <Card key={index} size="sm">
-                  <CardBody>
-                    <HStack spacing={4}>
-                      <Skeleton height="60px" width="60px" borderRadius="md" />
-                      <VStack flex={1} spacing={2} align="stretch">
-                        <Skeleton height="18px" width="100%" />
-                        <Skeleton height="14px" width="80%" />
-                        <Skeleton height="12px" width="60%" />
-                      </VStack>
-                    </HStack>
-                  </CardBody>
-                </Card>
-              ))}
-            </VStack>
-          </VStack>
-        </CardBody>
-      </Card>
-    </VStack>
+          <div className="flex flex-col gap-4">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div key={index} className="bg-gray-50 rounded-lg p-4">
+                <div className="flex gap-4">
+                  <div className="h-15 w-15 bg-gray-200 rounded-md animate-pulse flex-shrink-0" />
+                  <div className="flex-1 flex flex-col gap-2">
+                    <div className="h-4.5 w-full bg-gray-200 rounded animate-pulse" />
+                    <div className="h-3.5 w-[80%] bg-gray-200 rounded animate-pulse" />
+                    <div className="h-3 w-[60%] bg-gray-200 rounded animate-pulse" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -208,40 +175,36 @@ export const ProfileSkeleton = () => {
  * Donation Interface Skeleton Loader
  */
 export const DonationSkeleton = () => {
-  const bgColor = useColorModeValue('white', 'gray.800');
-
   return (
-    <Card bg={bgColor}>
-      <CardBody>
-        <VStack spacing={6} align="stretch">
-          <VStack spacing={2} align="center" textAlign="center">
-            <Skeleton height="24px" width="150px" />
-            <Skeleton height="16px" width="200px" />
-          </VStack>
+    <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-2 items-center text-center">
+          <div className="h-6 w-37 bg-gray-200 rounded animate-pulse" />
+          <div className="h-4 w-50 bg-gray-200 rounded animate-pulse" />
+        </div>
 
-          <Box>
-            <Skeleton height="16px" width="100px" mb={2} />
-            <Skeleton height="40px" width="100%" borderRadius="md" />
-          </Box>
+        <div>
+          <div className="h-4 w-25 bg-gray-200 rounded animate-pulse mb-2" />
+          <div className="h-10 w-full bg-gray-200 rounded-md animate-pulse" />
+        </div>
 
-          <Box>
-            <Skeleton height="16px" width="120px" mb={2} />
-            <Skeleton height="100px" width="100%" borderRadius="md" />
-          </Box>
+        <div>
+          <div className="h-4 w-30 bg-gray-200 rounded animate-pulse mb-2" />
+          <div className="h-25 w-full bg-gray-200 rounded-md animate-pulse" />
+        </div>
 
-          <HStack spacing={4}>
-            <Skeleton height="40px" flex={1} borderRadius="md" />
-            <Skeleton height="40px" width="100px" borderRadius="md" />
-          </HStack>
+        <div className="flex gap-4">
+          <div className="h-10 flex-1 bg-gray-200 rounded-md animate-pulse" />
+          <div className="h-10 w-25 bg-gray-200 rounded-md animate-pulse" />
+        </div>
 
-          <VStack spacing={2} align="stretch">
-            <Skeleton height="14px" width="100%" />
-            <Skeleton height="14px" width="90%" />
-            <Skeleton height="14px" width="80%" />
-          </VStack>
-        </VStack>
-      </CardBody>
-    </Card>
+        <div className="flex flex-col gap-2">
+          <div className="h-3.5 w-full bg-gray-200 rounded animate-pulse" />
+          <div className="h-3.5 w-[90%] bg-gray-200 rounded animate-pulse" />
+          <div className="h-3.5 w-[80%] bg-gray-200 rounded animate-pulse" />
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -249,30 +212,26 @@ export const DonationSkeleton = () => {
  * Generic Table Skeleton Loader
  */
 export const TableSkeleton = ({ rows = 5, columns = 4 }) => {
-  const bgColor = useColorModeValue('white', 'gray.800');
-
   return (
-    <Card bg={bgColor}>
-      <CardBody>
-        <VStack spacing={4} align="stretch">
-          {/* Table Header */}
-          <HStack spacing={4}>
-            {Array.from({ length: columns }).map((_, index) => (
-              <Skeleton key={index} height="16px" flex={1} />
-            ))}
-          </HStack>
-
-          {/* Table Rows */}
-          {Array.from({ length: rows }).map((_, rowIndex) => (
-            <HStack key={rowIndex} spacing={4}>
-              {Array.from({ length: columns }).map((_, colIndex) => (
-                <Skeleton key={colIndex} height="14px" flex={1} />
-              ))}
-            </HStack>
+    <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="flex flex-col gap-4">
+        {/* Table Header */}
+        <div className="flex gap-4">
+          {Array.from({ length: columns }).map((_, index) => (
+            <div key={index} className="h-4 flex-1 bg-gray-200 rounded animate-pulse" />
           ))}
-        </VStack>
-      </CardBody>
-    </Card>
+        </div>
+
+        {/* Table Rows */}
+        {Array.from({ length: rows }).map((_, rowIndex) => (
+          <div key={rowIndex} className="flex gap-4">
+            {Array.from({ length: columns }).map((_, colIndex) => (
+              <div key={colIndex} className="h-3.5 flex-1 bg-gray-200 rounded animate-pulse" />
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
   );
 };
 
@@ -281,23 +240,23 @@ export const TableSkeleton = ({ rows = 5, columns = 4 }) => {
  */
 export const SearchSkeleton = () => {
   return (
-    <VStack spacing={6} align="stretch">
+    <div className="flex flex-col gap-6">
       {/* Search Bar */}
-      <Skeleton height="48px" width="100%" borderRadius="md" />
+      <div className="h-12 w-full bg-gray-200 rounded-md animate-pulse" />
 
       {/* Filters */}
-      <HStack spacing={4}>
-        <Skeleton height="32px" width="120px" borderRadius="md" />
-        <Skeleton height="32px" width="100px" borderRadius="md" />
-        <Skeleton height="32px" width="80px" borderRadius="md" />
-      </HStack>
+      <div className="flex gap-4">
+        <div className="h-8 w-30 bg-gray-200 rounded-md animate-pulse" />
+        <div className="h-8 w-25 bg-gray-200 rounded-md animate-pulse" />
+        <div className="h-8 w-20 bg-gray-200 rounded-md animate-pulse" />
+      </div>
 
       {/* Results Count */}
-      <Skeleton height="16px" width="150px" />
+      <div className="h-4 w-37 bg-gray-200 rounded animate-pulse" />
 
       {/* Results Grid */}
       <CampaignCardSkeleton count={6} />
-    </VStack>
+    </div>
   );
 };
 

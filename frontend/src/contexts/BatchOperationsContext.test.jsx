@@ -1,9 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { BatchOperationsProvider, useBatchOperations } from './BatchOperationsContext';
 import { WalletProvider } from './WalletContext';
 import { ApiProvider } from './ApiContext';
-import { ChakraProvider } from '@chakra-ui/react';
 
 // Mock dependencies
 vi.mock('@polkadot/extension-dapp', () => ({
@@ -26,19 +25,12 @@ vi.mock('../utils/sentry', () => ({
 }));
 
 describe('BatchOperationsContext', () => {
-  const mockAccount = {
-    address: '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY',
-    meta: { name: 'Test Account', source: 'polkadot-js' },
-  };
-
   const wrapper = ({ children }) => (
-    <ChakraProvider>
-      <ApiProvider>
-        <WalletProvider>
-          <BatchOperationsProvider>{children}</BatchOperationsProvider>
-        </WalletProvider>
-      </ApiProvider>
-    </ChakraProvider>
+    <ApiProvider>
+      <WalletProvider>
+        <BatchOperationsProvider>{children}</BatchOperationsProvider>
+      </WalletProvider>
+    </ApiProvider>
   );
 
   beforeEach(() => {

@@ -467,7 +467,7 @@ describe('DonationInterface', () => {
       fireEvent.change(input, { target: { value: '0.05' } });
 
       // The button should be disabled due to validation
-      const donateButton = screen.getByRole('button', { name: /Enter Amount/i });
+      screen.getByRole('button', { name: /Enter Amount/i });
       
       // The validation should prevent the call
       expect(mockDonateToCampaign).not.toHaveBeenCalled();

@@ -241,7 +241,7 @@ describe('CaptchaModal Component', () => {
       });
 
       await waitFor(() => {
-        const errorText = screen.queryByText(/Incorrect answer|attempt.*remaining/i);
+        screen.queryByText(/Incorrect answer|attempt.*remaining/i);
         // Error might appear
       });
     });
@@ -361,7 +361,7 @@ describe('CaptchaModal Component', () => {
       });
 
       // Should not show suspicious activity error
-      const suspiciousError = screen.queryByText(/suspicious activity/i);
+      screen.queryByText(/suspicious activity/i);
       // May or may not appear depending on answer correctness
     });
   });

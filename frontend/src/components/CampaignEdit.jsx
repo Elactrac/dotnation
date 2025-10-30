@@ -1,19 +1,7 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import {
-  VStack,
-  FormControl,
-  FormLabel,
-  Input,
-  Textarea,
-  Button,
-  NumberInput,
-  NumberInputField,
-  FormErrorMessage,
-  Alert,
-  AlertIcon,
-  useToast,
-} from '@chakra-ui/react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { AlertCircle, Save, X, Calendar, Target, User, FileText } from 'lucide-react';
 import { useCampaign } from '../contexts/CampaignContext';
 import { useWallet } from '../contexts/WalletContext';
 
@@ -31,7 +19,15 @@ export const CampaignEdit = ({ campaignId, onSuccess, onCancel }) => {
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const toast = useToast();
+  const [toast, setToast] = useState({ show: false, title: '', description: '', type: 'success' });
+
+  // Auto-hide toast
+  useEffect(() => {
+    if (toast.show) {
+      const timer = setTimeout(() => setToast({ ...toast, show: false }), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast.show]);
 
   useEffect(() => {
     const campaign = campaigns.find(c => c.id === campaignId);
@@ -87,22 +83,20 @@ export const CampaignEdit = ({ campaignId, onSuccess, onCancel }) => {
         deadline: deadlineTimestamp,
       });
 
-      toast({
+      setToast({
+        show: true,
         title: 'Success',
         description: 'Your campaign has been updated successfully.',
-        status: 'success',
-        duration: 5000,
-        isClosable: true,
+        type: 'success'
       });
 
       onSuccess();
     } catch (error) {
-      toast({
+      setToast({
+        show: true,
         title: 'Error',
         description: error.message,
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
+        type: 'error'
       });
     } finally {
       setIsSubmitting(false);
@@ -127,96 +121,282 @@ export const CampaignEdit = ({ campaignId, onSuccess, onCancel }) => {
   const campaign = campaigns.find(c => c.id === campaignId);
   if (!campaign) {
     return (
-      <Alert status="error">
-        <AlertIcon />
-        Campaign not found
-      </Alert>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="bg-gradient-to-br from-red-50 to-pink-50 border-2 border-red-200 rounded-xl p-6 flex items-start gap-3"
+      >
+        <AlertCircle className="w-6 h-6 text-red-500 flex-shrink-0 mt-0.5" />
+        <div>
+          <p className="font-semibold text-red-900">Campaign Not Found</p>
+          <p className="text-sm text-red-700 mt-1">The requested campaign could not be found.</p>
+        </div>
+      </motion.div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <VStack spacing={4}>
-        <FormControl isInvalid={errors.title}>
-          <FormLabel>Campaign Title</FormLabel>
-          <Input
+    <>
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toast.show && (
+          <motion.div
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -50 }}
+            className="fixed top-4 right-4 z-50"
+          >
+            <div className={`${
+              toast.type === 'success' 
+                ? 'bg-gradient-to-r from-green-500 to-emerald-500' 
+                : 'bg-gradient-to-r from-red-500 to-pink-500'
+            } text-white px-6 py-4 rounded-xl shadow-2xl backdrop-blur-xl max-w-md`}>
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-bold">{toast.title}</p>
+                  <p className="text-sm opacity-90 mt-1">{toast.description}</p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Title Field */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0 }}
+        >
+          <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+            <FileText className="w-4 h-4" />
+            Campaign Title
+          </label>
+          <input
+            type="text"
             name="title"
             value={formData.title}
             onChange={handleChange}
             placeholder="Enter campaign title"
+            className={`w-full px-4 py-3 rounded-xl border-2 transition-all focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+              errors.title 
+                ? 'border-red-300 bg-red-50' 
+                : 'border-gray-200 bg-white hover:border-gray-300'
+            }`}
           />
-          <FormErrorMessage>{errors.title}</FormErrorMessage>
-        </FormControl>
+          {errors.title && (
+            <motion.p
+              initial={{ opacity: 0, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-red-600 text-sm mt-2 flex items-center gap-1"
+            >
+              <AlertCircle className="w-4 h-4" />
+              {errors.title}
+            </motion.p>
+          )}
+        </motion.div>
 
-        <FormControl isInvalid={errors.description}>
-          <FormLabel>Description</FormLabel>
-          <Textarea
+        {/* Description Field */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+        >
+          <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+            <FileText className="w-4 h-4" />
+            Description
+          </label>
+          <textarea
             name="description"
             value={formData.description}
             onChange={handleChange}
             placeholder="Describe your campaign"
             rows={4}
+            className={`w-full px-4 py-3 rounded-xl border-2 transition-all focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none ${
+              errors.description 
+                ? 'border-red-300 bg-red-50' 
+                : 'border-gray-200 bg-white hover:border-gray-300'
+            }`}
           />
-          <FormErrorMessage>{errors.description}</FormErrorMessage>
-        </FormControl>
+          {errors.description && (
+            <motion.p
+              initial={{ opacity: 0, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-red-600 text-sm mt-2 flex items-center gap-1"
+            >
+              <AlertCircle className="w-4 h-4" />
+              {errors.description}
+            </motion.p>
+          )}
+        </motion.div>
 
-        <FormControl isInvalid={errors.goal}>
-          <FormLabel>Funding Goal (DOT)</FormLabel>
-          <NumberInput min={0}>
-            <NumberInputField
-              name="goal"
-              value={formData.goal}
-              onChange={(value) => handleChange({ target: { name: 'goal', value } })}
-              placeholder="0.00"
-            />
-          </NumberInput>
-          <FormErrorMessage>{errors.goal}</FormErrorMessage>
-        </FormControl>
+        {/* Goal Field */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+            <Target className="w-4 h-4" />
+            Funding Goal (DOT)
+          </label>
+          <input
+            type="number"
+            name="goal"
+            value={formData.goal}
+            onChange={handleChange}
+            placeholder="0.00"
+            min="0"
+            step="0.01"
+            className={`w-full px-4 py-3 rounded-xl border-2 transition-all focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+              errors.goal 
+                ? 'border-red-300 bg-red-50' 
+                : 'border-gray-200 bg-white hover:border-gray-300'
+            }`}
+          />
+          {errors.goal && (
+            <motion.p
+              initial={{ opacity: 0, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-red-600 text-sm mt-2 flex items-center gap-1"
+            >
+              <AlertCircle className="w-4 h-4" />
+              {errors.goal}
+            </motion.p>
+          )}
+        </motion.div>
 
-        <FormControl isInvalid={errors.deadline}>
-          <FormLabel>Campaign Deadline</FormLabel>
-          <Input
-            name="deadline"
+        {/* Deadline Field */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+        >
+          <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+            <Calendar className="w-4 h-4" />
+            Campaign Deadline
+          </label>
+          <input
             type="datetime-local"
+            name="deadline"
             value={formData.deadline}
             onChange={handleChange}
             min={new Date().toISOString().slice(0, 16)}
+            className={`w-full px-4 py-3 rounded-xl border-2 transition-all focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+              errors.deadline 
+                ? 'border-red-300 bg-red-50' 
+                : 'border-gray-200 bg-white hover:border-gray-300'
+            }`}
           />
-          <FormErrorMessage>{errors.deadline}</FormErrorMessage>
-        </FormControl>
+          {errors.deadline && (
+            <motion.p
+              initial={{ opacity: 0, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-red-600 text-sm mt-2 flex items-center gap-1"
+            >
+              <AlertCircle className="w-4 h-4" />
+              {errors.deadline}
+            </motion.p>
+          )}
+        </motion.div>
 
-        <FormControl isInvalid={errors.beneficiary}>
-          <FormLabel>Beneficiary Address</FormLabel>
-          <Input
+        {/* Beneficiary Field */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+            <User className="w-4 h-4" />
+            Beneficiary Address
+          </label>
+          <input
+            type="text"
             name="beneficiary"
             value={formData.beneficiary}
             onChange={handleChange}
             placeholder="Enter the beneficiary's Polkadot address"
+            className={`w-full px-4 py-3 rounded-xl border-2 font-mono text-sm transition-all focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+              errors.beneficiary 
+                ? 'border-red-300 bg-red-50' 
+                : 'border-gray-200 bg-white hover:border-gray-300'
+            }`}
           />
-          <FormErrorMessage>{errors.beneficiary}</FormErrorMessage>
-        </FormControl>
+          {errors.beneficiary && (
+            <motion.p
+              initial={{ opacity: 0, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-red-600 text-sm mt-2 flex items-center gap-1"
+            >
+              <AlertCircle className="w-4 h-4" />
+              {errors.beneficiary}
+            </motion.p>
+          )}
+        </motion.div>
 
-        <Button
-          type="submit"
-          colorScheme="blue"
-          width="full"
-          mt={4}
-          isLoading={isSubmitting}
-          loadingText="Updating..."
-          disabled={!selectedAccount}
+        {/* Action Buttons */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+          className="flex gap-4 pt-4"
         >
-          Update Campaign
-        </Button>
-        
-        <Button
-          onClick={onCancel}
-          width="full"
-          variant="outline"
-        >
-          Cancel
-        </Button>
-      </VStack>
-    </form>
+          <button
+            type="submit"
+            disabled={!selectedAccount || isSubmitting}
+            className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-white transition-all ${
+              !selectedAccount || isSubmitting
+                ? 'bg-gray-300 cursor-not-allowed'
+                : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl'
+            }`}
+          >
+            {isSubmitting ? (
+              <>
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                >
+                  <Save className="w-5 h-5" />
+                </motion.div>
+                Updating...
+              </>
+            ) : (
+              <>
+                <Save className="w-5 h-5" />
+                Update Campaign
+              </>
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={onCancel}
+            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-gray-700 bg-white border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition-all"
+          >
+            <X className="w-5 h-5" />
+            Cancel
+          </button>
+        </motion.div>
+
+        {/* Wallet Warning */}
+        {!selectedAccount && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 rounded-xl p-4 flex items-start gap-3"
+          >
+            <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-medium text-amber-900">Wallet Not Connected</p>
+              <p className="text-sm text-amber-700 mt-1">Please connect your wallet to update the campaign.</p>
+            </div>
+          </motion.div>
+        )}
+      </form>
+    </>
   );
 };
 

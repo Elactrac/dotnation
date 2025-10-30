@@ -624,7 +624,7 @@ describe('CreateCampaignForm', () => {
     });
 
     it('should have proper button states', async () => {
-      const user = userEvent.setup();
+      userEvent.setup();
       renderWithProviders(<CreateCampaignForm onSuccess={mockOnSuccess} />);
 
       const submitButton = screen.getByRole('button', { name: /create campaign/i });

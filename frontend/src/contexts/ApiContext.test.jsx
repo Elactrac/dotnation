@@ -23,10 +23,6 @@ describe('ApiContext', () => {
     disconnect: vi.fn(),
   };
 
-  const mockContract = {
-    address: '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY',
-  };
-
   const wrapper = ({ children }) => <ApiProvider>{children}</ApiProvider>;
 
   beforeEach(() => {

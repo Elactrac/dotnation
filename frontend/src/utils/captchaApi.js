@@ -4,6 +4,18 @@
  */
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+const API_KEY = import.meta.env.VITE_BACKEND_API_KEY || 'dev_api_key_12345';
+
+/**
+ * Get authentication headers for API requests
+ * @returns {Object} Headers object with API key
+ */
+function getAuthHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    'X-API-Key': API_KEY,
+  };
+}
 
 /**
  * Create a new captcha session
@@ -13,9 +25,7 @@ export async function createCaptchaSession() {
   try {
     const response = await fetch(`${BACKEND_URL}/api/captcha/session`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
     });
 
     if (!response.ok) {
@@ -52,9 +62,7 @@ export async function verifyCaptcha({
   try {
     const response = await fetch(`${BACKEND_URL}/api/captcha/verify`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify({
         sessionToken,
         captchaType,
@@ -87,9 +95,7 @@ export async function validateCaptchaToken(token) {
   try {
     const response = await fetch(`${BACKEND_URL}/api/captcha/validate-token`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ token }),
     });
 
@@ -113,9 +119,7 @@ export async function getCaptchaStats() {
   try {
     const response = await fetch(`${BACKEND_URL}/api/captcha/stats`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
     });
 
     if (!response.ok) {

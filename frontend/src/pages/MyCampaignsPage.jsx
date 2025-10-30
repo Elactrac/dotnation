@@ -219,7 +219,7 @@ const MyCampaignsPage = () => {
                 </div>
                 <h3 className="text-3xl font-bold font-display text-white">No Campaigns Yet</h3>
                 <p className="text-white/70 font-body max-w-md mx-auto">
-                  You haven't created any campaigns yet. Start your first crowdfunding campaign to make a difference!
+                  You haven&apos;t created any campaigns yet. Start your first crowdfunding campaign to make a difference!
                 </p>
                 <button
                   onClick={() => navigate('/dashboard/create-campaign')}

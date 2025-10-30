@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
+import { motion } from 'framer-motion';
+import { AlertCircle, RefreshCw, RotateCcw } from 'lucide-react';
 import { ErrorBoundary } from './ErrorBoundary';
-import { Box, Alert, AlertIcon, AlertTitle, AlertDescription, Button } from '@chakra-ui/react';
 import { trackError, addBreadcrumb } from '../utils/sentry';
 
 /**
@@ -8,56 +9,61 @@ import { trackError, addBreadcrumb } from '../utils/sentry';
  */
 const DefaultFallback = ({ error, onReset, onReload, pageName, onRetry, showReload }) => {
   return (
-    <Box p={8} maxW="container.md" mx="auto">
-      <Alert status="error" borderRadius="lg">
-        <AlertIcon />
-        <Box>
-          <AlertTitle mr={2}>
-            {pageName} Error
-          </AlertTitle>
-          <AlertDescription>
-            Something went wrong while loading {pageName.toLowerCase()}.
-            {error?.message && (
-              <Box mt={2} fontSize="sm" opacity={0.8}>
-                {error.message}
-              </Box>
-            )}
-          </AlertDescription>
-          <Box mt={4}>
-            <Button
-              size="sm"
-              colorScheme="red"
-              variant="outline"
-              onClick={onReset}
-              mr={2}
-            >
-              Try Again
-            </Button>
-            {onRetry && (
-              <Button
-                size="sm"
-                colorScheme="blue"
-                variant="outline"
-                onClick={onRetry}
-              >
-                Retry Action
-              </Button>
-            )}
-            {showReload && (
-              <Button
-                size="sm"
-                colorScheme="gray"
-                variant="outline"
-                onClick={onReload}
-                ml={2}
-              >
-                Reload Page
-              </Button>
-            )}
-          </Box>
-        </Box>
-      </Alert>
-    </Box>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="p-8 max-w-3xl mx-auto"
+    >
+      <div className="bg-gradient-to-br from-red-50 to-pink-50 border-2 border-red-200 rounded-2xl shadow-xl overflow-hidden">
+        <div className="p-8">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+              <AlertCircle className="w-6 h-6 text-white" />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-2xl font-bold text-red-900 mb-2">
+                {pageName} Error
+              </h2>
+              <p className="text-red-700 mb-4">
+                Something went wrong while loading {pageName.toLowerCase()}.
+              </p>
+              {error?.message && (
+                <div className="bg-white/50 backdrop-blur-sm rounded-lg p-4 mb-6 border border-red-200">
+                  <p className="text-sm text-red-800 font-mono">{error.message}</p>
+                </div>
+              )}
+              <div className="flex flex-wrap gap-3">
+                <button
+                  onClick={onReset}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-white bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  Try Again
+                </button>
+                {onRetry && (
+                  <button
+                    onClick={onRetry}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-blue-700 bg-blue-100 hover:bg-blue-200 transition-colors border-2 border-blue-300"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    Retry Action
+                  </button>
+                )}
+                {showReload && (
+                  <button
+                    onClick={onReload}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 transition-colors border-2 border-gray-300"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    Reload Page
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </motion.div>
   );
 };
 

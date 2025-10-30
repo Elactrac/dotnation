@@ -1,12 +1,10 @@
 import { render } from '@testing-library/react';
-import { ChakraProvider } from '@chakra-ui/react';
 import { BrowserRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { ApiProvider } from '../contexts/ApiContext';
 import { WalletProvider } from '../contexts/WalletContext';
 import { CampaignProvider } from '../contexts/CampaignContext';
 import { BatchOperationsProvider } from '../contexts/BatchOperationsContext';
-import theme from '../theme';
 
 /**
  * Custom render function that wraps components with all necessary providers
@@ -21,7 +19,6 @@ import theme from '../theme';
 export function renderWithProviders(
   ui,
   {
-    initialState = {},
     withRouter = true,
     withWallet = true,
     withCampaign = true,
@@ -29,29 +26,23 @@ export function renderWithProviders(
   } = {}
 ) {
   const Wrapper = ({ children }) => {
-    let wrapped = (
-      <ChakraProvider theme={theme}>
-        {children}
-      </ChakraProvider>
-    );
+    let wrapped = children;
 
     if (withWallet || withCampaign) {
       wrapped = (
-        <ChakraProvider theme={theme}>
-          <ApiProvider>
-            <WalletProvider>
-              {withCampaign ? (
-                <CampaignProvider>
-                  <BatchOperationsProvider>
-                    {children}
-                  </BatchOperationsProvider>
-                </CampaignProvider>
-              ) : (
-                children
-              )}
-            </WalletProvider>
-          </ApiProvider>
-        </ChakraProvider>
+        <ApiProvider>
+          <WalletProvider>
+            {withCampaign ? (
+              <CampaignProvider>
+                <BatchOperationsProvider>
+                  {children}
+                </BatchOperationsProvider>
+              </CampaignProvider>
+            ) : (
+              children
+            )}
+          </WalletProvider>
+        </ApiProvider>
       );
     }
 
