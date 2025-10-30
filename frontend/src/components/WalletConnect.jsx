@@ -59,22 +59,23 @@ const WalletConnect = () => {
             </button>
 
             {isMenuOpen && (
-                <div className="absolute top-full right-0 mt-2 card min-w-64 shadow-hard z-50">
-                    <div className="px-4 py-2 text-body-sm text-text-secondary border-b border-border">
-                        Connected as: <strong className="text-text-primary">{selectedAccount.meta.name}</strong>
+                <div className="absolute top-full right-0 mt-2 card min-w-64 max-w-xs shadow-hard z-50 overflow-hidden">
+                    <div className="px-4 py-2 text-body-sm text-text-secondary border-b border-border overflow-hidden">
+                        Connected as: <strong className="text-text-primary block truncate">{selectedAccount.meta.name}</strong>
                     </div>
                     <div className="py-2">
                         {accounts.map((account) => (
                             <button
                                 key={account.address}
                                 onClick={() => switchAccount(account)}
-                                className={`w-full text-left px-4 py-2 text-body-sm hover:bg-surface transition-colors ${
+                                className={`w-full text-left px-4 py-2 text-body-sm hover:bg-surface transition-colors truncate ${
                                     selectedAccount.address === account.address
                                         ? 'bg-primary/10 text-primary font-semibold'
                                         : 'text-text-primary'
                                 }`}
+                                title={`${account.meta.name} (${account.address})`}
                             >
-                                {account.meta.name} ({shortenAddress(account.address)})
+                                <span className="block truncate">{account.meta.name} ({shortenAddress(account.address)})</span>
                             </button>
                         ))}
                         <button
