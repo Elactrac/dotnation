@@ -149,8 +149,12 @@ const SuspenseFallback = () => (
   </div>
 );
 
-// Initialize Sentry on app start
-initSentry();
+// Initialize Sentry on app start (with error handling)
+try {
+  initSentry();
+} catch (err) {
+  console.warn('Failed to initialize Sentry:', err);
+}
 
 function App() {
   return (

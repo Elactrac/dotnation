@@ -1,5 +1,4 @@
 import * as Sentry from '@sentry/react';
-import { BrowserTracing } from '@sentry/tracing';
 
 /**
  * Initialize Sentry error tracking and performance monitoring
@@ -18,7 +17,7 @@ export const initSentry = () => {
       dsn,
       environment,
       integrations: [
-        new BrowserTracing({
+        Sentry.browserTracingIntegration({
           // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
           tracePropagationTargets: [
             'localhost',
