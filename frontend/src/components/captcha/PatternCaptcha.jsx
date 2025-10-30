@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { verifyCaptcha } from '../../utils/captchaApi';
+import { verifyCaptcha, generateCaptchaChallenge } from '../../utils/captchaApi';
 
 /**
  * Pattern Memory Captcha Component
@@ -17,18 +17,22 @@ const PatternCaptcha = ({ sessionToken, onVerify, onCancel }) => {
   const [gameState, setGameState] = useState('ready'); // ready, showing, playing, success, failure
   const [startTime, setStartTime] = useState(null);
 
-  // Generate random pattern
-  const generatePattern = useCallback(() => {
-    const newPattern = [];
-    for (let i = 0; i < difficulty; i++) {
-      newPattern.push(Math.floor(Math.random() * 9));
+  // Generate pattern by fetching from backend
+  const generatePattern = useCallback(async () => {
+    if (!sessionToken) return;
+
+    try {
+      const challenge = await generateCaptchaChallenge(sessionToken, 'pattern', { difficulty });
+      setPattern(challenge.pattern);
+      setUserPattern([]);
+      setCurrentStep(-1);
+      setError('');
+      setGameState('ready');
+    } catch (error) {
+      console.error('[PatternCaptcha] Failed to fetch challenge:', error);
+      setError('Failed to load pattern. Please try again.');
     }
-    setPattern(newPattern);
-    setUserPattern([]);
-    setCurrentStep(-1);
-    setError('');
-    setGameState('ready');
-  }, [difficulty]);
+  }, [sessionToken, difficulty]);
 
   useEffect(() => {
     generatePattern();
@@ -99,7 +103,6 @@ const PatternCaptcha = ({ sessionToken, onVerify, onCancel }) => {
         sessionToken,
         captchaType: 'pattern',
         userAnswer: userPattern,
-        expectedAnswer: pattern,
         timeTaken
       });
 

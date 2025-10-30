@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { verifyCaptcha } from '../../utils/captchaApi';
+import { verifyCaptcha, generateCaptchaChallenge } from '../../utils/captchaApi';
 
 /**
  * Slider Puzzle Captcha Component
@@ -16,12 +16,23 @@ const SliderCaptcha = ({ sessionToken, onVerify, onCancel }) => {
   const sliderRef = useRef(null);
   const containerRef = useRef(null);
 
-  // Generate random target position on mount
+  // Fetch challenge from backend on mount
   useEffect(() => {
-    const randomPos = Math.floor(Math.random() * 60) + 20; // Between 20% and 80%
-    setTargetPosition(randomPos);
-    setStartTime(Date.now());
-  }, []);
+    const fetchChallenge = async () => {
+      if (!sessionToken) return;
+
+      try {
+        const challenge = await generateCaptchaChallenge(sessionToken, 'slider');
+        setTargetPosition(challenge.targetPosition);
+        setStartTime(Date.now());
+      } catch (error) {
+        console.error('[SliderCaptcha] Failed to fetch challenge:', error);
+        setError('Failed to load challenge. Please try again.');
+      }
+    };
+
+    fetchChallenge();
+  }, [sessionToken]);
 
   // Handle mouse/touch down
   const handleStart = (e) => {
@@ -89,7 +100,6 @@ const SliderCaptcha = ({ sessionToken, onVerify, onCancel }) => {
         sessionToken,
         captchaType: 'slider',
         userAnswer: sliderPosition,
-        expectedAnswer: targetPosition,
         timeTaken,
         options: { tolerance: 5 }
       });
@@ -118,12 +128,21 @@ const SliderCaptcha = ({ sessionToken, onVerify, onCancel }) => {
     }
   };
 
-  const handleReset = () => {
+  const handleReset = async () => {
     setSliderPosition(0);
     setError('');
-    // Generate new target position
-    const randomPos = Math.floor(Math.random() * 60) + 20;
-    setTargetPosition(randomPos);
+    
+    // Fetch new challenge from backend
+    if (sessionToken) {
+      try {
+        const challenge = await generateCaptchaChallenge(sessionToken, 'slider');
+        setTargetPosition(challenge.targetPosition);
+        setStartTime(Date.now());
+      } catch (error) {
+        console.error('[SliderCaptcha] Failed to fetch new challenge:', error);
+        setError('Failed to load new challenge. Please try again.');
+      }
+    }
   };
 
   return (
