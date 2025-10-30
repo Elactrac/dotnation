@@ -33,7 +33,7 @@ const CreateCampaignPage = () => {
         </svg>
       </div>
 
-      <div className="fixed top-1/2 left-10 w-48 h-48 opacity-8 animate-float-slow pointer-events-none z-0">
+      <div className="fixed top-1/2 left-10 w-48 h-48 opacity-10 animate-float-slow pointer-events-none z-0">
         <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect x="50" y="50" width="100" height="100" stroke="currentColor" strokeWidth="2" className="text-primary" transform="rotate(45 100 100)"/>
           <circle cx="100" cy="100" r="20" fill="currentColor" className="text-secondary/30"/>
