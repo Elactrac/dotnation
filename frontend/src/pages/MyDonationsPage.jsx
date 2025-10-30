@@ -209,7 +209,7 @@ const MyDonationsPage = () => {
                 </div>
                 <h3 className="text-3xl font-bold font-display text-white">No Donations Yet</h3>
                 <p className="text-white/70 font-body max-w-md mx-auto">
-                  You haven't made any donations yet. Browse campaigns and start supporting causes you care about!
+                  You haven&apos;t made any donations yet. Browse campaigns and start supporting causes you care about!
                 </p>
                 <Link
                   to="/dashboard"

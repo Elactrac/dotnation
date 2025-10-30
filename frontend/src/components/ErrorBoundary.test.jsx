@@ -4,6 +4,8 @@ import userEvent from '@testing-library/user-event';
 import { ErrorBoundary, withErrorBoundary } from './ErrorBoundary';
 import '@testing-library/jest-dom';
 
+import PropTypes from 'prop-types';
+
 // Mock Sentry utils
 vi.mock('../utils/sentry', () => ({
   trackError: vi.fn(),
@@ -16,6 +18,11 @@ const ThrowError = ({ shouldThrow, errorMessage }) => {
     throw new Error(errorMessage || 'Test error');
   }
   return <div>No error</div>;
+};
+
+ThrowError.propTypes = {
+  shouldThrow: PropTypes.bool,
+  errorMessage: PropTypes.string,
 };
 
 const NetworkError = () => {

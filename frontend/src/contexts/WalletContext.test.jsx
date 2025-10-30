@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import { WalletProvider, useWallet } from './WalletContext';
 import { ApiProvider } from './ApiContext';
 
@@ -40,14 +40,6 @@ describe('WalletContext', () => {
       meta: { name: 'Test Account 2', source: 'polkadot-js' },
     },
   ];
-
-  const mockApi = {
-    query: {
-      system: {
-        account: vi.fn(),
-      },
-    },
-  };
 
   const wrapper = ({ children }) => (
     <ApiProvider>

@@ -1,9 +1,12 @@
 /**
  * @file Fraud Detection Module for Campaign Analysis
  * Uses AI-powered analysis to detect fraudulent campaigns, plagiarism, and scam patterns.
+ * Production-ready with Redis persistence for fraud database
  */
 
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { getRedisClient, fraudOps } = require('./redisClient');
+const logger = require('./logger');
 
 /**
  * Initialize Gemini model for fraud detection with stricter parameters
@@ -20,6 +23,23 @@ function initializeFraudDetectionModel(apiKey) {
     }
   });
 }
+
+/**
+ * Check if Redis is available
+ */
+function isRedisAvailable() {
+  try {
+    const client = getRedisClient();
+    return client && client.isOpen;
+  } catch (error) {
+    return false;
+  }
+}
+
+/**
+ * In-memory fallback for fraud database
+ */
+const inMemoryFraudDB = new Map();
 
 /**
  * Known scam patterns and red flags to check for
@@ -244,6 +264,7 @@ Be thorough and consider that legitimate blockchain projects should have:
     }
     
     // Fallback if JSON parsing fails
+    logger.warn('AI analysis failed to parse JSON response');
     return {
       riskScore: 50,
       riskLevel: 'medium',
@@ -257,16 +278,32 @@ Be thorough and consider that legitimate blockchain projects should have:
       confidence: 30
     };
   } catch (error) {
-    console.error('AI analysis error:', error);
+    logger.error('AI analysis error', error);
     throw error;
   }
 }
 
 /**
- * Check campaign against known fraud database
+ * Check campaign against known fraud database (Redis-backed with fallback)
  */
-function checkAgainstKnownFraud(campaignData, knownFraudCampaigns = []) {
+async function checkAgainstKnownFraud(campaignData) {
   const matches = [];
+  let knownFraudCampaigns = [];
+  
+  // Try to get from Redis first
+  if (isRedisAvailable()) {
+    try {
+      knownFraudCampaigns = await fraudOps.getAllFraudCampaigns();
+      logger.debug(`Loaded ${knownFraudCampaigns.length} known fraud campaigns from Redis`);
+    } catch (error) {
+      logger.error('Failed to load fraud campaigns from Redis, using in-memory fallback', error);
+      knownFraudCampaigns = Array.from(inMemoryFraudDB.values());
+    }
+  } else {
+    // Fallback to in-memory
+    knownFraudCampaigns = Array.from(inMemoryFraudDB.values());
+    logger.debug(`Using in-memory fraud database (${knownFraudCampaigns.length} entries)`);
+  }
   
   for (const fraudCampaign of knownFraudCampaigns) {
     const titleSimilarity = calculateTextSimilarity(
@@ -289,10 +326,72 @@ function checkAgainstKnownFraud(campaignData, knownFraudCampaigns = []) {
     }
   }
   
+  if (matches.length > 0) {
+    logger.warn('Campaign matched known fraud patterns', { 
+      campaignTitle: campaignData.title,
+      matchCount: matches.length 
+    });
+  }
+  
   return {
     matchesFound: matches.length > 0,
     matches,
     highRisk: matches.some(m => m.titleSimilarity > 80 || m.descriptionSimilarity > 70)
+  };
+}
+
+/**
+ * Add a campaign to the fraud database
+ */
+async function addToFraudDatabase(campaignData, reason = 'Flagged as fraudulent') {
+  const fraudEntry = {
+    id: campaignData.id || `fraud_${Date.now()}`,
+    title: campaignData.title,
+    description: campaignData.description,
+    reason,
+    flaggedAt: Date.now()
+  };
+  
+  if (isRedisAvailable()) {
+    try {
+      await fraudOps.addFraudCampaign(fraudEntry);
+      logger.info('Added campaign to fraud database (Redis)', { id: fraudEntry.id });
+      return { success: true, storage: 'redis' };
+    } catch (error) {
+      logger.error('Failed to add to Redis fraud database, using in-memory', error);
+      // Fall through to in-memory
+    }
+  }
+  
+  // Fallback to in-memory
+  inMemoryFraudDB.set(fraudEntry.id, fraudEntry);
+  logger.info('Added campaign to fraud database (in-memory)', { id: fraudEntry.id });
+  return { success: true, storage: 'in-memory' };
+}
+
+/**
+ * Get fraud database statistics
+ */
+async function getFraudDatabaseStats() {
+  const usingRedis = isRedisAvailable();
+  
+  if (usingRedis) {
+    try {
+      const campaigns = await fraudOps.getAllFraudCampaigns();
+      return {
+        storage: 'redis',
+        totalEntries: campaigns.length,
+        redisAvailable: true
+      };
+    } catch (error) {
+      logger.error('Failed to get fraud stats from Redis', error);
+    }
+  }
+  
+  return {
+    storage: 'in-memory',
+    totalEntries: inMemoryFraudDB.size,
+    redisAvailable: false
   };
 }
 
@@ -347,11 +446,17 @@ function determineRiskLevel(score) {
 async function detectFraud(campaignData, options = {}) {
   const {
     apiKey,
-    knownFraudCampaigns = [],
     skipAI = false
   } = options;
   
+  const startTime = Date.now();
+  
   try {
+    logger.info('Starting fraud detection', { 
+      campaignId: campaignData.id,
+      title: campaignData.title 
+    });
+    
     // Step 1: Pattern-based detection
     const patternAnalysis = detectScamPatterns(
       campaignData.title, 
@@ -364,15 +469,15 @@ async function detectFraud(campaignData, options = {}) {
     // Step 3: AI-powered analysis (if API key provided and not skipped)
     let aiAnalysis = null;
     if (apiKey && !skipAI && apiKey !== 'your_gemini_api_key_here') {
+      logger.debug('Running AI-powered fraud analysis');
       const model = initializeFraudDetectionModel(apiKey);
       aiAnalysis = await analyzeWithAI(model, campaignData);
+    } else {
+      logger.debug('Skipping AI analysis', { skipAI, hasApiKey: !!apiKey });
     }
     
-    // Step 4: Check against known fraud database
-    const knownFraudCheck = checkAgainstKnownFraud(
-      campaignData, 
-      knownFraudCampaigns
-    );
+    // Step 4: Check against known fraud database (now async)
+    const knownFraudCheck = await checkAgainstKnownFraud(campaignData);
     
     // Step 5: Calculate overall risk
     const overallRiskScore = calculateOverallRiskScore({
@@ -392,6 +497,16 @@ async function detectFraud(campaignData, options = {}) {
       recommendation = 'review';
     }
     
+    const analysisTime = Date.now() - startTime;
+    
+    logger.info('Fraud detection completed', {
+      campaignId: campaignData.id,
+      riskLevel,
+      score: overallRiskScore,
+      recommendation,
+      analysisTimeMs: analysisTime
+    });
+    
     // Step 7: Compile comprehensive report
     return {
       campaignId: campaignData.id || 'new',
@@ -399,6 +514,7 @@ async function detectFraud(campaignData, options = {}) {
       overallRiskScore,
       riskLevel,
       recommendation,
+      analysisTimeMs: analysisTime,
       analysis: {
         patternAnalysis: {
           detected: patternAnalysis.detected,
@@ -430,7 +546,7 @@ async function detectFraud(campaignData, options = {}) {
     };
     
   } catch (error) {
-    console.error('Fraud detection error:', error);
+    logger.error('Fraud detection error', error);
     return {
       error: true,
       message: 'Fraud detection analysis failed',
@@ -487,5 +603,7 @@ module.exports = {
   detectScamPatterns,
   validateCampaignStructure,
   calculateTextSimilarity,
-  checkAgainstKnownFraud
+  checkAgainstKnownFraud,
+  addToFraudDatabase,
+  getFraudDatabaseStats
 };

@@ -5,6 +5,18 @@
  */
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+const API_KEY = import.meta.env.VITE_BACKEND_API_KEY || 'dev_api_key_12345';
+
+/**
+ * Get authentication headers for API requests
+ * @returns {Object} Headers object with API key
+ */
+function getAuthHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    'X-API-Key': API_KEY,
+  };
+}
 
 /**
  * Generate campaign description using AI
@@ -15,9 +27,7 @@ export async function generateDescription(title) {
   try {
     const response = await fetch(`${BACKEND_URL}/api/generate-description`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ title }),
     });
 
@@ -43,9 +53,7 @@ export async function generateTitles(keywords, category = 'general') {
   try {
     const response = await fetch(`${BACKEND_URL}/api/generate-title`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ keywords, category }),
     });
 
@@ -75,9 +83,7 @@ export async function detectFraud(campaign) {
   try {
     const response = await fetch(`${BACKEND_URL}/api/fraud-detection`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ campaign }),
     });
 
@@ -103,9 +109,7 @@ export async function summarizeContent(description, maxLength = 100) {
   try {
     const response = await fetch(`${BACKEND_URL}/api/summarize`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ description, maxLength }),
     });
 
@@ -130,9 +134,7 @@ export async function generateContractSummary(contract) {
   try {
     const response = await fetch(`${BACKEND_URL}/api/contract-summary`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ contract }),
     });
 

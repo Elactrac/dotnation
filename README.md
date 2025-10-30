@@ -7,6 +7,19 @@
 
 A decentralized crowdfunding platform built on Polkadot, enabling transparent and secure fundraising through smart contracts.
 
+## 🎯 Quick Start (100% FREE for Hackathons!)
+
+Deploy the entire platform with **zero cost**:
+- **Frontend**: Vercel (FREE)
+- **Backend**: Render.com (FREE tier)
+- **Redis**: Upstash (FREE tier)
+- **AI**: Google Gemini (FREE API)
+- **Blockchain**: Rococo testnet (FREE)
+
+**Total: $0/month** - No credit card required! Perfect for hackathons and demos.
+
+See [VERCEL_DEPLOYMENT_GUIDE.md](VERCEL_DEPLOYMENT_GUIDE.md) for complete deployment instructions.
+
 ## Features
 
 ### Core Functionality
@@ -93,9 +106,16 @@ The frontend is a modern Single Page Application (SPA) built with React and Vite
 ### 3. Gemini Backend (`gemini-backend/`)
 
 The Gemini backend is a Node.js server that provides AI-powered features to enhance the user experience. It offers a RESTful API for:
-- **Content Generation**: Generating compelling campaign descriptions and summaries using the Google Gemini AI.
-- **Campaign Assistance**: Providing users with suggestions and optimizations for their campaign content.
-- **Scalability**: Offloading AI-related tasks from the frontend to a dedicated server, which can be scaled independently.
+- **🔐 Secure Authentication**: API key-based authentication on all endpoints
+- **⚡ Rate Limiting**: Protection against abuse (100 req/15min general, 10 req/15min AI)
+- **🤖 AI Content Generation**: Generating compelling campaign descriptions and titles using Google Gemini AI
+- **🛡️ Fraud Detection**: AI-powered campaign analysis to detect potential fraud
+- **🎯 Captcha System**: Multi-type captcha verification with Redis session management
+- **📊 Redis Persistence**: Session storage with graceful in-memory fallback
+- **🔍 Campaign Assistance**: Providing users with suggestions and optimizations for their campaign content
+- **📈 Scalability**: Offloading AI-related tasks from the frontend to a dedicated server, which can be scaled independently
+
+**See [gemini-backend/README.md](gemini-backend/README.md) for complete API documentation and configuration details.**
 
 ---
 
@@ -104,9 +124,11 @@ The Gemini backend is a Node.js server that provides AI-powered features to enha
 ### Prerequisites
 
 - **Node.js**: v18+
+- **Redis**: For backend session persistence
 - **Polkadot.js Extension**: A browser extension for managing Polkadot accounts.
 - **Rust**: The Rust toolchain with the `wasm32-unknown-unknown` target for smart contract development.
 - **cargo-contract**: v5.0.3+ for building and deploying ink! smart contracts.
+- **Google Gemini API Key**: FREE API key from [Google AI Studio](https://aistudio.google.com/app/apikey)
 
 ### Setup
 
@@ -122,7 +144,63 @@ The Gemini backend is a Node.js server that provides AI-powered features to enha
    npm install
    ```
 
-3. **Set up the Rust environment** (for smart contract development):
+3. **Install backend dependencies**:
+   ```bash
+   cd ../gemini-backend
+   npm install
+   ```
+
+4. **Set up Redis** (required for backend):
+   ```bash
+   # macOS
+   brew install redis
+   brew services start redis
+   
+   # Ubuntu/Debian
+   sudo apt-get install redis-server
+   sudo systemctl start redis
+   ```
+
+5. **Configure backend environment**:
+   ```bash
+   cd gemini-backend
+   cp .env.example .env
+   ```
+   
+   Edit `.env` and add your configuration:
+   ```bash
+   # Required - Backend API key for authentication
+   BACKEND_API_KEY=dev_api_key_12345
+   
+   # Required - Google Gemini API key (get free at https://aistudio.google.com/app/apikey)
+   GEMINI_API_KEY=your_gemini_api_key_here
+   
+   # Optional - defaults shown
+   PORT=3001
+   NODE_ENV=development
+   REDIS_URL=redis://localhost:6379
+   ALLOWED_ORIGINS=http://localhost:5173
+   ```
+
+6. **Configure frontend environment**:
+   ```bash
+   cd ../frontend
+   cp .env.example .env.local
+   ```
+   
+   Edit `.env.local`:
+   ```bash
+   # Backend API Configuration
+   VITE_BACKEND_URL=http://localhost:3001
+   VITE_BACKEND_API_KEY=dev_api_key_12345  # Must match backend
+   
+   # Network Configuration
+   VITE_NETWORK_NAME=Shibuya Testnet
+   VITE_RPC_ENDPOINT=wss://shibuya.public.blastapi.io
+   VITE_CONTRACT_ADDRESS=your_deployed_contract_address
+   ```
+
+7. **Set up the Rust environment** (for smart contract development):
    ```bash
    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
    rustup target add wasm32-unknown-unknown
@@ -135,6 +213,14 @@ The Gemini backend is a Node.js server that provides AI-powered features to enha
 
 For a quick start, you can run the frontend with mock data, which allows you to test the UI/UX without needing a running blockchain.
 
+**Start the backend** (in one terminal):
+```bash
+cd gemini-backend
+node server.js
+```
+Backend will be available at `http://localhost:3001`.
+
+**Start the frontend** (in another terminal):
 ```bash
 cd frontend
 npm run dev
@@ -144,6 +230,12 @@ The application will be available at `http://localhost:5173`.
 #### 2. Full Blockchain Development
 
 For end-to-end testing, you will need to run a local blockchain node, deploy the smart contract, and configure the frontend to connect to it.
+
+- **Start the backend**:
+  ```bash
+  cd gemini-backend
+  node server.js
+  ```
 
 - **Start a local blockchain node**:
   ```bash
@@ -161,7 +253,7 @@ For end-to-end testing, you will need to run a local blockchain node, deploy the
   ```
 
 - **Configure the frontend**:
-  Create a `.env.local` file in the `frontend` directory and add the following, replacing `your_deployed_address` with the address of your deployed contract:
+  Update `.env.local` in the `frontend` directory with your deployed contract address:
   ```
   VITE_CONTRACT_ADDRESS=your_deployed_address
   ```
@@ -174,6 +266,26 @@ For end-to-end testing, you will need to run a local blockchain node, deploy the
 ---
 
 ## Testing
+
+### Backend
+
+To run the backend server:
+```bash
+cd gemini-backend
+node server.js
+```
+
+To test authentication:
+```bash
+# Should return 401 (no API key)
+curl http://localhost:3001/api/generate-description
+
+# Should return 200 with valid key
+curl -H "X-API-Key: dev_api_key_12345" \
+  -H "Content-Type: application/json" \
+  -X POST http://localhost:3001/api/generate-description \
+  -d '{"title":"Test Campaign"}'
+```
 
 ### Smart Contract
 

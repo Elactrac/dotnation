@@ -2,7 +2,13 @@ import { createContext, useContext, useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { useApi } from './ApiContext';
 import { useWallet } from './WalletContext';
-import { useToast } from '@chakra-ui/react';
+
+// Simple toast utility without Chakra UI
+const showToast = ({ title, description, status }) => {
+  console.log(`[${status.toUpperCase()}] ${title}: ${description}`);
+  // In a real implementation, you'd show a custom toast component
+  // For now, we'll use console.log as a placeholder
+};
 
 const BatchOperationsContext = createContext();
 
@@ -17,7 +23,6 @@ export const useBatchOperations = () => {
 export const BatchOperationsProvider = ({ children }) => {
   const { api, contract } = useApi();
   const { selectedAccount } = useWallet();
-  const toast = useToast();
 
   const [batchLoading, setBatchLoading] = useState(false);
   const [batchProgress, setBatchProgress] = useState({ current: 0, total: 0 });
@@ -95,12 +100,10 @@ export const BatchOperationsProvider = ({ children }) => {
 
             batchResult.failed = campaignsData.length - batchResult.successful;
 
-            toast({
+            showToast({
               title: 'Batch Creation Complete',
               description: `✅ ${batchResult.successful} campaigns created successfully${batchResult.failed > 0 ? `, ❌ ${batchResult.failed} failed` : ''}`,
               status: batchResult.failed === 0 ? 'success' : 'warning',
-              duration: 5000,
-              isClosable: true,
             });
 
             resolve(batchResult);
@@ -111,19 +114,17 @@ export const BatchOperationsProvider = ({ children }) => {
       });
     } catch (error) {
       console.error('Batch campaign creation error:', error);
-      toast({
+      showToast({
         title: 'Batch Creation Failed',
         description: error.message || 'Failed to create campaigns in batch',
         status: 'error',
-        duration: 5000,
-        isClosable: true,
       });
       throw error;
     } finally {
       setBatchLoading(false);
       setBatchProgress({ current: 0, total: 0 });
     }
-  }, [api, contract, selectedAccount, toast]);
+  }, [api, contract, selectedAccount]);
 
   /**
    * Withdraw funds from multiple campaigns in a single batch transaction
@@ -188,12 +189,10 @@ export const BatchOperationsProvider = ({ children }) => {
 
             batchResult.failed = campaignIds.length - batchResult.successful;
 
-            toast({
+            showToast({
               title: 'Batch Withdrawal Complete',
               description: `✅ ${batchResult.successful} withdrawals successful${batchResult.failed > 0 ? `, ❌ ${batchResult.failed} failed` : ''}`,
               status: batchResult.failed === 0 ? 'success' : 'warning',
-              duration: 5000,
-              isClosable: true,
             });
 
             resolve(batchResult);
@@ -204,19 +203,17 @@ export const BatchOperationsProvider = ({ children }) => {
       });
     } catch (error) {
       console.error('Batch withdrawal error:', error);
-      toast({
+      showToast({
         title: 'Batch Withdrawal Failed',
         description: error.message || 'Failed to withdraw funds in batch',
         status: 'error',
-        duration: 5000,
-        isClosable: true,
       });
       throw error;
     } finally {
       setBatchLoading(false);
       setBatchProgress({ current: 0, total: 0 });
     }
-  }, [api, contract, selectedAccount, toast]);
+  }, [api, contract, selectedAccount]);
 
   /**
    * Get the contract version

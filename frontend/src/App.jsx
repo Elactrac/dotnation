@@ -1,13 +1,11 @@
 import React, { Suspense } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { ChakraProvider } from '@chakra-ui/react';
 import { ApiProvider } from './contexts/ApiContext.jsx';
 import { WalletProvider } from './contexts/WalletContext.jsx';
 import { CampaignProvider } from './contexts/CampaignContext.jsx';
 import { BatchOperationsProvider } from './contexts/BatchOperationsContext.jsx';
 import ErrorBoundary from './components/ErrorBoundary';
 import { initSentry } from './utils/sentry';
-import theme from './theme';
 
 const NewLandingPage = React.lazy(() => import('./pages/NewLandingPage'));
 const NewDashboardLayout = React.lazy(() => import('./pages/NewDashboardLayout'));
@@ -174,19 +172,17 @@ function App() {
         });
       }}
     >
-      <ChakraProvider theme={theme}>
-        <ApiProvider>
-          <WalletProvider>
-            <CampaignProvider>
-              <BatchOperationsProvider>
-                <Suspense fallback={<SuspenseFallback />}>
-                  <RouterProvider router={router} />
-                </Suspense>
-              </BatchOperationsProvider>
-            </CampaignProvider>
-          </WalletProvider>
-        </ApiProvider>
-      </ChakraProvider>
+      <ApiProvider>
+        <WalletProvider>
+          <CampaignProvider>
+            <BatchOperationsProvider>
+              <Suspense fallback={<SuspenseFallback />}>
+                <RouterProvider router={router} />
+              </Suspense>
+            </BatchOperationsProvider>
+          </CampaignProvider>
+        </WalletProvider>
+      </ApiProvider>
     </ErrorBoundary>
   );
 }

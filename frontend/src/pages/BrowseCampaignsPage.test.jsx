@@ -234,7 +234,7 @@ describe('BrowseCampaignsPage', () => {
     });
 
     it('should show all campaigns when status is "all"', async () => {
-      const user = userEvent.setup();
+      userEvent.setup();
       renderWithProviders(<BrowseCampaignsPage />);
       
       expect(screen.getByText('Tech Innovation Project')).toBeInTheDocument();

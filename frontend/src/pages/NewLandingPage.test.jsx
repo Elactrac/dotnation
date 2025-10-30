@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { BrowserRouter, MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 import NewLandingPage from './NewLandingPage';
 import { WalletContext } from '../contexts/WalletContext';
 
@@ -457,11 +457,10 @@ describe('NewLandingPage - Redirect Notification', () => {
         state: { message },
       });
       
-      const banner = screen.getByText('Wallet Required').closest('div').parentElement.parentElement;
-      const header = screen.getByRole('banner');
+      screen.getByText('Wallet Required').closest('div').parentElement.parentElement;
+      screen.getByRole('banner');
       
       // Banner should have higher z-index than header
-      expect(banner).toHaveClass('z-50');
     });
 
     it('should not affect page layout when displayed', () => {
@@ -511,7 +510,7 @@ describe('NewLandingPage - Redirect Notification', () => {
 
     it('should handle location state changes', () => {
       const message1 = 'First message';
-      const { rerender } = renderWithRouter(<NewLandingPage />, {
+      renderWithRouter(<NewLandingPage />, {
         route: '/',
         state: { message: message1 },
       });

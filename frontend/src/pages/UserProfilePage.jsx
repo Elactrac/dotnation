@@ -347,7 +347,7 @@ const UserProfilePage = () => {
               ) : (
                 <div className="text-center py-12">
                   <div className="text-6xl mb-4">📦</div>
-                  <p className="text-gray-400 font-body mb-6">You haven't created any campaigns yet</p>
+                  <p className="text-gray-400 font-body mb-6">You haven&apos;t created any campaigns yet</p>
                   <a
                     href="/dashboard/create-campaign"
                     className="inline-block px-8 py-4 bg-gradient-to-r from-primary to-secondary text-white font-body font-bold rounded-xl hover:shadow-glow transition-all duration-200"

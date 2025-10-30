@@ -1,5 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react';
-import { BrowserRouter, useNavigate } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import ProtectedRoute from './ProtectedRoute';
 import { WalletContext } from '../contexts/WalletContext';

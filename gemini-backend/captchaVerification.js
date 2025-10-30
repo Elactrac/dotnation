@@ -1,19 +1,30 @@
 /**
  * @file Captcha Verification Module
  * Provides secure server-side captcha verification with session management
+ * Production-ready with Redis persistence
  */
 
 const crypto = require('crypto');
+const { getRedisClient, sessionOps, rateLimitOps } = require('./redisClient');
+const logger = require('./logger');
 
 /**
- * In-memory session store (use Redis in production)
+ * Fallback in-memory stores when Redis is unavailable
  */
 const sessionStore = new Map();
+const rateLimitStore = new Map();
 
 /**
- * Rate limit tracking per IP
+ * Check if Redis is available
  */
-const rateLimitStore = new Map();
+function isRedisAvailable() {
+  try {
+    const client = getRedisClient();
+    return client && client.isOpen;
+  } catch (error) {
+    return false;
+  }
+}
 
 /**
  * Session configuration
@@ -34,9 +45,14 @@ const RATE_LIMIT_CONFIG = {
 };
 
 /**
- * Clean up expired sessions periodically
+ * Clean up expired sessions periodically (only for fallback in-memory store)
  */
 setInterval(() => {
+  if (isRedisAvailable()) {
+    // Redis handles TTL automatically, no cleanup needed
+    return;
+  }
+  
   const now = Date.now();
   
   // Clean up sessions
@@ -53,7 +69,7 @@ setInterval(() => {
     }
   }
   
-  console.log(`[Captcha] Cleanup: ${sessionStore.size} active sessions, ${rateLimitStore.size} rate limit entries`);
+  logger.info(`Captcha cleanup (in-memory): ${sessionStore.size} sessions, ${rateLimitStore.size} rate limits`);
 }, SESSION_CONFIG.cleanupInterval);
 
 /**
@@ -79,7 +95,22 @@ function generateVerificationToken(sessionToken, ip) {
 /**
  * Check rate limit for IP address
  */
-function checkRateLimit(ip) {
+async function checkRateLimit(ip) {
+  if (isRedisAvailable()) {
+    // Use Redis rate limiting
+    try {
+      return await rateLimitOps.checkRateLimit(
+        ip, 
+        RATE_LIMIT_CONFIG.maxRequests, 
+        RATE_LIMIT_CONFIG.windowMs
+      );
+    } catch (error) {
+      logger.error('Redis rate limit check failed, falling back to in-memory', error);
+      // Fall through to in-memory implementation
+    }
+  }
+  
+  // Fallback: In-memory rate limiting
   const now = Date.now();
   const rateLimitData = rateLimitStore.get(ip) || {
     count: 0,
@@ -105,7 +136,7 @@ function checkRateLimit(ip) {
 /**
  * Create a new captcha session
  */
-function createSession(ip) {
+async function createSession(ip) {
   const sessionToken = generateSessionToken();
   const session = {
     token: sessionToken,
@@ -116,6 +147,18 @@ function createSession(ip) {
     ip: crypto.createHash('sha256').update(ip).digest('hex')
   };
   
+  if (isRedisAvailable()) {
+    try {
+      await sessionOps.createSession(sessionToken, session, SESSION_CONFIG.maxAge / 1000);
+      logger.debug('Created captcha session in Redis', { token: sessionToken.substring(0, 8) });
+      return sessionToken;
+    } catch (error) {
+      logger.error('Failed to create session in Redis, using in-memory fallback', error);
+      // Fall through to in-memory storage
+    }
+  }
+  
+  // Fallback: In-memory storage
   sessionStore.set(sessionToken, session);
   
   return sessionToken;
@@ -196,9 +239,9 @@ function verifyPatternCaptcha(sessionToken, userPattern, correctPattern, timeTak
  * Unified captcha verification with session management
  * @param {string} captchaType - Type of captcha: 'math', 'image', 'slider', 'pattern'
  */
-function verifyCaptcha(sessionToken, captchaType, userAnswer, expectedAnswer, timeTaken, ip, options = {}) {
+async function verifyCaptcha(sessionToken, captchaType, userAnswer, expectedAnswer, timeTaken, ip, options = {}) {
   // Check rate limit
-  const rateLimit = checkRateLimit(ip);
+  const rateLimit = await checkRateLimit(ip);
   if (!rateLimit.allowed) {
     return {
       verified: false,
@@ -207,8 +250,23 @@ function verifyCaptcha(sessionToken, captchaType, userAnswer, expectedAnswer, ti
     };
   }
   
+  // Get session (try Redis first, fallback to in-memory)
+  let session = null;
+  
+  if (isRedisAvailable()) {
+    try {
+      session = await sessionOps.getSession(sessionToken);
+    } catch (error) {
+      logger.error('Failed to get session from Redis', error);
+    }
+  }
+  
+  if (!session) {
+    // Fallback to in-memory
+    session = sessionStore.get(sessionToken);
+  }
+  
   // Validate session token
-  const session = sessionStore.get(sessionToken);
   if (!session) {
     return {
       verified: false,
@@ -219,7 +277,16 @@ function verifyCaptcha(sessionToken, captchaType, userAnswer, expectedAnswer, ti
   // Check session age
   const sessionAge = Date.now() - session.createdAt;
   if (sessionAge > SESSION_CONFIG.maxAge) {
+    // Delete expired session
+    if (isRedisAvailable()) {
+      try {
+        await sessionOps.deleteSession(sessionToken);
+      } catch (error) {
+        logger.error('Failed to delete session from Redis', error);
+      }
+    }
     sessionStore.delete(sessionToken);
+    
     return {
       verified: false,
       error: 'Session expired'
@@ -253,7 +320,8 @@ function verifyCaptcha(sessionToken, captchaType, userAnswer, expectedAnswer, ti
       session.lockUntil = Date.now() + SESSION_CONFIG.lockoutDuration;
     }
     
-    sessionStore.set(sessionToken, session);
+    // Update session
+    await updateSession(sessionToken, session);
     
     return {
       verified: false,
@@ -288,6 +356,13 @@ function verifyCaptcha(sessionToken, captchaType, userAnswer, expectedAnswer, ti
   
   if (isCorrect) {
     // Success - clear session and generate verification token
+    if (isRedisAvailable()) {
+      try {
+        await sessionOps.deleteSession(sessionToken);
+      } catch (error) {
+        logger.error('Failed to delete session from Redis', error);
+      }
+    }
     sessionStore.delete(sessionToken);
     
     const verificationToken = generateVerificationToken(sessionToken, ip);
@@ -306,7 +381,8 @@ function verifyCaptcha(sessionToken, captchaType, userAnswer, expectedAnswer, ti
       session.lockUntil = Date.now() + SESSION_CONFIG.lockoutDuration;
     }
     
-    sessionStore.set(sessionToken, session);
+    // Update session
+    await updateSession(sessionToken, session);
     
     return {
       verified: false,
@@ -319,6 +395,23 @@ function verifyCaptcha(sessionToken, captchaType, userAnswer, expectedAnswer, ti
 }
 
 /**
+ * Update session in Redis or in-memory store
+ */
+async function updateSession(sessionToken, session) {
+  if (isRedisAvailable()) {
+    try {
+      await sessionOps.updateSession(sessionToken, session, SESSION_CONFIG.maxAge / 1000);
+      return;
+    } catch (error) {
+      logger.error('Failed to update session in Redis', error);
+    }
+  }
+  
+  // Fallback to in-memory
+  sessionStore.set(sessionToken, session);
+}
+
+/**
  * Validate a verification token
  */
 function validateVerificationToken(token, ip) {
@@ -328,18 +421,21 @@ function validateVerificationToken(token, ip) {
     // Check token age (valid for 1 hour)
     const tokenAge = Date.now() - payload.timestamp;
     if (tokenAge > 60 * 60 * 1000) {
+      logger.warn('Verification token expired', { tokenAge, ip });
       return { valid: false, error: 'Token expired' };
     }
     
     // Verify IP hash matches (optional - for extra security)
     const ipHash = crypto.createHash('sha256').update(ip).digest('hex');
     if (payload.ip !== ipHash) {
-      console.warn('[Captcha] IP mismatch for verification token');
+      logger.warn('IP mismatch for verification token', { ip });
       // Don't fail on IP mismatch (IP can change), just log it
     }
     
+    logger.debug('Verification token validated', { ip });
     return { valid: true, payload };
   } catch (error) {
+    logger.error('Invalid verification token format', error);
     return { valid: false, error: 'Invalid token format' };
   }
 }
@@ -348,9 +444,13 @@ function validateVerificationToken(token, ip) {
  * Get session statistics (for monitoring)
  */
 function getStats() {
+  const usingRedis = isRedisAvailable();
+  
   return {
-    activeSessions: sessionStore.size,
-    rateLimitEntries: rateLimitStore.size,
+    storage: usingRedis ? 'redis' : 'in-memory',
+    activeSessions: usingRedis ? 'N/A (stored in Redis)' : sessionStore.size,
+    rateLimitEntries: usingRedis ? 'N/A (stored in Redis)' : rateLimitStore.size,
+    redisAvailable: usingRedis,
     config: {
       sessionMaxAge: SESSION_CONFIG.maxAge,
       maxAttempts: SESSION_CONFIG.maxAttempts,
