@@ -3,7 +3,8 @@ import PropTypes from 'prop-types';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWallet } from '../contexts/WalletContext';
-import { generateDescription, generateTitles, detectFraud } from '../utils/aiApi';
+import { useCampaign } from '../contexts/CampaignContext';
+import { generateDescription, generateTitles, detectFraud, generateContractSummary } from '../utils/aiApi';
 
 // Reusable form components for consistent styling
 const FormField = ({ label, name, error, children, required }) => (
@@ -38,6 +39,7 @@ TextareaField.propTypes = { className: PropTypes.string };
  */
 export const CreateCampaignForm = ({ onSuccess }) => {
   const { selectedAccount } = useWallet();
+  const { createCampaign } = useCampaign();
 
   console.log('CreateCampaignForm render - selectedAccount:', selectedAccount);
   
@@ -164,20 +166,13 @@ export const CreateCampaignForm = ({ onSuccess }) => {
       beneficiary: formData.beneficiary,
     });
     try {
-      const response = await fetch('http://localhost:3001/api/contract-summary', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: formData.title,
-          description: formData.description,
-          goal: formData.goal,
-          deadline: formData.deadline,
-          beneficiary: formData.beneficiary,
-        }),
+      const data = await generateContractSummary({
+        title: formData.title,
+        description: formData.description,
+        goal: formData.goal,
+        deadline: formData.deadline,
+        beneficiary: formData.beneficiary,
       });
-      console.log('API response status:', response.status);
-      if (!response.ok) throw new Error(`Failed to generate contract summary: ${response.status}`);
-      const data = await response.json();
       console.log('Received summary:', data.summary);
       setContractSummary(data.summary);
       setShowModal(true);
@@ -201,26 +196,53 @@ export const CreateCampaignForm = ({ onSuccess }) => {
   };
 
   const handleConfirmCreate = async () => {
+    if (!selectedAccount) {
+      toast.error('Please connect your wallet to create a campaign');
+      setShowModal(false);
+      return;
+    }
+
     setShowModal(false);
     setIsSubmitting(true);
+    
     try {
-      // For testing: Skip actual contract deployment
-      console.log('TEST MODE: Skipping contract deployment');
-      console.log('Would deploy with:', {
+      // Prepare campaign data for contract
+      const campaignData = {
         title: formData.title,
         description: formData.description,
-        goal: Math.floor(parseFloat(formData.goal) * 1_000_000_000_000),
+        goal: Math.floor(parseFloat(formData.goal) * 1_000_000_000_000), // Convert DOT to planks
         deadline: new Date(formData.deadline).getTime(),
         beneficiary: formData.beneficiary
-      });
+      };
 
-      // Simulate successful creation
-      await new Promise(resolve => setTimeout(resolve, 2000)); // 2 second delay
-      toast.success('Campaign created! (Test Mode) - This was a test, no real contract deployed.');
-      onSuccess();
+      console.log('Creating campaign with data:', campaignData);
+
+      // Call the createCampaign function from CampaignContext
+      const tx = await createCampaign(campaignData);
+
+      // Sign and send the transaction
+      await tx.signAndSend(selectedAccount.address, ({ status, events }) => {
+        if (status.isInBlock) {
+          console.log(`Transaction included in block hash: ${status.asInBlock.toHex()}`);
+        } else if (status.isFinalized) {
+          console.log(`Transaction finalized in block hash: ${status.asFinalized.toHex()}`);
+          
+          // Check for success event
+          events.forEach(({ event }) => {
+            if (event.method === 'ExtrinsicSuccess') {
+              toast.success('Campaign created successfully!');
+              onSuccess();
+            } else if (event.method === 'ExtrinsicFailed') {
+              toast.error('Campaign creation failed');
+            }
+          });
+          
+          setIsSubmitting(false);
+        }
+      });
     } catch (error) {
+      console.error('Campaign creation error:', error);
       toast.error(`Failed to create campaign: ${error.message}`);
-    } finally {
       setIsSubmitting(false);
     }
   };

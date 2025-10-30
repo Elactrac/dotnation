@@ -135,7 +135,7 @@ export async function generateContractSummary(contract) {
     const response = await fetch(`${BACKEND_URL}/api/contract-summary`, {
       method: 'POST',
       headers: getAuthHeaders(),
-      body: JSON.stringify({ contract }),
+      body: JSON.stringify(contract),
     });
 
     if (!response.ok) {
