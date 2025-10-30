@@ -226,6 +226,25 @@ The frontend is automatically deployed to Vercel from the `main` branch.
 
 ---
 
+## Documentation
+
+This repository is thoroughly documented to assist developers.
+
+### Smart Contracts
+The smart contract code in the `donation_platform/` directory is documented using Rust's official documentation tool, `rustdoc`. To generate the documentation:
+
+```bash
+cd donation_platform
+cargo doc --open
+```
+This command will build the documentation and open it in your default web browser.
+
+### Frontend
+The frontend code in the `frontend/` directory is documented using JSDoc. To generate the documentation, you can use a tool like `jsdoc-to-markdown`.
+
+### Backend
+The backend code in the `gemini-backend/` directory is also documented using JSDoc.
+
 ## Contributing
 
 Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribute to this project.

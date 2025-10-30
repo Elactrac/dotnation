@@ -5,10 +5,16 @@ import { formatDotBalance, getCampaignStatus, calculateProgress } from '../utils
 
 /**
  * A card component that displays a summary of a fundraising campaign.
- * It includes the campaign title, progress, status, and actions like viewing details or generating an AI summary.
+ *
+ * It includes the campaign's title, funding progress, and current status.
+ * The card provides interactive elements for viewing detailed information about the
+ * campaign and generating an AI-powered summary of its description.
+ * For successful campaigns, a withdrawal action is also available.
+ *
  * @param {object} props - The component props.
- * @param {object} props.campaign - The campaign object to display.
- * @returns {JSX.Element} The campaign card component.
+ * @param {object} props.campaign - The campaign object containing details like title,
+ *   raised amount, goal, etc.
+ * @returns {JSX.Element} The rendered campaign card component.
  */
 const CampaignCard = ({ campaign }) => {
     const [summary, setSummary] = useState('');

@@ -2,6 +2,20 @@ import { useState, useRef, useEffect } from 'react';
 import { useWallet } from '../contexts/WalletContext.jsx';
 import { shortenAddress, formatDotBalance } from '../utils/formatters';
 
+/**
+ * A component that handles the user's wallet connection status and interactions.
+ *
+ * This component displays the current wallet connection state, including:
+ * - A "Connect Wallet" button if no wallet is connected.
+ * - A loading indicator while connecting.
+ * - An error state with a retry button if the connection fails.
+ * - The connected account's address and balance.
+ * - A dropdown menu to switch between accounts or disconnect the wallet.
+ *
+ * It utilizes the `useWallet` hook to manage wallet state and actions.
+ *
+ * @returns {JSX.Element} The rendered wallet connection component.
+ */
 const WalletConnect = () => {
     const { accounts, selectedAccount, connectWallet, disconnectWallet, switchAccount, isLoading, error, balance } = useWallet();
     const [isMenuOpen, setIsMenuOpen] = useState(false);

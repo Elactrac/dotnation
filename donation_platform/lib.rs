@@ -11,7 +11,10 @@ mod donation_platform_v2 {
     use ink::prelude::string::String;
     use ink::storage::Mapping;
 
-    /// Errors that can occur during contract execution.
+    /// Defines the errors that can occur during the execution of the donation platform contract.
+    ///
+    /// Each variant corresponds to a specific failure condition, providing clear reasons for
+    /// transaction failures.
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub enum Error {
@@ -51,7 +54,10 @@ mod donation_platform_v2 {
         BatchSizeTooLarge,
     }
 
-    /// Represents the state of a fundraising campaign.
+    /// Represents the lifecycle state of a fundraising campaign.
+    ///
+    /// A campaign progresses through these states from its creation to its completion,
+    /// either by success, failure, or fund withdrawal.
     #[derive(Debug, PartialEq, Eq, Clone, Copy, scale::Encode, scale::Decode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     #[cfg_attr(feature = "std", derive(::ink::storage::traits::StorageLayout))]
@@ -66,8 +72,12 @@ mod donation_platform_v2 {
         Withdrawn,
     }
 
-    /// Represents a single donation to a campaign.
+    /// Represents a single donation made to a fundraising campaign.
+    ///
+    /// This struct captures the essential details of each contribution, including who made
+    /// the donation, the amount, and when it was made.
     #[derive(Debug, Clone, scale::Encode, scale::Decode)]
+    #[cfg_attr(feature = "std", derive(::ink::storage::traits::StorageLayout))]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub struct Donation {
         /// The account that made the donation.
@@ -78,7 +88,10 @@ mod donation_platform_v2 {
         timestamp: Timestamp,
     }
 
-    /// Represents a fundraising campaign.
+    /// Represents a single fundraising campaign.
+    ///
+    /// This struct holds all the essential information about a campaign, including its
+    /// metadata, funding status, and lifecycle state.
     #[derive(Debug, scale::Encode, scale::Decode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     #[cfg_attr(feature = "std", derive(::ink::storage::traits::StorageLayout))]
@@ -105,7 +118,10 @@ mod donation_platform_v2 {
         donation_count: u32,
     }
 
-    /// Contains the details of a campaign, including all its donations.
+    /// A composite struct that holds the details of a campaign along with its donations.
+    ///
+    /// This is used for query methods to return a comprehensive view of a campaign,
+    /// including a paginated list of its donations.
     #[derive(Debug, scale::Encode, scale::Decode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub struct CampaignDetails {
@@ -117,7 +133,10 @@ mod donation_platform_v2 {
         total_donations: u32,
     }
 
-    /// Batch result for multiple operations.
+    /// Represents the result of a batch operation.
+    ///
+    /// This struct provides a summary of the outcomes of batch operations, such as
+    /// creating or withdrawing from multiple campaigns in a single transaction.
     #[derive(Debug, scale::Encode, scale::Decode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub struct BatchResult {
@@ -130,6 +149,9 @@ mod donation_platform_v2 {
     }
 
     /// The main storage struct for the donation platform contract.
+    ///
+    /// This struct holds all the persistent data of the contract, including campaigns,
+    /// donations, and administrative settings.
     #[ink(storage)]
     pub struct DonationPlatformV2 {
         /// A mapping from campaign ID to campaign data.
@@ -152,6 +174,11 @@ mod donation_platform_v2 {
         /// Creates a new instance of the donation platform contract V2.
         ///
         /// The caller of this constructor becomes the administrator.
+        ///
+        /// # Returns
+        ///
+        /// A new instance of the `DonationPlatformV2` contract, initialized with
+        /// default values and the caller as the admin.
         #[ink(constructor)]
         pub fn new() -> Self {
             Self {
@@ -165,11 +192,19 @@ mod donation_platform_v2 {
             }
         }
 
-        /// Migrates from V1 to V2. Called after upgrading the logic contract.
+        /// Migrates the contract from V1 to V2.
+        ///
+        /// This constructor is intended to be called by the proxy contract when upgrading
+        /// from a V1 instance of the contract. It preserves the campaign count while
+        /// re-initializing the rest of the state for V2.
         ///
         /// # Arguments
         ///
-        /// * `campaign_count` - The campaign count from the V1 contract.
+        /// * `campaign_count` - The total number of campaigns from the V1 contract.
+        ///
+        /// # Returns
+        ///
+        /// A new instance of the V2 contract with migrated state.
         #[ink(constructor)]
         pub fn migrate_from_v1(campaign_count: u32) -> Self {
             Self {
@@ -183,18 +218,31 @@ mod donation_platform_v2 {
             }
         }
 
-        /// A guard function to prevent reentrant calls.
+        /// Locks the contract to prevent reentrancy attacks.
+        ///
+        /// This function is called at the beginning of sensitive operations to ensure
+        /// that the contract state cannot be manipulated by recursive calls.
+        ///
+        /// # Panics
+        ///
+        /// Panics if the contract is already locked.
         fn guard(&mut self) {
             assert!(!self.locked, "Reentrant call");
             self.locked = true;
         }
 
-        /// Releases the reentrancy guard.
+        /// Unlocks the contract after a sensitive operation is complete.
         fn unguard(&mut self) {
             self.locked = false;
         }
 
         /// Creates a new fundraising campaign.
+        ///
+        /// This function allows any user to create a new campaign with a specified
+        /// title, description, funding goal, deadline, and beneficiary. The caller
+        /// of this function becomes the owner of the campaign.
+        ///
+        /// On successful creation, a `CampaignCreated` event is emitted.
         ///
         /// # Arguments
         ///
@@ -206,7 +254,14 @@ mod donation_platform_v2 {
         ///
         /// # Returns
         ///
-        /// Returns the ID of the newly created campaign, or an error if input validation fails.
+        /// - `Ok(u32)`: The ID of the newly created campaign.
+        /// - `Err(Error)`: An error variant indicating why the creation failed, such as
+        ///   `InvalidTitle`, `InvalidGoal`, or `InvalidDeadline`.
+        ///
+        /// # Errors
+        ///
+        /// Returns `Error` if any of the input parameters are invalid (e.g., empty title,
+        /// zero goal, deadline in the past).
         #[ink(message)]
         pub fn create_campaign(
             &mut self,
@@ -272,14 +327,24 @@ mod donation_platform_v2 {
         }
 
         /// Creates multiple campaigns in a single transaction.
+        /// This batch function allows for the creation of multiple campaigns in a single
+        /// transaction, reducing gas costs and improving efficiency.
         ///
         /// # Arguments
         ///
-        /// * `campaigns_data` - A vector of tuples containing campaign data.
+        /// * `campaigns_data` - A vector of tuples, where each tuple contains the
+        ///   `title`, `description`, `goal`, `deadline`, and `beneficiary` for a new campaign.
         ///
         /// # Returns
         ///
-        /// Returns a BatchResult with the status of each operation.
+        /// - `Ok(BatchResult)`: A struct indicating the number of successful and failed
+        ///   creations, along with the IDs of the successful campaigns.
+        /// - `Err(Error)`: An error variant, such as `BatchSizeTooLarge`.
+        ///
+        /// # Errors
+        ///
+        /// Returns `Error::BatchSizeTooLarge` if the input vector exceeds the
+        /// maximum allowed batch size.
         #[ink(message)]
         pub fn create_campaigns_batch(
             &mut self,
@@ -312,7 +377,12 @@ mod donation_platform_v2 {
             })
         }
 
-        /// Donates to a campaign.
+        /// Donates to a specific fundraising campaign.
+        /// Any user can donate to a campaign by calling this function and sending
+        /// a native token value. The donation is only accepted if the campaign is active
+        /// and has not passed its deadline.
+        ///
+        /// On successful donation, a `DonationReceived` event is emitted.
         ///
         /// # Arguments
         ///
@@ -320,7 +390,12 @@ mod donation_platform_v2 {
         ///
         /// # Returns
         ///
-        /// Returns `Ok(())` if the donation was successful, or an error otherwise.
+        /// - `Ok(())`: If the donation was successful.
+        /// - `Err(Error)`: An error variant indicating why the donation failed, such as
+        ///   `CampaignNotFound`, `CampaignNotActive`, or `DeadlinePassed`.
+        ///
+        /// # Errors
+        /// Returns `Error` if the campaign is not in a donatable state.
         #[ink(message, payable)]
         pub fn donate(&mut self, campaign_id: u32) -> Result<(), Error> {
             self.guard();
@@ -329,7 +404,15 @@ mod donation_platform_v2 {
             result
         }
 
-        /// Internal function to process a donation.
+        /// The internal logic for processing a donation.
+        ///
+        /// This private function is called by `donate` and handles the core logic of
+        /// validating the campaign state, recording the donation, and updating the
+        /// campaign's raised amount.
+        ///
+        /// # Arguments
+        /// * `campaign_id` - The ID of the campaign.
+        /// * `donation_amount` - The amount of the donation.
         fn process_donation(&mut self, campaign_id: u32, donation_amount: Balance) -> Result<(), Error> {
             let caller = self.env().caller();
             let current_time = self.env().block_timestamp();
@@ -393,6 +476,12 @@ mod donation_platform_v2 {
         }
 
         /// Withdraws the funds from a successful or failed campaign.
+        /// This function can only be called by the campaign owner or the contract admin.
+        /// If the campaign was successful, the entire raised amount is transferred to the
+        /// beneficiary. If the campaign failed, this function does not transfer funds,
+        /// but marks the campaign as withdrawn.
+        ///
+        /// On successful withdrawal, a `FundsWithdrawn` event is emitted.
         ///
         /// # Arguments
         ///
@@ -400,7 +489,12 @@ mod donation_platform_v2 {
         ///
         /// # Returns
         ///
-        /// Returns `Ok(())` if the withdrawal was successful, or an error otherwise.
+        /// - `Ok(())`: If the withdrawal process was completed successfully.
+        /// - `Err(Error)`: An error variant indicating failure, such as `NotCampaignOwner`,
+        ///   `GoalNotReached`, or `FundsAlreadyWithdrawn`.
+        ///
+        /// # Errors
+        /// Returns `Error` if the caller is not authorized or the campaign is not in a withdrawable state.
         #[ink(message)]
         pub fn withdraw_funds(&mut self, campaign_id: u32) -> Result<(), Error> {
             self.guard();
@@ -409,7 +503,12 @@ mod donation_platform_v2 {
             result
         }
 
-        /// Internal function to process a withdrawal.
+        /// The internal logic for processing a fund withdrawal.
+        /// This private function handles the state checks and fund transfer for a withdrawal.
+        ///
+        /// # Arguments
+        ///
+        /// * `campaign_id` - The ID of the campaign to process.
         fn process_withdrawal(&mut self, campaign_id: u32) -> Result<(), Error> {
             let caller = self.env().caller();
             let current_time = self.env().block_timestamp();
@@ -462,6 +561,8 @@ mod donation_platform_v2 {
         }
 
         /// Withdraws funds from multiple campaigns in a single transaction.
+        /// Allows a user to withdraw funds from multiple owned campaigns in one batch,
+        /// saving on transaction fees.
         ///
         /// # Arguments
         ///
@@ -469,7 +570,15 @@ mod donation_platform_v2 {
         ///
         /// # Returns
         ///
-        /// Returns a BatchResult with the status of each operation.
+        /// - `Ok(BatchResult)`: A struct indicating the number of successful and failed
+        ///   withdrawals.
+        /// - `Err(Error)`: An error variant, such as `BatchSizeTooLarge`.
+        ///
+        /// # Errors
+        ///
+        /// Returns `Error::BatchSizeTooLarge` if the input vector exceeds the
+        /// maximum allowed batch size. Each individual withdrawal may also fail with
+        /// errors reported in the `failed` count of the `BatchResult`.
         #[ink(message)]
         pub fn withdraw_funds_batch(&mut self, campaign_ids: Vec<u32>) -> Result<BatchResult, Error> {
             if campaign_ids.len() > self.max_batch_size as usize {
@@ -500,12 +609,32 @@ mod donation_platform_v2 {
         }
 
         /// Retrieves a campaign by its ID.
+        ///
+        /// # Arguments
+        ///
+        /// * `campaign_id` - The ID of the campaign to retrieve.
+        ///
+        /// # Returns
+        ///
+        /// - `Some(Campaign)`: The campaign data if found.
+        /// - `None`: If no campaign with the given ID exists.
         #[ink(message)]
         pub fn get_campaign(&self, campaign_id: u32) -> Option<Campaign> {
             self.campaigns.get(campaign_id)
         }
 
         /// Retrieves the details of a campaign, including paginated donations.
+        ///
+        /// # Arguments
+        ///
+        /// * `campaign_id` - The ID of the campaign to retrieve details for.
+        /// * `offset` - The starting index for the donation pagination.
+        /// * `limit` - The maximum number of donations to return.
+        ///
+        /// # Returns
+        ///
+        /// - `Some(CampaignDetails)`: The campaign details if the campaign is found.
+        /// - `None`: If the campaign does not exist.
         #[ink(message)]
         pub fn get_campaign_details(&self, campaign_id: u32, offset: u32, limit: u32) -> Option<CampaignDetails> {
             let campaign = self.campaigns.get(campaign_id)?;
@@ -523,6 +652,15 @@ mod donation_platform_v2 {
         }
 
         /// Retrieves a paginated list of all campaigns.
+        ///
+        /// # Arguments
+        ///
+        /// * `offset` - The starting index for the campaign pagination.
+        /// * `limit` - The maximum number of campaigns to return.
+        ///
+        /// # Returns
+        ///
+        /// A vector of `Campaign` structs.
         #[ink(message)]
         pub fn get_campaigns_paginated(&self, offset: u32, limit: u32) -> Vec<Campaign> {
             let mut campaigns = Vec::new();
@@ -539,6 +677,15 @@ mod donation_platform_v2 {
         }
 
         /// Retrieves all active campaigns (paginated).
+        ///
+        /// # Arguments
+        ///
+        /// * `offset` - The starting index for the campaign pagination.
+        /// * `limit` - The maximum number of active campaigns to return.
+        ///
+        /// # Returns
+        ///
+        /// A vector of active `Campaign` structs.
         #[ink(message)]
         pub fn get_active_campaigns(&self, offset: u32, limit: u32) -> Vec<Campaign> {
             let mut active_campaigns = Vec::new();
@@ -565,18 +712,35 @@ mod donation_platform_v2 {
         }
 
         /// Gets the contract version.
+        ///
+        /// # Returns
+        ///
+        /// The current version number of the contract logic.
         #[ink(message)]
         pub fn get_version(&self) -> u32 {
             self.version
         }
 
         /// Gets the total campaign count.
+        ///
+        /// # Returns
+        ///
+        /// The total number of campaigns ever created in the contract.
         #[ink(message)]
         pub fn get_campaign_count(&self) -> u32 {
             self.campaign_count
         }
 
         /// Updates the maximum batch size (admin only).
+        ///
+        /// # Arguments
+        ///
+        /// * `size` - The new maximum batch size.
+        ///
+        /// # Returns
+        ///
+        /// - `Ok(())` on success.
+        /// - `Err(Error::NotCampaignOwner)` if the caller is not the admin.
         #[ink(message)]
         pub fn set_max_batch_size(&mut self, size: u32) -> Result<(), Error> {
             if self.env().caller() != self.admin {
@@ -587,6 +751,10 @@ mod donation_platform_v2 {
         }
 
         /// Gets the maximum batch size.
+        ///
+        /// # Returns
+        ///
+        /// The maximum number of operations allowed in a single batch transaction.
         #[ink(message)]
         pub fn get_max_batch_size(&self) -> u32 {
             self.max_batch_size
@@ -594,31 +762,44 @@ mod donation_platform_v2 {
     }
 
     // Events
+    /// Emitted when a new campaign is created.
     #[ink(event)]
     pub struct CampaignCreated {
+        /// The unique ID of the created campaign.
         #[ink(topic)]
         campaign_id: u32,
+        /// The account that owns the new campaign.
         #[ink(topic)]
         owner: AccountId,
+        /// The funding goal of the campaign.
         goal: Balance,
+        /// The deadline of the campaign.
         deadline: Timestamp,
     }
 
+    /// Emitted when a donation is made to a campaign.
     #[ink(event)]
     pub struct DonationReceived {
+        /// The ID of the campaign that received the donation.
         #[ink(topic)]
         campaign_id: u32,
+        /// The account that made the donation.
         #[ink(topic)]
         donor: AccountId,
+        /// The amount of the donation.
         amount: Balance,
     }
 
+    /// Emitted when funds are withdrawn from a campaign.
     #[ink(event)]
     pub struct FundsWithdrawn {
+        /// The ID of the campaign from which funds were withdrawn.
         #[ink(topic)]
         campaign_id: u32,
+        /// The account that received the funds.
         #[ink(topic)]
         beneficiary: AccountId,
+        /// The amount of funds withdrawn.
         amount: Balance,
     }
 

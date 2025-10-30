@@ -21,7 +21,19 @@ InputField.propTypes = { className: PropTypes.string };
 const TextareaField = (props) => <textarea {...props} className={`w-full px-4 py-3 bg-gray-800/50 border-2 border-gray-700 rounded-xl text-gray-100 font-body placeholder-gray-500 transition-all duration-200 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 hover:border-gray-600 resize-none ${props.className || ''}`} />;
 TextareaField.propTypes = { className: PropTypes.string };
 
-
+/**
+ * A comprehensive form for creating a new fundraising campaign.
+ *
+ * This component provides a user interface for inputting all the necessary details
+ * for a new campaign, such as title, description, funding goal, and beneficiary.
+ * It includes features like AI-powered description generation and a final summary
+ * confirmation step before submission.
+ *
+ * @param {object} props - The component props.
+ * @param {function} props.onSuccess - A callback function to be executed upon
+ *   successful campaign creation.
+ * @returns {JSX.Element} The rendered campaign creation form.
+ */
 export const CreateCampaignForm = ({ onSuccess }) => {
   const { selectedAccount } = useWallet();
 

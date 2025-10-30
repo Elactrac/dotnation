@@ -1,6 +1,16 @@
 import { BN, formatBalance } from '@polkadot/util';
 
-// This function is a placeholder until the API is fully integrated
+/**
+ * Formats a given balance into a human-readable string with a "DOT" unit.
+ *
+ * This function takes a balance, which can be a string, number, or BigInt,
+ * and uses the Polkadot.js utility to format it into a concise representation
+ * (e.g., "1.23 kDOT").
+ *
+ * @param {string|number|BN} balance - The balance to format.
+ * @returns {string} The formatted balance string (e.g., "1.23 kDOT") or "0 DOT"
+ *   if the balance is zero or undefined.
+ */
 export const formatDotBalance = (balance) => {
   if (!balance) return '0 DOT';
   
@@ -12,7 +22,17 @@ export const formatDotBalance = (balance) => {
   return formatBalance(bnBalance, { withSi: true, withUnit: 'DOT' });
 };
 
-
+/**
+ * Shortens a Polkadot address for display purposes.
+ *
+ * It returns a truncated version of the address, showing the first and last
+ * few characters, separated by an ellipsis.
+ *
+ * @param {string} address - The full Polkadot address to shorten.
+ * @param {number} [chars=6] - The number of characters to show at the beginning
+ *   and end of the address.
+ * @returns {string} The shortened address (e.g., "15Gf...K9aW").
+ */
 export const shortenAddress = (address, chars = 6) => {
   if (!address) return '';
   const prefix = address.slice(0, chars);

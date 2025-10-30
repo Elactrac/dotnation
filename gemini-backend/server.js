@@ -33,12 +33,19 @@ const model = genAI.getGenerativeModel({
 });
 
 /**
+ * Endpoint to generate a compelling campaign description using AI.
+ *
+ * This endpoint takes a campaign title and uses a generative AI model to create a
+ * detailed and persuasive description for a crowdfunding campaign. If the AI service
+ * is not configured, it returns a mock description.
+ *
  * @route POST /api/generate-description
  * @group AI - AI-powered content generation
- * @param {string} title.body.required - The title of the campaign.
+ * @param {object} req.body - The request body.
+ * @param {string} req.body.title - The title of the campaign.
  * @returns {object} 200 - An object containing the generated description.
- * @returns {Error}  400 - Project title is required.
- * @returns {Error}  500 - Failed to generate content from AI.
+ * @returns {object} 400 - An error object if the title is missing.
+ * @returns {object} 500 - An error object if the AI fails to generate content.
  */
 app.post('/api/generate-description', async (req, res) => {
   try {

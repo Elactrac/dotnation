@@ -8,6 +8,18 @@ import CaptchaModal from '../components/CaptchaModal';
 
 const WalletContext = createContext({});
 
+/**
+ * Provides wallet-related state and functions to the application.
+ *
+ * This provider manages the connection to the user's Polkadot wallet,
+ * fetching accounts, handling account switching, and disconnecting. It also
+ * retrieves the balance of the selected account.
+ *
+ * @param {object} props - The component props.
+ * @param {React.ReactNode} props.children - The child components that will have
+ *   access to the wallet context.
+ * @returns {JSX.Element} The WalletProvider component.
+ */
 export const WalletProvider = ({ children }) => {
   const { api, isReady: isApiReady } = useApi();
   const [accounts, setAccounts] = useState([]);
