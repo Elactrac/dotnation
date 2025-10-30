@@ -122,9 +122,81 @@ function createSession(ip) {
 }
 
 /**
- * Verify captcha answer
+ * Verify math captcha answer
  */
-function verifyCaptcha(sessionToken, userAnswer, expectedAnswer, timeTaken, ip) {
+function verifyMathCaptcha(sessionToken, userAnswer, expectedAnswer, timeTaken, ip) {
+  // Normalize answers for comparison
+  const normalizedUser = String(userAnswer).trim().toUpperCase();
+  const normalizedExpected = String(expectedAnswer).trim().toUpperCase();
+  
+  return normalizedUser === normalizedExpected;
+}
+
+/**
+ * Verify image captcha answer
+ * @param {Array} userSelection - Array of selected image indices (e.g., [0, 2, 5])
+ * @param {Array} correctIndices - Array of correct image indices
+ */
+function verifyImageCaptcha(sessionToken, userSelection, correctIndices, timeTaken, ip) {
+  if (!Array.isArray(userSelection) || !Array.isArray(correctIndices)) {
+    return false;
+  }
+  
+  // Sort both arrays for comparison
+  const sortedUser = [...userSelection].sort((a, b) => a - b);
+  const sortedCorrect = [...correctIndices].sort((a, b) => a - b);
+  
+  // Check if arrays have same length and same values
+  if (sortedUser.length !== sortedCorrect.length) {
+    return false;
+  }
+  
+  return sortedUser.every((val, idx) => val === sortedCorrect[idx]);
+}
+
+/**
+ * Verify slider captcha answer
+ * @param {number} userPosition - User's slider position (0-100)
+ * @param {number} targetPosition - Target position (0-100)
+ * @param {number} tolerance - Acceptable tolerance (default 5%)
+ */
+function verifySliderCaptcha(sessionToken, userPosition, targetPosition, timeTaken, ip, tolerance = 5) {
+  const position = parseFloat(userPosition);
+  const target = parseFloat(targetPosition);
+  
+  if (isNaN(position) || isNaN(target)) {
+    return false;
+  }
+  
+  // Check if position is within tolerance
+  const difference = Math.abs(position - target);
+  return difference <= tolerance;
+}
+
+/**
+ * Verify pattern captcha answer
+ * @param {Array} userPattern - Array of user's pattern indices (e.g., [0, 4, 8])
+ * @param {Array} correctPattern - Array of correct pattern indices
+ */
+function verifyPatternCaptcha(sessionToken, userPattern, correctPattern, timeTaken, ip) {
+  if (!Array.isArray(userPattern) || !Array.isArray(correctPattern)) {
+    return false;
+  }
+  
+  // Check if arrays have same length
+  if (userPattern.length !== correctPattern.length) {
+    return false;
+  }
+  
+  // Check if patterns match exactly (order matters)
+  return userPattern.every((val, idx) => val === correctPattern[idx]);
+}
+
+/**
+ * Unified captcha verification with session management
+ * @param {string} captchaType - Type of captcha: 'math', 'image', 'slider', 'pattern'
+ */
+function verifyCaptcha(sessionToken, captchaType, userAnswer, expectedAnswer, timeTaken, ip, options = {}) {
   // Check rate limit
   const rateLimit = checkRateLimit(ip);
   if (!rateLimit.allowed) {
@@ -171,8 +243,9 @@ function verifyCaptcha(sessionToken, userAnswer, expectedAnswer, timeTaken, ip) 
     }
   }
   
-  // Validate timing (anti-bot check)
-  if (timeTaken < 2) {
+  // Validate timing (anti-bot check) - minimum 1 second for math, 2 seconds for others
+  const minTime = captchaType === 'math' ? 1 : 2;
+  if (timeTaken < minTime) {
     session.attempts++;
     
     if (session.attempts >= SESSION_CONFIG.maxAttempts) {
@@ -190,12 +263,30 @@ function verifyCaptcha(sessionToken, userAnswer, expectedAnswer, timeTaken, ip) 
     };
   }
   
-  // Normalize answers for comparison
-  const normalizedUser = String(userAnswer).trim().toUpperCase();
-  const normalizedExpected = String(expectedAnswer).trim().toUpperCase();
+  // Verify based on captcha type
+  let isCorrect = false;
   
-  // Verify answer
-  if (normalizedUser === normalizedExpected) {
+  switch (captchaType) {
+    case 'math':
+      isCorrect = verifyMathCaptcha(sessionToken, userAnswer, expectedAnswer, timeTaken, ip);
+      break;
+    case 'image':
+      isCorrect = verifyImageCaptcha(sessionToken, userAnswer, expectedAnswer, timeTaken, ip);
+      break;
+    case 'slider':
+      isCorrect = verifySliderCaptcha(sessionToken, userAnswer, expectedAnswer, timeTaken, ip, options.tolerance);
+      break;
+    case 'pattern':
+      isCorrect = verifyPatternCaptcha(sessionToken, userAnswer, expectedAnswer, timeTaken, ip);
+      break;
+    default:
+      return {
+        verified: false,
+        error: 'Invalid captcha type'
+      };
+  }
+  
+  if (isCorrect) {
     // Success - clear session and generate verification token
     sessionStore.delete(sessionToken);
     
@@ -273,6 +364,10 @@ function getStats() {
 module.exports = {
   createSession,
   verifyCaptcha,
+  verifyMathCaptcha,
+  verifyImageCaptcha,
+  verifySliderCaptcha,
+  verifyPatternCaptcha,
   validateVerificationToken,
   getStats,
   generateSessionToken

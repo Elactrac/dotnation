@@ -7,6 +7,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const captchaVerification = require('./captchaVerification');
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -151,6 +152,171 @@ app.post('/api/contract-summary', async (req, res) => {
   } catch (error) {
     console.error('Error generating contract summary:', error);
     res.status(500).json({ error: 'Failed to generate contract summary.' });
+  }
+});
+
+/**
+ * Helper function to get client IP address
+ */
+function getClientIP(req) {
+  return req.headers['x-forwarded-for']?.split(',')[0].trim() ||
+         req.headers['x-real-ip'] ||
+         req.connection.remoteAddress ||
+         req.socket.remoteAddress ||
+         '0.0.0.0';
+}
+
+/**
+ * @route POST /api/captcha/session
+ * @group Captcha - Captcha verification system
+ * @returns {object} 200 - An object containing the session token.
+ * @returns {Error}  500 - Failed to create captcha session.
+ */
+app.post('/api/captcha/session', (req, res) => {
+  try {
+    const ip = getClientIP(req);
+    const sessionToken = captchaVerification.createSession(ip);
+    
+    console.log('[Captcha] New session created:', { ip, token: sessionToken.substring(0, 8) + '...' });
+    
+    res.json({
+      success: true,
+      sessionToken,
+      expiresIn: 300 // 5 minutes in seconds
+    });
+  } catch (error) {
+    console.error('[Captcha] Error creating session:', error);
+    res.status(500).json({ error: 'Failed to create captcha session' });
+  }
+});
+
+/**
+ * @route POST /api/captcha/verify
+ * @group Captcha - Captcha verification system
+ * @param {string} sessionToken.body.required - The session token.
+ * @param {string} captchaType.body.required - The type of captcha (math, image, slider, pattern).
+ * @param {any} userAnswer.body.required - The user's answer.
+ * @param {any} expectedAnswer.body.required - The expected answer.
+ * @param {number} timeTaken.body.required - Time taken to solve in seconds.
+ * @param {object} options.body - Additional options (e.g., tolerance for slider).
+ * @returns {object} 200 - Verification result.
+ * @returns {Error}  400 - Missing required fields.
+ * @returns {Error}  500 - Verification failed.
+ */
+app.post('/api/captcha/verify', (req, res) => {
+  try {
+    const { sessionToken, captchaType, userAnswer, expectedAnswer, timeTaken, options } = req.body;
+    
+    // Validate required fields
+    if (!sessionToken || !captchaType || userAnswer === undefined || expectedAnswer === undefined || timeTaken === undefined) {
+      return res.status(400).json({
+        error: 'Missing required fields',
+        required: ['sessionToken', 'captchaType', 'userAnswer', 'expectedAnswer', 'timeTaken']
+      });
+    }
+    
+    // Validate captcha type
+    const validTypes = ['math', 'image', 'slider', 'pattern'];
+    if (!validTypes.includes(captchaType)) {
+      return res.status(400).json({
+        error: 'Invalid captcha type',
+        validTypes
+      });
+    }
+    
+    const ip = getClientIP(req);
+    
+    console.log('[Captcha] Verification attempt:', {
+      type: captchaType,
+      ip,
+      timeTaken,
+      token: sessionToken.substring(0, 8) + '...'
+    });
+    
+    const result = captchaVerification.verifyCaptcha(
+      sessionToken,
+      captchaType,
+      userAnswer,
+      expectedAnswer,
+      timeTaken,
+      ip,
+      options || {}
+    );
+    
+    if (result.verified) {
+      console.log('[Captcha] Verification successful:', {
+        type: captchaType,
+        ip,
+        token: result.token.substring(0, 16) + '...'
+      });
+    } else {
+      console.log('[Captcha] Verification failed:', {
+        type: captchaType,
+        ip,
+        error: result.error,
+        attempts: result.attempts
+      });
+    }
+    
+    res.json(result);
+    
+  } catch (error) {
+    console.error('[Captcha] Error during verification:', error);
+    res.status(500).json({
+      error: 'Verification failed',
+      details: error.message
+    });
+  }
+});
+
+/**
+ * @route POST /api/captcha/validate-token
+ * @group Captcha - Captcha verification system
+ * @param {string} token.body.required - The verification token to validate.
+ * @returns {object} 200 - Validation result.
+ * @returns {Error}  400 - Token is required.
+ * @returns {Error}  500 - Validation failed.
+ */
+app.post('/api/captcha/validate-token', (req, res) => {
+  try {
+    const { token } = req.body;
+    
+    if (!token) {
+      return res.status(400).json({ error: 'Token is required' });
+    }
+    
+    const ip = getClientIP(req);
+    const result = captchaVerification.validateVerificationToken(token, ip);
+    
+    if (result.valid) {
+      console.log('[Captcha] Token validated successfully');
+    } else {
+      console.log('[Captcha] Token validation failed:', result.error);
+    }
+    
+    res.json(result);
+    
+  } catch (error) {
+    console.error('[Captcha] Error validating token:', error);
+    res.status(500).json({
+      error: 'Token validation failed',
+      details: error.message
+    });
+  }
+});
+
+/**
+ * @route GET /api/captcha/stats
+ * @group Captcha - Captcha verification system
+ * @returns {object} 200 - Captcha system statistics.
+ */
+app.get('/api/captcha/stats', (req, res) => {
+  try {
+    const stats = captchaVerification.getStats();
+    res.json(stats);
+  } catch (error) {
+    console.error('[Captcha] Error retrieving stats:', error);
+    res.status(500).json({ error: 'Failed to retrieve stats' });
   }
 });
 

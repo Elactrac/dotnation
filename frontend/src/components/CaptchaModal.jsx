@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import ImageCaptcha from './captcha/ImageCaptcha';
 import SliderCaptcha from './captcha/SliderCaptcha';
 import PatternCaptcha from './captcha/PatternCaptcha';
+import { createCaptchaSession, verifyCaptcha } from '../utils/captchaApi';
 
 /**
  * Advanced Multi-Type Captcha Modal with Progressive Difficulty
@@ -15,6 +16,8 @@ const CaptchaModal = ({ isOpen, onClose, onVerify }) => {
   const [error, setError] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [failureCount, setFailureCount] = useState(0);
+  const [sessionToken, setSessionToken] = useState(null);
+  const [startTime, setStartTime] = useState(null);
 
   // Captcha type configuration
   const captchaTypes = {
@@ -48,16 +51,31 @@ const CaptchaModal = ({ isOpen, onClose, onVerify }) => {
     setCaptchaQuestion({ num1, num2, operation, answer });
     setUserAnswer('');
     setError('');
+    setStartTime(Date.now()); // Track start time for verification
   }, [failureCount]);
+
+  // Initialize captcha session
+  const initializeSession = useCallback(async () => {
+    try {
+      const session = await createCaptchaSession();
+      setSessionToken(session.sessionToken);
+      console.log('[CaptchaModal] Session created:', session.sessionToken.substring(0, 8) + '...');
+    } catch (error) {
+      console.error('[CaptchaModal] Failed to create session:', error);
+      setError('Failed to initialize captcha. Please try again.');
+    }
+  }, []);
 
   // Reset state when modal opens
   useEffect(() => {
     if (isOpen) {
       setCaptchaType('math');
       setFailureCount(0);
+      setSessionToken(null);
+      initializeSession();
       generateMathCaptcha();
     }
-  }, [isOpen, generateMathCaptcha]);
+  }, [isOpen, generateMathCaptcha, initializeSession]);
 
   // Progressive difficulty: escalate on failures
   useEffect(() => {
@@ -76,30 +94,62 @@ const CaptchaModal = ({ isOpen, onClose, onVerify }) => {
   // Handle math captcha submission
   const handleMathSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!sessionToken) {
+      setError('Session not initialized. Please try again.');
+      return;
+    }
+    
     setIsVerifying(true);
     setError('');
 
-    // Simulate verification delay
-    await new Promise(resolve => setTimeout(resolve, 500));
+    try {
+      // Calculate time taken
+      const timeTaken = (Date.now() - startTime) / 1000; // Convert to seconds
 
-    if (parseInt(userAnswer) === captchaQuestion.answer) {
-      // Success!
-      onVerify(true);
-      onClose();
-    } else {
-      // Failure
-      setError('Incorrect answer. Please try again.');
-      setFailureCount(prev => prev + 1);
-      generateMathCaptcha();
+      // Verify with backend
+      const result = await verifyCaptcha({
+        sessionToken,
+        captchaType: 'math',
+        userAnswer: parseInt(userAnswer),
+        expectedAnswer: captchaQuestion.answer,
+        timeTaken
+      });
+
+      if (result.verified) {
+        // Success!
+        console.log('[CaptchaModal] Verification successful');
+        onVerify(true, result.token);
+        onClose();
+      } else {
+        // Failure
+        setError(result.error || 'Incorrect answer. Please try again.');
+        setFailureCount(prev => prev + 1);
+        
+        // Create new session for next attempt
+        await initializeSession();
+        generateMathCaptcha();
+        setIsVerifying(false);
+      }
+    } catch (error) {
+      console.error('[CaptchaModal] Verification error:', error);
+      setError('Verification failed. Please try again.');
       setIsVerifying(false);
+      
+      // Create new session on error
+      await initializeSession();
     }
   };
 
   // Handle verification from other captcha types
-  const handleOtherCaptchaVerify = (success) => {
+  const handleOtherCaptchaVerify = async (success, captchaData) => {
     if (success) {
-      onVerify(true);
+      onVerify(true, captchaData?.token);
       onClose();
+    } else {
+      setFailureCount(prev => prev + 1);
+      // Create new session for next attempt
+      await initializeSession();
     }
   };
 
@@ -284,6 +334,7 @@ const CaptchaModal = ({ isOpen, onClose, onVerify }) => {
 
           {captchaType === 'image' && (
             <ImageCaptcha 
+              sessionToken={sessionToken}
               onVerify={handleOtherCaptchaVerify}
               onCancel={handleCaptchaCancel}
             />
@@ -291,6 +342,7 @@ const CaptchaModal = ({ isOpen, onClose, onVerify }) => {
 
           {captchaType === 'slider' && (
             <SliderCaptcha 
+              sessionToken={sessionToken}
               onVerify={handleOtherCaptchaVerify}
               onCancel={handleCaptchaCancel}
             />
@@ -298,6 +350,7 @@ const CaptchaModal = ({ isOpen, onClose, onVerify }) => {
 
           {captchaType === 'pattern' && (
             <PatternCaptcha 
+              sessionToken={sessionToken}
               onVerify={handleOtherCaptchaVerify}
               onCancel={handleCaptchaCancel}
             />
