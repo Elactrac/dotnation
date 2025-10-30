@@ -1,0 +1,42 @@
+{
+  "name": "dotnation-monorepo",
+  "version": "1.0.0",
+  "description": "DotNation - Decentralized Crowdfunding Platform on Polkadot",
+  "scripts": {
+    "install:all": "npm install && cd frontend && npm install && cd ../gemini-backend && npm install",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd gemini-backend && npm start",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "build:frontend": "cd frontend && npm run build",
+    "build:contract": "cd donation_platform && cargo contract build --release",
+    "test:frontend": "cd frontend && npm test",
+    "test:contract": "cd donation_platform && cargo test",
+    "lint:frontend": "cd frontend && npm run lint",
+    "clean": "rm -rf frontend/node_modules gemini-backend/node_modules frontend/dist",
+    "deploy:contract": "cd donation_platform && ./build_contracts.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Elactrac/dotnation.git"
+  },
+  "keywords": [
+    "polkadot",
+    "blockchain",
+    "crowdfunding",
+    "web3",
+    "defi",
+    "ink",
+    "substrate",
+    "ai",
+    "gemini"
+  ],
+  "author": "DotNation Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
