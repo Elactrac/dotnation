@@ -26,11 +26,106 @@ const BrowseCampaignsPage = () => {
   const [progressRange, setProgressRange] = useState([0, 100]); // Progress percentage
   const [selectedCategories, setSelectedCategories] = useState([]);
 
+  // Mesh grid canvas effect
+  useEffect(() => {
+    const canvas = document.getElementById('mesh-canvas-browse');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = document.documentElement.scrollHeight;
+    
+    let mouseX = window.innerWidth / 2;
+    let mouseY = window.innerHeight / 2;
+    
+    const handleMouseMove = (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY + window.pageYOffset;
+    };
+    
+    const drawMesh = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      const gridSize = 40;
+      const maxDistance = 200;
+      
+      // Draw vertical lines
+      for (let x = 0; x < canvas.width; x += gridSize) {
+        const distX = Math.abs(mouseX - x);
+        if (distX < maxDistance) {
+          const opacity = (1 - distX / maxDistance) * 0.3;
+          ctx.strokeStyle = `rgba(56, 195, 255, ${opacity})`;
+        } else {
+          ctx.strokeStyle = 'rgba(56, 116, 255, 0.08)';
+        }
+        
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+      
+      // Draw horizontal lines
+      for (let y = 0; y < canvas.height; y += gridSize) {
+        const distY = Math.abs(mouseY - y);
+        if (distY < maxDistance) {
+          const opacity = (1 - distY / maxDistance) * 0.3;
+          ctx.strokeStyle = `rgba(56, 195, 255, ${opacity})`;
+        } else {
+          ctx.strokeStyle = 'rgba(56, 116, 255, 0.08)';
+        }
+        
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+      
+      requestAnimationFrame(drawMesh);
+    };
+    
+    drawMesh();
+    
+    const handleResize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = document.documentElement.scrollHeight;
+    };
+    
+    document.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('resize', handleResize);
+
+    // Intersection Observer for scroll animations
+    const observerOptions = { 
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    // Observe elements with animation classes
+    document.querySelectorAll('.fade-in-up, .fade-in-left, .fade-in-right, .scale-in, .stagger-children').forEach(element => {
+      observer.observe(element);
+    });
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('resize', handleResize);
+      observer.disconnect();
+    };
+  }, []);
+
   // Mock categories (in a real app, these would come from the backend)
-  const availableCategories = [
+  const availableCategories = useMemo(() => [
     'Technology', 'Education', 'Health', 'Environment',
     'Arts', 'Community', 'Business', 'Charity'
-  ];
+  ], []);
 
   // Effect to clear user-specific filters on wallet disconnect
   useEffect(() => {
@@ -107,7 +202,7 @@ const BrowseCampaignsPage = () => {
     });
 
     return filtered;
-  }, [campaigns, searchQuery, statusFilter, sortBy, goalRange, progressRange, selectedCategories]);
+  }, [campaigns, searchQuery, statusFilter, sortBy, goalRange, progressRange, selectedCategories, availableCategories]);
 
   const handleCategoryToggle = (category) => {
     setSelectedCategories(prev =>
@@ -168,11 +263,40 @@ const BrowseCampaignsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background-dark">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div className="relative min-h-screen bg-background-dark">
+      {/* Interactive Mesh Grid Canvas */}
+      <canvas
+        id="mesh-canvas-browse"
+        className="fixed inset-0 pointer-events-none z-0"
+      />
+
+      {/* Static Background Gradients */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(56,116,255,0.03)_0%,transparent_50%)]" />
+        <div className="absolute top-1/4 right-0 w-1/2 h-1/2 bg-[radial-gradient(circle_at_center,rgba(56,195,255,0.02)_0%,transparent_50%)]" />
+        <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-[radial-gradient(circle_at_center,rgba(168,85,247,0.02)_0%,transparent_50%)]" />
+      </div>
+
+      {/* Floating Decorative Elements */}
+      <div className="fixed -top-32 -right-32 w-96 h-96 opacity-20 animate-float-slow pointer-events-none z-0">
+        <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="100" cy="100" r="80" stroke="currentColor" strokeWidth="2" className="text-primary"/>
+          <circle cx="100" cy="100" r="60" stroke="currentColor" strokeWidth="2" className="text-secondary"/>
+          <circle cx="100" cy="100" r="40" fill="currentColor" className="text-primary/30"/>
+        </svg>
+      </div>
+      
+      <div className="fixed -bottom-32 -left-32 w-80 h-80 opacity-15 animate-float-slower pointer-events-none z-0">
+        <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M100 20L180 100L100 180L20 100Z" stroke="currentColor" strokeWidth="2" className="text-secondary"/>
+          <path d="M100 50L150 100L100 150L50 100Z" fill="currentColor" className="text-secondary/20"/>
+        </svg>
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="space-y-8">
           {/* Header */}
-          <div className="text-left animate-fade-in">
+          <div className="text-left fade-in-up">
             <h1 className="text-5xl font-bold font-display bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent mb-3">
               Browse Campaigns
             </h1>
@@ -243,7 +367,7 @@ const BrowseCampaignsPage = () => {
           </div>
 
           {/* Results Summary */}
-          <div className="flex justify-between items-center flex-wrap gap-4 animate-fade-in">
+          <div className="flex justify-between items-center flex-wrap gap-4 fade-in-up">
             <p className="text-white/70 font-body">
               Showing <span className="text-white font-bold">{filteredCampaigns.length}</span> of <span className="text-white font-bold">{campaigns?.length || 0}</span> campaigns
             </p>
@@ -256,7 +380,7 @@ const BrowseCampaignsPage = () => {
 
           {/* Campaigns Grid */}
           {filteredCampaigns.length === 0 ? (
-            <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-xl rounded-2xl border-2 border-gray-700 p-12 text-center hover:border-primary/30 transition-all duration-300">
+            <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-xl rounded-2xl border-2 border-gray-700 p-12 text-center hover:border-primary/30 transition-all duration-300 scale-in">
               <div className="space-y-4">
                 <FiSearch className="w-16 h-16 text-white/40 mx-auto" />
                 <h3 className="text-2xl font-bold font-display text-white/70">No Campaigns Found</h3>
@@ -279,7 +403,7 @@ const BrowseCampaignsPage = () => {
           ) : isLoading ? (
             <CampaignCardSkeleton count={6} />
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-fade-in">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 stagger-children">
               {filteredCampaigns.map((campaign) => (
                 <CampaignCard
                   key={campaign.id}

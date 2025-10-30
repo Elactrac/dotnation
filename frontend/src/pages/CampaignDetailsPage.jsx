@@ -187,7 +187,22 @@ const CampaignDetailsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background-dark">
+    <div className="relative min-h-screen bg-background-dark">
+      {/* Animated Background Gradients */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(56,116,255,0.05)_0%,transparent_50%)] animate-pulse-slow" />
+        <div className="absolute top-1/4 right-0 w-1/2 h-1/2 bg-[radial-gradient(circle_at_center,rgba(0,234,211,0.03)_0%,transparent_50%)] animate-pulse-slow" />
+        <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-[radial-gradient(circle_at_center,rgba(168,85,247,0.03)_0%,transparent_50%)] animate-pulse-slow" />
+      </div>
+
+      {/* Floating Decorative Elements */}
+      <div className="fixed top-20 right-10 w-64 h-64 opacity-10 animate-float-slow pointer-events-none z-0">
+        <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="100" cy="100" r="60" stroke="currentColor" strokeWidth="2" className="text-primary"/>
+          <circle cx="100" cy="100" r="40" fill="currentColor" className="text-primary/30"/>
+        </svg>
+      </div>
+
       {/* Toast Notification */}
       {showToast && (
         <div className="fixed top-4 right-4 z-50 animate-slide-in-right">
@@ -201,12 +216,12 @@ const CampaignDetailsPage = () => {
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Campaign Details */}
           <div className="lg:col-span-2 space-y-6">
             {/* Campaign Image */}
-            <div className="relative rounded-2xl overflow-hidden group">
+            <div className="relative rounded-2xl overflow-hidden group fade-in-up">
               <img
                 src={campaign.imageUrl || 'https://via.placeholder.com/800x400?text=Campaign+Image'}
                 alt={campaign.title}
@@ -216,7 +231,7 @@ const CampaignDetailsPage = () => {
             </div>
 
             {/* Campaign Header */}
-            <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-xl rounded-2xl border-2 border-gray-700 p-6 hover:border-primary/50 transition-all duration-300">
+            <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-xl rounded-2xl border-2 border-gray-700 p-6 hover:border-primary/50 transition-all duration-300 fade-in-up">
               <div className="flex justify-between items-start flex-wrap gap-4 mb-4">
                 <h1 className="text-4xl font-bold font-display text-white">{campaign.title}</h1>
                 <div className="flex items-center gap-2">
@@ -258,32 +273,32 @@ const CampaignDetailsPage = () => {
 
               {/* Campaign Stats Grid */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-gray-900/50 rounded-xl p-4 border-2 border-gray-700">
+                <div className="bg-gray-900/50 rounded-xl p-4 border-2 border-gray-700 hover:border-green-400/50 hover:scale-105 transition-all duration-300 group">
                   <div className="flex items-center gap-2 mb-2">
-                    <FiTrendingUp className="w-5 h-5 text-green-400" />
+                    <FiTrendingUp className="w-5 h-5 text-green-400 group-hover:scale-110 transition-transform" />
                     <span className="text-sm font-body font-semibold uppercase text-white/70">Funds Raised</span>
                   </div>
                   <p className="text-2xl font-bold font-display text-green-400">{campaignStats?.formattedRaised} DOT</p>
                   <p className="text-sm text-white/60 font-body">of {campaignStats?.formattedGoal} DOT goal</p>
                 </div>
 
-                <div className="bg-gray-900/50 rounded-xl p-4 border-2 border-gray-700">
+                <div className="bg-gray-900/50 rounded-xl p-4 border-2 border-gray-700 hover:border-blue-400/50 hover:scale-105 transition-all duration-300 group">
                   <div className="flex items-center gap-2 mb-2">
-                    <FiTarget className="w-5 h-5 text-blue-400" />
+                    <FiTarget className="w-5 h-5 text-blue-400 group-hover:scale-110 transition-transform" />
                     <span className="text-sm font-body font-semibold uppercase text-white/70">Progress</span>
                   </div>
                   <p className="text-2xl font-bold font-display text-blue-400">{campaignStats?.progress.toFixed(1)}%</p>
-                  <div className="mt-2 w-full bg-gray-700 rounded-full h-2">
+                  <div className="mt-2 w-full bg-gray-700 rounded-full h-2 overflow-hidden">
                     <div 
-                      className="bg-gradient-to-r from-primary to-secondary h-2 rounded-full transition-all duration-500"
+                      className="bg-gradient-to-r from-primary to-secondary h-2 rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(56,116,255,0.5)] animate-pulse-slow"
                       style={{ width: `${Math.min(campaignStats?.progress || 0, 100)}%` }}
                     ></div>
                   </div>
                 </div>
 
-                <div className="bg-gray-900/50 rounded-xl p-4 border-2 border-gray-700">
+                <div className="bg-gray-900/50 rounded-xl p-4 border-2 border-gray-700 hover:border-yellow-400/50 hover:scale-105 transition-all duration-300 group">
                   <div className="flex items-center gap-2 mb-2">
-                    <FiCalendar className="w-5 h-5 text-yellow-400" />
+                    <FiCalendar className="w-5 h-5 text-yellow-400 group-hover:scale-110 transition-transform" />
                     <span className="text-sm font-body font-semibold uppercase text-white/70">Time Left</span>
                   </div>
                   <p className="text-2xl font-bold font-display text-yellow-400">
@@ -314,15 +329,15 @@ const CampaignDetailsPage = () => {
             </div>
 
             {/* Tabs */}
-            <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-xl rounded-2xl border-2 border-gray-700 p-6">
+            <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-xl rounded-2xl border-2 border-gray-700 p-6 fade-in-up">
               {/* Tab Headers */}
               <div className="flex flex-wrap gap-2 border-b-2 border-gray-700 pb-4 mb-6">
                 <button
                   onClick={() => setActiveTab('about')}
                   className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-body font-semibold transition-all duration-300 ${
                     activeTab === 'about'
-                      ? 'bg-gradient-to-r from-primary to-secondary text-white'
-                      : 'text-white/60 hover:text-white hover:bg-white/10'
+                      ? 'bg-gradient-to-r from-primary to-secondary text-white shadow-lg shadow-primary/30 scale-105'
+                      : 'text-white/60 hover:text-white hover:bg-white/10 hover:scale-105'
                   }`}
                 >
                   <FiHeart className="w-4 h-4" />
@@ -332,8 +347,8 @@ const CampaignDetailsPage = () => {
                   onClick={() => setActiveTab('updates')}
                   className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-body font-semibold transition-all duration-300 ${
                     activeTab === 'updates'
-                      ? 'bg-gradient-to-r from-primary to-secondary text-white'
-                      : 'text-white/60 hover:text-white hover:bg-white/10'
+                      ? 'bg-gradient-to-r from-primary to-secondary text-white shadow-lg shadow-primary/30 scale-105'
+                      : 'text-white/60 hover:text-white hover:bg-white/10 hover:scale-105'
                   }`}
                 >
                   <FiTrendingUp className="w-4 h-4" />
@@ -343,8 +358,8 @@ const CampaignDetailsPage = () => {
                   onClick={() => setActiveTab('discussion')}
                   className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-body font-semibold transition-all duration-300 ${
                     activeTab === 'discussion'
-                      ? 'bg-gradient-to-r from-primary to-secondary text-white'
-                      : 'text-white/60 hover:text-white hover:bg-white/10'
+                      ? 'bg-gradient-to-r from-primary to-secondary text-white shadow-lg shadow-primary/30 scale-105'
+                      : 'text-white/60 hover:text-white hover:bg-white/10 hover:scale-105'
                   }`}
                 >
                   <FiMessageSquare className="w-4 h-4" />
@@ -354,8 +369,8 @@ const CampaignDetailsPage = () => {
                   onClick={() => setActiveTab('donors')}
                   className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-body font-semibold transition-all duration-300 ${
                     activeTab === 'donors'
-                      ? 'bg-gradient-to-r from-primary to-secondary text-white'
-                      : 'text-white/60 hover:text-white hover:bg-white/10'
+                      ? 'bg-gradient-to-r from-primary to-secondary text-white shadow-lg shadow-primary/30 scale-105'
+                      : 'text-white/60 hover:text-white hover:bg-white/10 hover:scale-105'
                   }`}
                 >
                   <FiUsers className="w-4 h-4" />
@@ -394,7 +409,7 @@ const CampaignDetailsPage = () => {
                   <h2 className="text-2xl font-bold font-display text-white mb-4">Recent Donations</h2>
                   {donations.length > 0 ? (
                     donations.slice(0, 10).map((donation, index) => (
-                      <div key={index} className="bg-gray-900/50 rounded-xl p-4 border-2 border-gray-700 hover:border-primary/50 transition-all duration-300">
+                      <div key={index} className="bg-gray-900/50 rounded-xl p-4 border-2 border-gray-700 hover:border-primary/50 hover:scale-105 transition-all duration-300">
                         <div className="flex justify-between items-center">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold">
