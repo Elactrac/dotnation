@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
+import { verifyCaptcha } from '../../utils/captchaApi';
 
 /**
  * Pattern Memory Captcha Component
  * User must remember and repeat a sequence of highlighted tiles
  */
-const PatternCaptcha = ({ onVerify, onCancel }) => {
+const PatternCaptcha = ({ sessionToken, onVerify, onCancel }) => {
   const [pattern, setPattern] = useState([]);
   const [userPattern, setUserPattern] = useState([]);
   const [isShowing, setIsShowing] = useState(false);
@@ -14,6 +15,7 @@ const PatternCaptcha = ({ onVerify, onCancel }) => {
   const [currentStep, setCurrentStep] = useState(-1);
   const [difficulty, setDifficulty] = useState(3); // Start with 3 steps
   const [gameState, setGameState] = useState('ready'); // ready, showing, playing, success, failure
+  const [startTime, setStartTime] = useState(null);
 
   // Generate random pattern
   const generatePattern = useCallback(() => {
@@ -37,6 +39,7 @@ const PatternCaptcha = ({ onVerify, onCancel }) => {
     setGameState('showing');
     setIsShowing(true);
     setError('');
+    setStartTime(Date.now()); // Start tracking time when pattern is shown
 
     // Show each step with delay
     for (let i = 0; i < pattern.length; i++) {
@@ -79,12 +82,43 @@ const PatternCaptcha = ({ onVerify, onCancel }) => {
 
   // Handle successful pattern completion
   const handleSuccess = async () => {
+    if (!sessionToken) {
+      setError('Session not initialized. Please try again.');
+      return;
+    }
+
     setGameState('success');
     setIsVerifying(true);
 
-    // Celebrate success
-    await new Promise(resolve => setTimeout(resolve, 800));
-    onVerify(true);
+    try {
+      // Calculate time taken
+      const timeTaken = (Date.now() - startTime) / 1000;
+
+      // Verify with backend
+      const result = await verifyCaptcha({
+        sessionToken,
+        captchaType: 'pattern',
+        userAnswer: userPattern,
+        expectedAnswer: pattern,
+        timeTaken
+      });
+
+      if (result.verified) {
+        await new Promise(resolve => setTimeout(resolve, 800));
+        onVerify(true, result);
+      } else {
+        setError(result.error || 'Verification failed. Please try again.');
+        setGameState('failure');
+        setIsVerifying(false);
+        onVerify(false);
+      }
+    } catch (error) {
+      console.error('[PatternCaptcha] Verification error:', error);
+      setError('Verification failed. Please try again.');
+      setGameState('failure');
+      setIsVerifying(false);
+      onVerify(false);
+    }
   };
 
   // Increase difficulty
@@ -272,6 +306,7 @@ const PatternCaptcha = ({ onVerify, onCancel }) => {
 };
 
 PatternCaptcha.propTypes = {
+  sessionToken: PropTypes.string,
   onVerify: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
 };

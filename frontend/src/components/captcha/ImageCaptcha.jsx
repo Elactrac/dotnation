@@ -1,15 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
+import { verifyCaptcha } from '../../utils/captchaApi';
 
 /**
  * Image Selection Captcha Component
  * User must select all images matching a specific category
  */
-const ImageCaptcha = ({ onVerify, onCancel }) => {
+const ImageCaptcha = ({ sessionToken, onVerify, onCancel }) => {
   const [selectedImages, setSelectedImages] = useState([]);
   const [isVerifying, setIsVerifying] = useState(false);
   const [error, setError] = useState('');
   const [challenge, setChallenge] = useState(null);
+  const [startTime, setStartTime] = useState(null);
 
   // Available categories for image challenges
   const categories = {
@@ -45,6 +47,7 @@ const ImageCaptcha = ({ onVerify, onCancel }) => {
     });
     setSelectedImages([]);
     setError('');
+    setStartTime(Date.now()); // Track start time
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -72,23 +75,41 @@ const ImageCaptcha = ({ onVerify, onCancel }) => {
       return;
     }
 
+    if (!sessionToken) {
+      setError('Session not initialized. Please try again.');
+      return;
+    }
+
     setIsVerifying(true);
     setError('');
 
-    // Simulate verification delay
-    await new Promise(resolve => setTimeout(resolve, 800));
+    try {
+      // Calculate time taken
+      const timeTaken = (Date.now() - startTime) / 1000;
 
-    // Check if selection matches correct indices
-    const correct = challenge.data.correctIndices.sort().join(',');
-    const selected = [...selectedImages].sort().join(',');
+      // Verify with backend
+      const result = await verifyCaptcha({
+        sessionToken,
+        captchaType: 'image',
+        userAnswer: selectedImages,
+        expectedAnswer: challenge.data.correctIndices,
+        timeTaken
+      });
 
-    if (correct === selected) {
-      onVerify(true);
-    } else {
-      setError('Incorrect selection. Please try again.');
+      if (result.verified) {
+        onVerify(true, result);
+      } else {
+        setError(result.error || 'Incorrect selection. Please try again.');
+        setIsVerifying(false);
+        // Regenerate challenge after failed attempt
+        setTimeout(generateChallenge, 1500);
+        onVerify(false);
+      }
+    } catch (error) {
+      console.error('[ImageCaptcha] Verification error:', error);
+      setError('Verification failed. Please try again.');
       setIsVerifying(false);
-      // Regenerate challenge after failed attempt
-      setTimeout(generateChallenge, 1500);
+      onVerify(false);
     }
   };
 
@@ -232,6 +253,7 @@ const getImageEmoji = (index, category) => {
 };
 
 ImageCaptcha.propTypes = {
+  sessionToken: PropTypes.string,
   onVerify: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
 };

@@ -1,16 +1,18 @@
 import { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { verifyCaptcha } from '../../utils/captchaApi';
 
 /**
  * Slider Puzzle Captcha Component
  * User must drag slider to align puzzle piece with gap in image
  */
-const SliderCaptcha = ({ onVerify, onCancel }) => {
+const SliderCaptcha = ({ sessionToken, onVerify, onCancel }) => {
   const [sliderPosition, setSliderPosition] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [error, setError] = useState('');
   const [targetPosition, setTargetPosition] = useState(0);
+  const [startTime, setStartTime] = useState(null);
   const sliderRef = useRef(null);
   const containerRef = useRef(null);
 
@@ -18,6 +20,7 @@ const SliderCaptcha = ({ onVerify, onCancel }) => {
   useEffect(() => {
     const randomPos = Math.floor(Math.random() * 60) + 20; // Between 20% and 80%
     setTargetPosition(randomPos);
+    setStartTime(Date.now());
   }, []);
 
   // Handle mouse/touch down
@@ -69,29 +72,49 @@ const SliderCaptcha = ({ onVerify, onCancel }) => {
 
   // Handle verification
   const handleVerify = async () => {
+    if (!sessionToken) {
+      setError('Session not initialized. Please try again.');
+      return;
+    }
+
     setIsVerifying(true);
     setError('');
 
-    // Simulate verification delay
-    await new Promise(resolve => setTimeout(resolve, 600));
+    try {
+      // Calculate time taken
+      const timeTaken = (Date.now() - startTime) / 1000;
 
-    // Check if position is within tolerance (±5%)
-    const tolerance = 5;
-    const difference = Math.abs(sliderPosition - targetPosition);
+      // Verify with backend (tolerance of 5%)
+      const result = await verifyCaptcha({
+        sessionToken,
+        captchaType: 'slider',
+        userAnswer: sliderPosition,
+        expectedAnswer: targetPosition,
+        timeTaken,
+        options: { tolerance: 5 }
+      });
 
-    if (difference <= tolerance) {
-      // Success! Animate completion
-      setSliderPosition(targetPosition);
-      await new Promise(resolve => setTimeout(resolve, 300));
-      onVerify(true);
-    } else {
-      setError('Position incorrect. Please try again.');
+      if (result.verified) {
+        // Success! Animate completion
+        setSliderPosition(targetPosition);
+        await new Promise(resolve => setTimeout(resolve, 300));
+        onVerify(true, result);
+      } else {
+        setError(result.error || 'Position incorrect. Please try again.');
+        setIsVerifying(false);
+        // Reset slider after delay
+        setTimeout(() => {
+          setSliderPosition(0);
+          setError('');
+          setStartTime(Date.now());
+        }, 1500);
+        onVerify(false);
+      }
+    } catch (error) {
+      console.error('[SliderCaptcha] Verification error:', error);
+      setError('Verification failed. Please try again.');
       setIsVerifying(false);
-      // Reset slider after delay
-      setTimeout(() => {
-        setSliderPosition(0);
-        setError('');
-      }, 1500);
+      onVerify(false);
     }
   };
 
@@ -262,6 +285,7 @@ const SliderCaptcha = ({ onVerify, onCancel }) => {
 };
 
 SliderCaptcha.propTypes = {
+  sessionToken: PropTypes.string,
   onVerify: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
 };
