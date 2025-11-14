@@ -153,6 +153,10 @@ describe('calculateProgress', () => {
     expect(calculateProgress(raised, goal)).toBe(50);
   });
 
+  it('should accept numeric strings and convert them to plancks', () => {
+    expect(calculateProgress('5000', '10000')).toBe(50);
+  });
+
   it('should cap progress at 100%', () => {
     const raised = 15000n;
     const goal = 10000n;
@@ -232,18 +236,27 @@ describe('parseDOT', () => {
     expect(parseDOT(undefined)).toBe(0n);
   });
 
+  it('should return 0n for empty or whitespace strings', () => {
+    expect(parseDOT('')).toBe(0n);
+    expect(parseDOT('   ')).toBe(0n);
+  });
+
   it('should support numeric input values', () => {
     expect(parseDOT(123)).toBe(BigInt('123000000000000'));
   });
 
+  it('should return 0n for negative numeric input', () => {
+    expect(parseDOT(-5)).toBe(0n);
+  });
+
   it('should parse DOT string without unit', () => {
-  const result = parseDOT('10.5');
-  expect(result).toBe(BigInt('10500000000000'));
+    const result = parseDOT('10.5');
+    expect(result).toBe(BigInt('10500000000000'));
   });
 
   it('should parse DOT string with unit', () => {
-  const result = parseDOT('10.5 DOT');
-  expect(result).toBe(BigInt('10500000000000'));
+    const result = parseDOT('10.5 DOT');
+    expect(result).toBe(BigInt('10500000000000'));
   });
 
   it('should return 0n for invalid number strings', () => {
@@ -252,13 +265,18 @@ describe('parseDOT', () => {
   });
 
   it('should handle whole numbers', () => {
-  const result = parseDOT('100');
-  expect(result).toBe(BigInt('100000000000000'));
+    const result = parseDOT('100');
+    expect(result).toBe(BigInt('100000000000000'));
   });
 
   it('should handle small decimal values', () => {
-  const result = parseDOT('0.1');
-  expect(result).toBe(BigInt('100000000000'));
+    const result = parseDOT('0.1');
+    expect(result).toBe(BigInt('100000000000'));
+  });
+
+  it('should ignore unit-like suffixes via sanitization', () => {
+    const result = parseDOT('1_234.5 DOT');
+    expect(result).toBe(BigInt('1234500000000000'));
   });
 });
 
