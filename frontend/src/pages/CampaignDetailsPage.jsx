@@ -11,11 +11,16 @@ import {
   FiCopy,
   FiCalendar,
   FiTarget,
-  FiCheckCircle
+  FiCheckCircle,
+  FiXCircle,
+  FiDollarSign
 } from 'react-icons/fi';
+import { decodeAddress } from '@polkadot/util-crypto';
+import { u8aEq } from '@polkadot/util';
 import { useCampaign } from '../contexts/CampaignContext.jsx';
 import { useWallet } from '../contexts/WalletContext';
 import { DonationInterface } from '../components/DonationInterface.jsx';
+import ErrorBoundary from '../components/ErrorBoundary';
 import {
   formatDOT,
   formatDate,
@@ -28,11 +33,13 @@ import {
 
 const CampaignDetailsPage = () => {
   const { id } = useParams();
-  const { getCampaignDetails, withdrawFunds, isLoading, error } = useCampaign();
+  const { getCampaignDetails, withdrawFunds, cancelCampaign, claimRefund, isLoading, error } = useCampaign();
   const { selectedAccount } = useWallet();
   const [campaign, setCampaign] = useState(null);
   const [donations, setDonations] = useState([]);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [isClaimingRefund, setIsClaimingRefund] = useState(false);
   const [activeTab, setActiveTab] = useState('about');
   const [showToast, setShowToast] = useState(null);
 
@@ -80,6 +87,57 @@ const CampaignDetailsPage = () => {
     }
   };
 
+  const handleCancelCampaign = async () => {
+    if (!campaign || !selectedAccount) return;
+
+    if (!window.confirm('Are you sure you want to cancel this campaign? Donors will be able to claim refunds.')) {
+      return;
+    }
+
+    setIsCancelling(true);
+    try {
+      await cancelCampaign(id);
+      setShowToast({
+        type: 'success',
+        message: 'Campaign cancelled successfully. Donors can now claim refunds.'
+      });
+      // Refresh campaign details
+      const details = await getCampaignDetails(id);
+      setCampaign(details.campaign);
+    } catch (err) {
+      setShowToast({
+        type: 'error',
+        message: err.message
+      });
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
+  const handleClaimRefund = async () => {
+    if (!campaign || !selectedAccount) return;
+
+    setIsClaimingRefund(true);
+    try {
+      await claimRefund(id);
+      setShowToast({
+        type: 'success',
+        message: 'Refund claimed successfully!'
+      });
+      // Refresh campaign details
+      const details = await getCampaignDetails(id);
+      setCampaign(details.campaign);
+      setDonations(details.donations || []);
+    } catch (err) {
+      setShowToast({
+        type: 'error',
+        message: err.message
+      });
+    } finally {
+      setIsClaimingRefund(false);
+    }
+  };
+
   const handleShare = async (platform) => {
     const url = window.location.href;
     const title = campaign ? `Support ${campaign.title} on DotNation!` : 'Check out this campaign on DotNation!';
@@ -119,6 +177,22 @@ const CampaignDetailsPage = () => {
     const progress = calculateProgress(campaign.raised, campaign.goal);
     const deadlineStatus = getDeadlineStatus(campaign.deadline);
     const stateColor = getCampaignStateColor(campaign.state);
+    
+    // Helper function to compare addresses regardless of SS58 format
+    const addressesMatch = (addr1, addr2) => {
+      if (!addr1 || !addr2) return false;
+      try {
+        const pub1 = decodeAddress(addr1);
+        const pub2 = decodeAddress(addr2);
+        return u8aEq(pub1, pub2);
+      } catch (err) {
+        console.error('[CampaignDetailsPage] Failed to decode addresses:', err);
+        return false;
+      }
+    };
+    
+    const isOwner = selectedAccount && addressesMatch(selectedAccount.address, campaign.owner);
+    const userDonation = donations.find(d => addressesMatch(d.donor, selectedAccount?.address));
 
     return {
       progress,
@@ -126,12 +200,14 @@ const CampaignDetailsPage = () => {
       stateColor,
       formattedGoal: formatDOT(campaign.goal),
       formattedRaised: formatDOT(campaign.raised),
-      isOwner: selectedAccount && selectedAccount.address === campaign.owner,
-      canWithdraw: selectedAccount && campaign.owner === selectedAccount.address &&
+      isOwner,
+      canWithdraw: selectedAccount && isOwner &&
         (campaign.state === 'Successful' || (campaign.state === 'Active' && deadlineStatus.daysLeft === 0)) &&
-        campaign.state !== 'Withdrawn'
+        campaign.state !== 'Withdrawn',
+      canCancel: isOwner && campaign.state === 'Active',
+      canClaimRefund: selectedAccount && campaign.state === 'Failed' && userDonation && userDonation.amount > 0
     };
-  }, [campaign, selectedAccount]);
+  }, [campaign, selectedAccount, donations]);
 
   if (isLoading) {
     return (
@@ -460,12 +536,56 @@ const CampaignDetailsPage = () => {
                 )}
               </button>
             )}
+
+            {/* Cancel Campaign Button for Campaign Owner */}
+            {campaignStats?.canCancel && (
+              <button
+                onClick={handleCancelCampaign}
+                disabled={isCancelling}
+                className="w-full py-4 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl font-body font-bold text-lg hover:scale-105 transition-all duration-300 shadow-lg shadow-red-500/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isCancelling ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    Cancelling campaign...
+                  </>
+                ) : (
+                  <>
+                    <FiXCircle className="w-5 h-5" />
+                    Cancel Campaign
+                  </>
+                )}
+              </button>
+            )}
+
+            {/* Claim Refund Button for Donors */}
+            {campaignStats?.canClaimRefund && (
+              <button
+                onClick={handleClaimRefund}
+                disabled={isClaimingRefund}
+                className="w-full py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-body font-bold text-lg hover:scale-105 transition-all duration-300 shadow-lg shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isClaimingRefund ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    Claiming refund...
+                  </>
+                ) : (
+                  <>
+                    <FiDollarSign className="w-5 h-5" />
+                    Claim Refund
+                  </>
+                )}
+              </button>
+            )}
           </div>
 
           {/* Right Column - Donation Interface */}
           <div className="lg:col-span-1">
             <div className="sticky top-4">
-              <DonationInterface campaignId={id} campaign={campaign} />
+              <ErrorBoundary>
+                <DonationInterface campaignId={id} campaign={campaign} />
+              </ErrorBoundary>
             </div>
           </div>
         </div>

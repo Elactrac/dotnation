@@ -64,7 +64,7 @@ app.use(timeout(process.env.REQUEST_TIMEOUT_MS || 30000));
 // General rate limiter for all endpoints
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // 100 requests per 15 minutes per IP
+  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS, 10) || 100, // 100 requests per 15 minutes per IP
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
@@ -84,7 +84,7 @@ const generalLimiter = rateLimit({
 // Strict rate limiter for expensive AI operations
 const aiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10, // 10 AI requests per 15 minutes per IP
+  max: 100, // 100 AI requests per 15 minutes per IP (increased for development)
   message: 'Too many AI requests from this IP. Please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
@@ -121,8 +121,10 @@ const requireApiKey = (req, res, next) => {
 
   // Check if API key authentication is enabled
   if (!expectedApiKey || expectedApiKey === 'your_api_key_here') {
-    logger.warn('BACKEND_API_KEY not configured - API authentication disabled!');
-    return next();
+    logger.error('CRITICAL: BACKEND_API_KEY not configured. API is unavailable.');
+    return res.status(503).json({ 
+      error: 'Service Unavailable: API key is not configured on the server.' 
+    });
   }
 
   // Validate API key
@@ -167,13 +169,15 @@ if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your_gemini_a
 }
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+// Using gemini-2.5-flash as confirmed by API
+// Note: Gemini 2.5 uses "thinking tokens" for reasoning, so we need more output tokens
 const model = genAI.getGenerativeModel({
   model: 'gemini-2.5-flash',
   generationConfig: {
     temperature: 0.7,
     topK: 40,
     topP: 0.95,
-    maxOutputTokens: 1024,
+    maxOutputTokens: 8192, // Increased to account for thinking tokens in Gemini 2.5
   }
 });
 
@@ -233,10 +237,42 @@ app.post('/api/generate-description', aiLimiter, validateMiddleware('generateDes
       return res.json({ description, mock: true });
     }
 
-    const prompt = `Generate a compelling and detailed crowdfunding campaign description for a project titled "${title}".`;
+    const prompt = `Generate a compelling and detailed crowdfunding campaign description for a project titled "${title}".
+
+STRICT REQUIREMENTS:
+- Maximum 950 characters (to ensure it fits within 1000 character limit with some buffer)
+- Write in plain text WITHOUT any markdown formatting
+- DO NOT use asterisks (**), hashtags (#), or other markdown symbols
+- DO NOT include a title or header - start directly with the description
+- Be concise, clear, and persuasive
+- Focus on the problem, solution, and impact
+- Use simple paragraphs separated by line breaks
+
+Example format:
+This project addresses [problem]. We are building [solution] that will help [beneficiaries].
+
+Our approach focuses on [key features]. This will enable [specific outcomes] and create lasting impact through [benefits].
+
+With your support, we can [call to action]. Join us in [mission statement].`;
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    const text = response.text();
+    let text = response.text();
+
+    // Enforce 950 character limit (trim excess to ensure frontend stays under 1000)
+    if (text.length > 950) {
+      // Try to cut at last sentence before 950 chars
+      const lastPeriod = text.substring(0, 950).lastIndexOf('.');
+      const lastExclaim = text.substring(0, 950).lastIndexOf('!');
+      const lastQuestion = text.substring(0, 950).lastIndexOf('?');
+      const cutPoint = Math.max(lastPeriod, lastExclaim, lastQuestion);
+      
+      if (cutPoint > 700) { // If there's a sentence ending reasonably close
+        text = text.substring(0, cutPoint + 1).trim();
+      } else {
+        // Otherwise just hard cut at 950
+        text = text.substring(0, 950).trim();
+      }
+    }
 
     // Cache the response
     if (redisReady) {
@@ -281,7 +317,19 @@ app.post('/api/summarize', aiLimiter, validateMiddleware('summarize'), async (re
       return res.json({ summary: mockSummary, mock: true });
     }
 
-    const prompt = `Summarize the following campaign description into a single, concise paragraph: \n\n${description}`;
+    const prompt = `Summarize the following campaign description into a single, concise paragraph.
+
+Campaign Description:
+${description}
+
+STRICT REQUIREMENTS:
+- Maximum 200 characters
+- Write in plain text WITHOUT any markdown formatting (no **, ##, or symbols)
+- Single paragraph only
+- Capture the core mission and impact
+- Be clear and direct
+
+Return only the summary text, nothing else.`;
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
@@ -318,6 +366,13 @@ app.post('/api/contract-summary', aiLimiter, validateMiddleware('contractSummary
   try {
     const { title, description, goal, deadline, beneficiary } = req.body;
 
+    logger.debug('Contract summary request received', { 
+      titleLength: title?.length,
+      descLength: description?.length,
+      goal,
+      beneficiaryLength: beneficiary?.length
+    });
+
     logger.info('Generating contract summary', { title, goal });
 
     if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your_gemini_api_key_here') {
@@ -325,7 +380,32 @@ app.post('/api/contract-summary', aiLimiter, validateMiddleware('contractSummary
       return res.json({ summary: mockSummary, mock: true });
     }
 
-    const prompt = `Generate a clear, concise summary of a crowdfunding campaign contract based on the following details...`;
+    const prompt = `Generate a clear, concise summary of a crowdfunding campaign contract based on the following details:
+
+Title: ${title}
+Description: ${description}
+Funding Goal: ${goal} DOT
+Deadline: ${new Date(deadline).toLocaleString()}
+Beneficiary Address: ${beneficiary}
+
+STRICT REQUIREMENTS:
+- Write in plain text WITHOUT any markdown formatting (no **, ##, or other symbols)
+- Keep it brief and professional (maximum 500 characters)
+- DO NOT use bold, italics, or headers
+- Use simple bullet points with • symbol if needed
+- Structure: Brief overview, key terms, and what happens next
+
+Example format:
+Campaign Overview
+This campaign seeks to raise ${goal} DOT for ${title}. Funds will be transferred to the beneficiary address once the goal is reached by the deadline.
+
+Key Terms
+• Goal Amount: ${goal} DOT
+• Deadline: ${new Date(deadline).toLocaleDateString()}
+• Beneficiary: ${beneficiary.substring(0, 10)}...
+
+Next Steps
+Review the details above. If you confirm, the campaign will be created on the blockchain and will become publicly visible for donations.`;
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
@@ -408,14 +488,17 @@ app.post('/api/generate-title', aiLimiter, validateMiddleware('generateTitle'), 
 
     const prompt = `Generate 5 compelling and unique crowdfunding campaign titles for a ${category || 'general'} project about ${keywords || 'innovation'}. 
     
-    Requirements:
-    - Each title should be 5-10 words
-    - Make them catchy and professional
-    - Focus on the impact and benefits
-    - Avoid generic buzzwords
+    STRICT REQUIREMENTS:
+    - Each title must be 5-10 words and under 100 characters
+    - Make them catchy, professional, and action-oriented
+    - Focus on the impact and benefits, not just features
+    - Avoid generic buzzwords like "revolutionary" or "innovative"
     - Be specific and memorable
+    - NO markdown formatting, symbols, or special characters
+    - Return ONLY a valid JSON array, nothing else
     
-    Return as a JSON array of strings: ["title1", "title2", "title3", "title4", "title5"]`;
+    Return format (plain text JSON only):
+    ["First Campaign Title Here", "Second Campaign Title Here", "Third Campaign Title Here", "Fourth Campaign Title Here", "Fifth Campaign Title Here"]`;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;

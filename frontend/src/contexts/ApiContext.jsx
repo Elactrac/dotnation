@@ -41,12 +41,12 @@ export const ApiProvider = ({ children }) => {
         const rpcEndpoint = import.meta.env.VITE_RPC_ENDPOINT || 'ws://127.0.0.1:9944';
         const wsProvider = new WsProvider(rpcEndpoint);
 
-        console.log(`Connecting to ${rpcEndpoint}...`);
+        console.log('[ApiContext] Connecting to', rpcEndpoint);
 
-        // Use a shorter timeout and don't block the UI
+        // Use a longer timeout for remote endpoints (Mandala can be slow)
         apiInstance = await Promise.race([
           ApiPromise.create({ provider: wsProvider }),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Connection timeout')), 5000))
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Connection timeout')), 15000))
         ]);
 
         await apiInstance.isReady;
@@ -57,27 +57,35 @@ export const ApiProvider = ({ children }) => {
         }
         
         setApi(apiInstance);
+        console.log('[ApiContext] ✅ API connected successfully to', rpcEndpoint);
 
         // Initialize contract if address is provided
         const contractAddress = import.meta.env.VITE_CONTRACT_ADDRESS;
+        console.log('[ApiContext] Contract address from env:', contractAddress);
+        
         if (contractAddress) {
           try {
             const contractInstance = new ContractPromise(apiInstance, contractMetadata, contractAddress);
             setContract(contractInstance);
-            console.log(`Contract loaded at ${contractAddress}`);
+            console.log('[ApiContext] ✅ Contract loaded at', contractAddress);
           } catch (contractErr) {
-            console.warn('Failed to load contract:', contractErr.message);
+            console.error('[ApiContext] ❌ Failed to load contract:', contractErr.message);
+            console.error('[ApiContext] Contract error details:', contractErr);
           }
+        } else {
+          console.warn('[ApiContext] ⚠️  No contract address configured (VITE_CONTRACT_ADDRESS is empty)');
         }
 
         setIsReady(true);
 
-        console.log(`API connected successfully to ${rpcEndpoint}`);
+        console.log('[ApiContext] ✅ Initialization complete');
       } catch (err) {
-        console.warn('API connection failed:', err.message);
+        console.error('[ApiContext] ❌ API connection failed:', err.message);
+        console.error('[ApiContext] Error details:', err);
         setError(err.message);
         // Don't block the app - set ready to true anyway so the UI can load
         setIsReady(true);
+        console.log('[ApiContext] ⚠️  App will continue in mock mode');
       }
     };
 
@@ -105,6 +113,31 @@ export const ApiProvider = ({ children }) => {
       {children}
     </ApiContext.Provider>
   );
+};
+
+/**
+ * Helper function to create proper gas limit for contract queries
+ * Note: gasLimit: -1 causes ContractTrapped errors on some chains (e.g., Mandala/Paseo)
+ * 
+ * IMPORTANT: Previous values (30B refTime, 5MB proofSize) were causing "Transaction would 
+ * exhaust the block limits" errors. Reduced to conservative values that fit within typical
+ * Substrate block limits while still allowing complex operations.
+ * 
+ * @param {ApiPromise} api - The Polkadot API instance
+ * @returns {object} Proper WeightV2 gas limit
+ */
+export const createGasLimit = (api) => {
+  if (!api || !api.registry) {
+    // Fallback for when API is not ready
+    return { refTime: 3000000000, proofSize: 1048576 };
+  }
+  // Create proper WeightV2 gas limit
+  // refTime: 3 billion (reduced from 30 billion) - sufficient for most contract operations
+  // proofSize: 1MB (reduced from 5MB) - typical contract state proof size
+  return api.registry.createType('WeightV2', {
+    refTime: 3000000000,   // 3 billion gas units for computation (10x reduction)
+    proofSize: 1048576     // 1MB proof size (5x reduction)
+  });
 };
 
 /**

@@ -198,15 +198,15 @@ describe('DonationInterface', () => {
       expect(input.value).toBe('15');
     });
 
-    it('validates minimum amount (0.1 DOT)', () => {
+    it('validates minimum amount (0.001 DOT)', () => {
       render(
         <DonationInterface campaignId={mockCampaignId} campaign={mockActiveCampaign} />
       );
 
       const input = screen.getByPlaceholderText('Enter donation amount');
-      fireEvent.change(input, { target: { value: '0.05' } });
+      fireEvent.change(input, { target: { value: '0.0005' } });
 
-      expect(screen.getByText('Minimum donation is 0.1 DOT')).toBeInTheDocument();
+      expect(screen.getByText('Minimum donation is 0.001 DOT')).toBeInTheDocument();
     });
 
     it('validates maximum amount (100,000 DOT)', () => {
@@ -263,12 +263,12 @@ describe('DonationInterface', () => {
       const input = screen.getByPlaceholderText('Enter donation amount');
       
       // Enter invalid amount
-      fireEvent.change(input, { target: { value: '0.05' } });
-      expect(screen.getByText('Minimum donation is 0.1 DOT')).toBeInTheDocument();
+      fireEvent.change(input, { target: { value: '0.0005' } });
+      expect(screen.getByText('Minimum donation is 0.001 DOT')).toBeInTheDocument();
 
       // Enter valid amount
       fireEvent.change(input, { target: { value: '10' } });
-      expect(screen.queryByText('Minimum donation is 0.1 DOT')).not.toBeInTheDocument();
+      expect(screen.queryByText('Minimum donation is 0.001 DOT')).not.toBeInTheDocument();
     });
   });
 
@@ -303,14 +303,14 @@ describe('DonationInterface', () => {
 
       // Enter invalid amount
       const input = screen.getByPlaceholderText('Enter donation amount');
-      fireEvent.change(input, { target: { value: '0.05' } });
-      expect(screen.getByText('Minimum donation is 0.1 DOT')).toBeInTheDocument();
+      fireEvent.change(input, { target: { value: '0.0005' } });
+      expect(screen.getByText('Minimum donation is 0.001 DOT')).toBeInTheDocument();
 
       // Click quick amount
       const button = screen.getByText('10 DOT');
       fireEvent.click(button);
 
-      expect(screen.queryByText('Minimum donation is 0.1 DOT')).not.toBeInTheDocument();
+      expect(screen.queryByText('Minimum donation is 0.001 DOT')).not.toBeInTheDocument();
     });
 
     it('updates button text when quick amount is selected', () => {
@@ -714,9 +714,9 @@ describe('DonationInterface', () => {
       );
 
       const input = screen.getByPlaceholderText('Enter donation amount');
-      fireEvent.change(input, { target: { value: '0.05' } });
+      fireEvent.change(input, { target: { value: '0.0005' } });
 
-      const errorMessage = screen.getByText('Minimum donation is 0.1 DOT');
+      const errorMessage = screen.getByText('Minimum donation is 0.001 DOT');
       expect(errorMessage).toBeInTheDocument();
       expect(errorMessage).toHaveClass('text-red-400');
     });
@@ -793,8 +793,55 @@ describe('DonationInterface', () => {
       const input = screen.getByPlaceholderText('Enter donation amount');
       fireEvent.change(input, { target: { value: '0.5' } });
 
-      expect(screen.queryByText(/Minimum donation is 0.1 DOT/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/Minimum donation is 0.001 DOT/)).not.toBeInTheDocument();
       expect(screen.getByRole('button', { name: /Donate 0.5 DOT/i })).toBeInTheDocument();
+    });
+
+    it('validates exact minimum boundary (0.001 DOT)', () => {
+      render(
+        <DonationInterface campaignId={mockCampaignId} campaign={mockActiveCampaign} />
+      );
+
+      const input = screen.getByPlaceholderText('Enter donation amount');
+      fireEvent.change(input, { target: { value: '0.001' } });
+
+      expect(screen.queryByText(/Minimum donation is 0.001 DOT/)).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Donate 0.001 DOT/i })).toBeInTheDocument();
+    });
+
+    it('rejects amounts below minimum (0.0009 DOT)', () => {
+      render(
+        <DonationInterface campaignId={mockCampaignId} campaign={mockActiveCampaign} />
+      );
+
+      const input = screen.getByPlaceholderText('Enter donation amount');
+      fireEvent.change(input, { target: { value: '0.0009' } });
+
+      expect(screen.getByText('Minimum donation is 0.001 DOT')).toBeInTheDocument();
+    });
+
+    it('accepts amounts just above minimum (0.002 DOT)', () => {
+      render(
+        <DonationInterface campaignId={mockCampaignId} campaign={mockActiveCampaign} />
+      );
+
+      const input = screen.getByPlaceholderText('Enter donation amount');
+      fireEvent.change(input, { target: { value: '0.002' } });
+
+      expect(screen.queryByText(/Minimum donation is 0.001 DOT/)).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Donate 0.002 DOT/i })).toBeInTheDocument();
+    });
+
+    it('handles three decimal places correctly', () => {
+      render(
+        <DonationInterface campaignId={mockCampaignId} campaign={mockActiveCampaign} />
+      );
+
+      const input = screen.getByPlaceholderText('Enter donation amount');
+      fireEvent.change(input, { target: { value: '1.234' } });
+
+      expect(screen.queryByText(/Minimum donation is 0.001 DOT/)).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Donate 1.234 DOT/i })).toBeInTheDocument();
     });
   });
 });

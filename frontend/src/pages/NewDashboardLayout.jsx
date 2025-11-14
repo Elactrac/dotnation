@@ -1,10 +1,11 @@
 import { useEffect } from 'react';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useWallet } from '../contexts/WalletContext';
+import { shortenAddress } from '../utils/formatters';
 import VersionBanner from '../components/VersionBanner';
 
 const NewDashboardLayout = () => {
-  const { accounts, selectedAccount, connectWallet, selectAccount, disconnectWallet } = useWallet();
+  const { accounts, selectedAccount, connectWallet, switchAccount, disconnectWallet } = useWallet();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -140,26 +141,39 @@ const NewDashboardLayout = () => {
                   </button>
 
                   {/* Dropdown Menu */}
-                  <div className="absolute right-0 mt-2 w-64 rounded-xl border border-white/10 bg-background-dark/95 backdrop-blur-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                    <div className="p-4">
+                  <div className="absolute right-0 mt-2 w-80 rounded-xl border border-white/10 bg-background-dark/95 backdrop-blur-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 overflow-visible z-[100]">
+                    <div className="p-4 max-h-[500px] overflow-y-auto">
                       <p className="text-xs text-white/50 mb-2">Connected Account</p>
-                      <p className="text-xs text-white font-mono mb-4 break-all">{selectedAccount.address}</p>
+                      <div className="mb-4 min-w-0">
+                        <p className="text-sm text-white font-medium truncate">{selectedAccount.meta.name}</p>
+                        <p className="text-xs text-white/60 font-mono truncate">{shortenAddress(selectedAccount.address)}</p>
+                      </div>
                       
                       {accounts.length > 1 && (
                         <div className="mb-4">
-                          <p className="text-xs text-white/50 mb-2">Switch Account</p>
-                          <div className="space-y-1">
+                          <p className="text-xs text-white/50 mb-2">Switch Account ({accounts.length})</p>
+                          <div className="space-y-1.5">
                             {accounts.map((account) => (
                               <button
                                 key={account.address}
-                                onClick={() => selectAccount(account)}
-                                className={`w-full text-left px-3 py-2 rounded-lg text-sm ${
+                                onClick={() => {
+                                  switchAccount(account);
+                                }}
+                                className={`w-full text-left px-3 py-2.5 rounded-lg text-sm min-w-0 ${
                                   account.address === selectedAccount.address
-                                    ? 'bg-primary/20 text-primary'
-                                    : 'text-white/70 hover:bg-white/10'
-                                } transition-colors`}
+                                    ? 'bg-primary/20 text-primary border border-primary/30'
+                                    : 'text-white/70 hover:bg-white/10 border border-transparent'
+                                } transition-all`}
                               >
-                                {account.meta.name || formatAddress(account.address)}
+                                <div className="flex items-center justify-between gap-2">
+                                  <div className="min-w-0 flex-1">
+                                    <div className="font-medium truncate">{account.meta.name || shortenAddress(account.address)}</div>
+                                    <div className="text-xs opacity-60 truncate">{shortenAddress(account.address)}</div>
+                                  </div>
+                                  {account.address === selectedAccount.address && (
+                                    <span className="flex-shrink-0 text-primary">✓</span>
+                                  )}
+                                </div>
                               </button>
                             ))}
                           </div>
@@ -167,6 +181,14 @@ const NewDashboardLayout = () => {
                       )}
                       
                       <div className="space-y-2">
+                        <button
+                          onClick={() => {
+                            navigate('/profile');
+                          }}
+                          className="w-full px-4 py-2 rounded-lg bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors border border-primary/30"
+                        >
+                          👤 View Profile
+                        </button>
                         <button
                           onClick={() => navigate('/my-campaigns')}
                           className="w-full px-4 py-2 rounded-lg bg-white/5 text-white text-sm font-medium hover:bg-white/10 transition-colors"

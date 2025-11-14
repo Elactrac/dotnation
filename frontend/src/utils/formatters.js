@@ -1,4 +1,44 @@
 import { BN, formatBalance } from '@polkadot/util';
+import { TOKEN_DECIMALS, AMOUNT_LIMITS } from '../config/constants';
+
+const DECIMALS_NUMBER = Number(TOKEN_DECIMALS);
+
+const toPlanckBigInt = (value) => {
+  if (value === null || value === undefined) {
+    return 0n;
+  }
+
+  if (typeof value === 'bigint') {
+    return value;
+  }
+
+  if (typeof value === 'number') {
+    if (!Number.isFinite(value)) {
+      return 0n;
+    }
+    return BigInt(Math.trunc(value));
+  }
+
+  if (typeof value === 'string') {
+    const normalized = value.replace(/,/g, '').trim();
+    if (normalized === '') {
+      return 0n;
+    }
+
+    if (/^-?\d+$/.test(normalized)) {
+      return BigInt(normalized);
+    }
+
+    // String contains decimals – parse as DOT value
+    return parseDOT(normalized);
+  }
+
+  if (typeof value.toString === 'function') {
+    return toPlanckBigInt(value.toString());
+  }
+
+  return 0n;
+};
 
 /**
  * Formats a given balance into a human-readable string with a "DOT" unit.
@@ -7,19 +47,27 @@ import { BN, formatBalance } from '@polkadot/util';
  * and uses the Polkadot.js utility to format it into a concise representation
  * (e.g., "1.23 kDOT").
  *
- * @param {string|number|BN} balance - The balance to format.
+ * @param {string|number|BN} balance - The balance to format (in plancks, 12 decimals).
  * @returns {string} The formatted balance string (e.g., "1.23 kDOT") or "0 DOT"
  *   if the balance is zero or undefined.
  */
 export const formatDotBalance = (balance) => {
-  if (!balance) return '0 DOT';
-  
-  // Assuming balance is a BigInt or a string that can be converted to BN
-  const bnBalance = new BN(balance.toString());
-  
-  // Format the balance using Polkadot.js utility
-  // You might need to adjust the decimals based on the chain's configuration
-  return formatBalance(bnBalance, { withSi: true, withUnit: 'DOT' });
+  if (balance === null || balance === undefined) {
+    return '0 DOT';
+  }
+
+  try {
+    const plancks = toPlanckBigInt(balance);
+    const bnBalance = new BN(plancks.toString());
+    return formatBalance(bnBalance, {
+      decimals: DECIMALS_NUMBER,
+      withSi: true,
+      withUnit: 'DOT',
+    });
+  } catch (err) {
+    console.error('Error formatting balance:', err);
+    return '0 DOT';
+  }
 };
 
 /**
@@ -56,9 +104,19 @@ export const getCampaignStatus = (campaign) => {
 };
 
 export const calculateProgress = (raised, goal) => {
-    if (!goal || goal === 0n) return 0;
-    const percentage = (Number(raised) / Number(goal)) * 100;
-    return Math.min(percentage, 100);
+  const goalBigInt = toPlanckBigInt(goal);
+  if (goalBigInt <= 0n) {
+    return 0;
+  }
+
+  const raisedBigInt = toPlanckBigInt(raised);
+  if (raisedBigInt <= 0n) {
+    return 0;
+  }
+
+  const scaled = (raisedBigInt * 10000n) / goalBigInt; // two decimal precision
+  const cappedScaled = scaled > 10000n ? 10000n : scaled;
+  return Number(cappedScaled) / 100;
 };
 
 export const getDeadlineStatus = (deadline) => {
@@ -85,15 +143,65 @@ export const getCampaignStateColor = (state) => {
     }
 };
 
-export const formatDOT = formatDotBalance; // Alias for compatibility
+export const parseDOT = (value, decimals = DECIMALS_NUMBER) => {
+  if (value === null || value === undefined) {
+    return 0n;
+  }
 
-export const parseDOT = (value) => {
-    if (!value || typeof value !== 'string') return 0n;
-    // Simple parsing, assuming value is like "10.5 DOT"
-    const num = parseFloat(value.replace(' DOT', ''));
-    if (isNaN(num)) return 0n;
-    // Convert to smallest unit (assuming 10 decimals)
-    return BigInt(Math.floor(num * 1e10));
+  if (typeof value === 'bigint') {
+    return value;
+  }
+
+  let normalized;
+
+  if (typeof value === 'number') {
+    if (!Number.isFinite(value)) {
+      return 0n;
+    }
+    normalized = value.toString();
+  } else if (typeof value === 'string') {
+    normalized = value.replace(/,/g, '').replace(/[^0-9.]/g, '');
+  } else if (typeof value.toString === 'function') {
+    normalized = value.toString();
+  } else {
+    return 0n;
+  }
+
+  if (!normalized) {
+    return 0n;
+  }
+
+  if (!/^\d*(\.\d*)?$/.test(normalized)) {
+    return 0n;
+  }
+
+  const [whole = '0', fraction = ''] = normalized.split('.');
+  const fractionPadded = (fraction + '0'.repeat(decimals)).slice(0, decimals);
+
+  try {
+    return BigInt(whole || '0') * (10n ** BigInt(decimals)) + BigInt(fractionPadded || '0');
+  } catch (error) {
+    console.error('parseDOT failed:', error);
+    return 0n;
+  }
+};
+
+export const formatDOT = (plancks, decimals = DECIMALS_NUMBER) => {
+  const value = toPlanckBigInt(plancks);
+  if (value === 0n) {
+    return '0';
+  }
+
+  const divisor = 10n ** BigInt(decimals);
+  const wholePart = value / divisor;
+  const fractionPart = value % divisor;
+
+  if (fractionPart === 0n) {
+    return wholePart.toString();
+  }
+
+  const fractionString = fractionPart.toString().padStart(decimals, '0').replace(/0+$/, '');
+  return `${wholePart.toString()}.${fractionString}`;
 };
 
 export const isValidAddress = (address) => {
@@ -116,4 +224,9 @@ export const formatDateTime = (timestamp) => {
     if (!timestamp) return '';
     const date = new Date(timestamp);
     return date.toLocaleString();
+};
+
+export const validateAmountInRange = (plancks) => {
+  const amount = toPlanckBigInt(plancks);
+  return amount >= AMOUNT_LIMITS.MIN_DONATION && amount <= AMOUNT_LIMITS.MAX_DONATION;
 };

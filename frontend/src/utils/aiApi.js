@@ -6,6 +6,53 @@
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 const API_KEY = import.meta.env.VITE_BACKEND_API_KEY || 'dev_api_key_12345';
+const REQUEST_TIMEOUT = 10000; // 10 seconds for normal requests
+const AI_REQUEST_TIMEOUT = 45000; // 45 seconds for AI requests (Gemini can be slow)
+
+/**
+ * Fetch with timeout
+ * @param {string} url - URL to fetch
+ * @param {Object} options - Fetch options
+ * @param {number} timeout - Timeout in milliseconds
+ * @returns {Promise<Response>}
+ */
+async function fetchWithTimeout(url, options = {}, timeout = REQUEST_TIMEOUT) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+  
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal
+    });
+    clearTimeout(id);
+    return response;
+  } catch (error) {
+    clearTimeout(id);
+    if (error.name === 'AbortError') {
+      throw new Error('Request timeout - backend server may be down');
+    }
+    throw error;
+  }
+}
+
+/**
+ * Clean AI-generated text by removing markdown headers and extra formatting
+ * @param {string} text - Raw text from AI
+ * @returns {string} Cleaned text
+ */
+function cleanAIResponse(text) {
+  if (!text) return '';
+  
+  // Remove markdown headers (**, #, etc.)
+  let cleaned = text
+    .replace(/^#+\s+/gm, '') // Remove markdown headers
+    .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold markers
+    .replace(/^\*\s+/gm, '• ') // Convert markdown bullets to unicode bullets
+    .trim();
+  
+  return cleaned;
+}
 
 /**
  * Get authentication headers for API requests
@@ -25,21 +72,32 @@ function getAuthHeaders() {
  */
 export async function generateDescription(title) {
   try {
-    const response = await fetch(`${BACKEND_URL}/api/generate-description`, {
+    console.log('[AI API] Generating description for:', title);
+    const response = await fetchWithTimeout(`${BACKEND_URL}/api/generate-description`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify({ title }),
-    });
+    }, AI_REQUEST_TIMEOUT);
 
     if (!response.ok) {
+      console.error('[AI API] Backend error:', response.status, response.statusText);
       throw new Error(`Failed to generate description: ${response.statusText}`);
     }
 
     const data = await response.json();
+    // Clean the AI response to remove markdown formatting
+    if (data.description) {
+      data.description = cleanAIResponse(data.description);
+    }
+    console.log('[AI API] ✅ Description generated successfully');
     return data;
   } catch (error) {
     console.error('[AI API] Error generating description:', error);
-    throw error;
+    // Return fallback description
+    return {
+      description: `Help support this campaign: "${title}". Your contribution will make a difference in achieving this important goal. Every donation counts towards making this project a reality.`,
+      fallback: true
+    };
   }
 }
 
@@ -51,11 +109,11 @@ export async function generateDescription(title) {
  */
 export async function generateTitles(keywords, category = 'general') {
   try {
-    const response = await fetch(`${BACKEND_URL}/api/generate-title`, {
+    const response = await fetchWithTimeout(`${BACKEND_URL}/api/generate-title`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify({ keywords, category }),
-    });
+    }, AI_REQUEST_TIMEOUT);
 
     if (!response.ok) {
       throw new Error(`Failed to generate titles: ${response.statusText}`);
@@ -81,21 +139,31 @@ export async function generateTitles(keywords, category = 'general') {
  */
 export async function detectFraud(campaign) {
   try {
-    const response = await fetch(`${BACKEND_URL}/api/fraud-detection`, {
+    console.log('[AI API] Running fraud detection for campaign:', campaign.title);
+    const response = await fetchWithTimeout(`${BACKEND_URL}/api/fraud-detection`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify({ campaign }),
-    });
+    }, AI_REQUEST_TIMEOUT);
 
     if (!response.ok) {
+      console.error('[AI API] Backend error:', response.status, response.statusText);
       throw new Error(`Failed to detect fraud: ${response.statusText}`);
     }
 
     const data = await response.json();
+    console.log('[AI API] ✅ Fraud detection completed, risk level:', data.riskLevel);
     return data;
   } catch (error) {
     console.error('[AI API] Error detecting fraud:', error);
-    throw error;
+    // Return safe default - low risk if backend unavailable
+    return {
+      riskScore: 30,
+      riskLevel: 'low',
+      flags: [],
+      recommendations: ['Backend fraud detection unavailable - proceeding with caution'],
+      fallback: true
+    };
   }
 }
 
@@ -107,21 +175,35 @@ export async function detectFraud(campaign) {
  */
 export async function summarizeContent(description, maxLength = 100) {
   try {
-    const response = await fetch(`${BACKEND_URL}/api/summarize`, {
+    console.log('[AI API] Summarizing content, length:', description?.length);
+    const response = await fetchWithTimeout(`${BACKEND_URL}/api/summarize`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify({ description, maxLength }),
-    });
+    }, AI_REQUEST_TIMEOUT);
 
     if (!response.ok) {
+      console.error('[AI API] Backend error:', response.status, response.statusText);
       throw new Error(`Failed to summarize content: ${response.statusText}`);
     }
 
     const data = await response.json();
+    // Clean the AI response
+    if (data.summary) {
+      data.summary = cleanAIResponse(data.summary);
+    }
+    console.log('[AI API] ✅ Content summarized successfully');
     return data;
   } catch (error) {
     console.error('[AI API] Error summarizing content:', error);
-    throw error;
+    // Return fallback summary (truncated description)
+    const fallbackSummary = description 
+      ? description.substring(0, maxLength) + (description.length > maxLength ? '...' : '')
+      : 'No description available';
+    return {
+      summary: fallbackSummary,
+      fallback: true
+    };
   }
 }
 
@@ -132,17 +214,29 @@ export async function summarizeContent(description, maxLength = 100) {
  */
 export async function generateContractSummary(contract) {
   try {
-    const response = await fetch(`${BACKEND_URL}/api/contract-summary`, {
+    console.log('[AI API] Sending contract summary request:', contract);
+    const response = await fetchWithTimeout(`${BACKEND_URL}/api/contract-summary`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify(contract),
-    });
+    }, AI_REQUEST_TIMEOUT);
 
     if (!response.ok) {
-      throw new Error(`Failed to generate contract summary: ${response.statusText}`);
+      const errorData = await response.json().catch(() => ({}));
+      console.error('[AI API] Contract summary error response:', errorData);
+      // Handle both string and array details
+      const detailsMessage = Array.isArray(errorData.details) 
+        ? errorData.details.join(', ') 
+        : errorData.details;
+      const errorMessage = detailsMessage || errorData.error || response.statusText;
+      throw new Error(`Failed to generate contract summary: ${errorMessage}`);
     }
 
     const data = await response.json();
+    // Clean the AI response
+    if (data.summary) {
+      data.summary = cleanAIResponse(data.summary);
+    }
     return data;
   } catch (error) {
     console.error('[AI API] Error generating contract summary:', error);

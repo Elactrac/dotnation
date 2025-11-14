@@ -1,8 +1,8 @@
 {
   "source": {
-    "hash": "0xc1be2d0ec1ff4851d974e74a0281bcff76c7dc4637f495e478c71107802fa2d7",
+    "hash": "0xc43c60639f1ba23cbc90fc989a095ed0729b807f156ca816ec581c4df00005f6",
     "language": "ink! 5.1.1",
-    "compiler": "rustc 1.90.0",
+    "compiler": "rustc 1.91.1",
     "build_info": {
       "build_mode": "Release",
       "cargo_contract_version": "5.0.3",
@@ -26,7 +26,16 @@
       {
         "args": [],
         "default": false,
-        "docs": [],
+        "docs": [
+          "Creates a new instance of the donation platform contract V2.",
+          "",
+          "The caller of this constructor becomes the administrator.",
+          "",
+          "# Returns",
+          "",
+          "A new instance of the `DonationPlatformV2` contract, initialized with",
+          "default values and the caller as the admin."
+        ],
         "label": "new",
         "payable": false,
         "returnType": {
@@ -34,12 +43,56 @@
             "ink_primitives",
             "ConstructorResult"
           ],
-          "type": 21
+          "type": 25
         },
         "selector": "0x9bae9d5e"
+      },
+      {
+        "args": [
+          {
+            "label": "campaign_count",
+            "type": {
+              "displayName": [
+                "u32"
+              ],
+              "type": 0
+            }
+          }
+        ],
+        "default": false,
+        "docs": [
+          "Migrates the contract from V1 to V2.",
+          "",
+          "This constructor is intended to be called by the proxy contract when upgrading",
+          "from a V1 instance of the contract. It preserves the campaign count while",
+          "re-initializing the rest of the state for V2.",
+          "",
+          "# Arguments",
+          "",
+          "* `campaign_count` - The total number of campaigns from the V1 contract.",
+          "",
+          "# Returns",
+          "",
+          "A new instance of the V2 contract with migrated state."
+        ],
+        "label": "migrate_from_v1",
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink_primitives",
+            "ConstructorResult"
+          ],
+          "type": 25
+        },
+        "selector": "0x87703c7b"
       }
     ],
-    "docs": [],
+    "docs": [
+      " Version 2 of the donation platform with improved scalability features.",
+      "",
+      " This contract is designed to work with a proxy pattern for upgradability.",
+      " It includes batch operations, improved pagination, and optimized storage."
+    ],
     "environment": {
       "accountId": {
         "displayName": [
@@ -63,13 +116,13 @@
         "displayName": [
           "ChainExtension"
         ],
-        "type": 37
+        "type": 47
       },
       "hash": {
         "displayName": [
           "Hash"
         ],
-        "type": 36
+        "type": 46
       },
       "maxEventTopics": 4,
       "staticBufferSize": 16384,
@@ -84,7 +137,9 @@
       {
         "args": [
           {
-            "docs": [],
+            "docs": [
+              "The ID of the campaign."
+            ],
             "indexed": true,
             "label": "campaign_id",
             "type": {
@@ -95,59 +150,9 @@
             }
           },
           {
-            "docs": [],
-            "indexed": true,
-            "label": "owner",
-            "type": {
-              "displayName": [
-                "AccountId"
-              ],
-              "type": 1
-            }
-          },
-          {
-            "docs": [],
-            "indexed": false,
-            "label": "goal",
-            "type": {
-              "displayName": [
-                "Balance"
-              ],
-              "type": 5
-            }
-          },
-          {
-            "docs": [],
-            "indexed": false,
-            "label": "deadline",
-            "type": {
-              "displayName": [
-                "Timestamp"
-              ],
-              "type": 6
-            }
-          }
-        ],
-        "docs": [],
-        "label": "CampaignCreated",
-        "module_path": "donation_platform::donation_platform",
-        "signature_topic": "0xe4b4dc370f9e8fe1011217c677279aae74c29de80cf8d9b28ecdc8317fba7abf"
-      },
-      {
-        "args": [
-          {
-            "docs": [],
-            "indexed": true,
-            "label": "campaign_id",
-            "type": {
-              "displayName": [
-                "u32"
-              ],
-              "type": 0
-            }
-          },
-          {
-            "docs": [],
+            "docs": [
+              "The donor who claimed the refund."
+            ],
             "indexed": true,
             "label": "donor",
             "type": {
@@ -158,7 +163,9 @@
             }
           },
           {
-            "docs": [],
+            "docs": [
+              "The amount refunded."
+            ],
             "indexed": false,
             "label": "amount",
             "type": {
@@ -169,15 +176,19 @@
             }
           }
         ],
-        "docs": [],
-        "label": "DonationReceived",
-        "module_path": "donation_platform::donation_platform",
-        "signature_topic": "0xe7cb87197fe9a36e171b975ddafca074427a14bca1847a3fd983d945ded188bd"
+        "docs": [
+          "Emitted when a donor claims a refund for a failed campaign."
+        ],
+        "label": "RefundClaimed",
+        "module_path": "donation_platform::donation_platform_v2",
+        "signature_topic": "0x5e5ab1aa8f6f193ef52462b6d7d0d457feb41f80a1d89dd4b8a10130596cf17f"
       },
       {
         "args": [
           {
-            "docs": [],
+            "docs": [
+              "The ID of the campaign from which funds were withdrawn."
+            ],
             "indexed": true,
             "label": "campaign_id",
             "type": {
@@ -188,7 +199,9 @@
             }
           },
           {
-            "docs": [],
+            "docs": [
+              "The account that received the funds."
+            ],
             "indexed": true,
             "label": "beneficiary",
             "type": {
@@ -199,7 +212,9 @@
             }
           },
           {
-            "docs": [],
+            "docs": [
+              "The amount of funds withdrawn."
+            ],
             "indexed": false,
             "label": "amount",
             "type": {
@@ -210,15 +225,19 @@
             }
           }
         ],
-        "docs": [],
+        "docs": [
+          "Emitted when funds are withdrawn from a campaign."
+        ],
         "label": "FundsWithdrawn",
-        "module_path": "donation_platform::donation_platform",
+        "module_path": "donation_platform::donation_platform_v2",
         "signature_topic": "0xd3291ce16c34d99bd4e92756c936966cd8eebd124a1d72210e7b7f8e22794391"
       },
       {
         "args": [
           {
-            "docs": [],
+            "docs": [
+              "The unique ID of the created campaign."
+            ],
             "indexed": true,
             "label": "campaign_id",
             "type": {
@@ -229,32 +248,136 @@
             }
           },
           {
-            "docs": [],
-            "indexed": false,
-            "label": "old_state",
+            "docs": [
+              "The account that owns the new campaign."
+            ],
+            "indexed": true,
+            "label": "owner",
             "type": {
               "displayName": [
-                "CampaignState"
+                "AccountId"
               ],
-              "type": 9
+              "type": 1
             }
           },
           {
-            "docs": [],
+            "docs": [
+              "The funding goal of the campaign."
+            ],
             "indexed": false,
-            "label": "new_state",
+            "label": "goal",
             "type": {
               "displayName": [
-                "CampaignState"
+                "Balance"
               ],
-              "type": 9
+              "type": 5
+            }
+          },
+          {
+            "docs": [
+              "The deadline of the campaign."
+            ],
+            "indexed": false,
+            "label": "deadline",
+            "type": {
+              "displayName": [
+                "Timestamp"
+              ],
+              "type": 6
             }
           }
         ],
-        "docs": [],
-        "label": "CampaignStateChanged",
-        "module_path": "donation_platform::donation_platform",
-        "signature_topic": "0xb7e5d6d42ef9085569523f36fb61b0b33cfb9cb56c1c1d5e9d1ae82717a59011"
+        "docs": [
+          "Emitted when a new campaign is created."
+        ],
+        "label": "CampaignCreated",
+        "module_path": "donation_platform::donation_platform_v2",
+        "signature_topic": "0xe4b4dc370f9e8fe1011217c677279aae74c29de80cf8d9b28ecdc8317fba7abf"
+      },
+      {
+        "args": [
+          {
+            "docs": [
+              "The ID of the campaign that received the donation."
+            ],
+            "indexed": true,
+            "label": "campaign_id",
+            "type": {
+              "displayName": [
+                "u32"
+              ],
+              "type": 0
+            }
+          },
+          {
+            "docs": [
+              "The account that made the donation."
+            ],
+            "indexed": true,
+            "label": "donor",
+            "type": {
+              "displayName": [
+                "AccountId"
+              ],
+              "type": 1
+            }
+          },
+          {
+            "docs": [
+              "The amount of the donation."
+            ],
+            "indexed": false,
+            "label": "amount",
+            "type": {
+              "displayName": [
+                "Balance"
+              ],
+              "type": 5
+            }
+          }
+        ],
+        "docs": [
+          "Emitted when a donation is made to a campaign."
+        ],
+        "label": "DonationReceived",
+        "module_path": "donation_platform::donation_platform_v2",
+        "signature_topic": "0xe7cb87197fe9a36e171b975ddafca074427a14bca1847a3fd983d945ded188bd"
+      },
+      {
+        "args": [
+          {
+            "docs": [
+              "The ID of the cancelled campaign."
+            ],
+            "indexed": true,
+            "label": "campaign_id",
+            "type": {
+              "displayName": [
+                "u32"
+              ],
+              "type": 0
+            }
+          },
+          {
+            "docs": [
+              "The account that cancelled the campaign."
+            ],
+            "indexed": true,
+            "label": "cancelled_by",
+            "type": {
+              "displayName": [
+                "AccountId"
+              ],
+              "type": 1
+            }
+          }
+        ],
+        "docs": [
+          "Emitted when a campaign is cancelled."
+        ],
+        "label": "CampaignCancelled",
+        "module_path": "donation_platform::donation_platform_v2",
+        "signature_topic": "0xf6c22e89cf7be3b9e3267fcf7dce7c7e8de273143c52e193b107b31220093bc2"
       }
     ],
     "lang_error": {
@@ -262,7 +385,7 @@
         "ink",
         "LangError"
       ],
-      "type": 22
+      "type": 26
     },
     "messages": [
       {
@@ -314,7 +437,34 @@
           }
         ],
         "default": false,
-        "docs": [],
+        "docs": [
+          " Creates a new fundraising campaign.",
+          "",
+          " This function allows any user to create a new campaign with a specified",
+          " title, description, funding goal, deadline, and beneficiary. The caller",
+          " of this function becomes the owner of the campaign.",
+          "",
+          " On successful creation, a `CampaignCreated` event is emitted.",
+          "",
+          " # Arguments",
+          "",
+          " * `title` - The title of the campaign.",
+          " * `description` - A description of the campaign.",
+          " * `goal` - The funding goal in the chain's native currency.",
+          " * `deadline` - The timestamp at which the campaign ends.",
+          " * `beneficiary` - The account that will receive the funds.",
+          "",
+          " # Returns",
+          "",
+          " - `Ok(u32)`: The ID of the newly created campaign.",
+          " - `Err(Error)`: An error variant indicating why the creation failed, such as",
+          "   `InvalidTitle`, `InvalidGoal`, or `InvalidDeadline`.",
+          "",
+          " # Errors",
+          "",
+          " Returns `Error` if any of the input parameters are invalid (e.g., empty title,",
+          " zero goal, deadline in the past)."
+        ],
         "label": "create_campaign",
         "mutates": true,
         "payable": false,
@@ -323,9 +473,55 @@
             "ink",
             "MessageResult"
           ],
-          "type": 23
+          "type": 27
         },
         "selector": "0xd75944ac"
+      },
+      {
+        "args": [
+          {
+            "label": "campaigns_data",
+            "type": {
+              "displayName": [
+                "Vec"
+              ],
+              "type": 30
+            }
+          }
+        ],
+        "default": false,
+        "docs": [
+          " Creates multiple campaigns in a single transaction.",
+          " This batch function allows for the creation of multiple campaigns in a single",
+          " transaction, reducing gas costs and improving efficiency.",
+          "",
+          " # Arguments",
+          "",
+          " * `campaigns_data` - A vector of tuples, where each tuple contains the",
+          "   `title`, `description`, `goal`, `deadline`, and `beneficiary` for a new campaign.",
+          "",
+          " # Returns",
+          "",
+          " - `Ok(BatchResult)`: A struct indicating the number of successful and failed",
+          "   creations, along with the IDs of the successful campaigns.",
+          " - `Err(Error)`: An error variant, such as `BatchSizeTooLarge`.",
+          "",
+          " # Errors",
+          "",
+          " Returns `Error::BatchSizeTooLarge` if the input vector exceeds the",
+          " maximum allowed batch size."
+        ],
+        "label": "create_campaigns_batch",
+        "mutates": true,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 32
+        },
+        "selector": "0x225a060e"
       },
       {
         "args": [
@@ -340,7 +536,27 @@
           }
         ],
         "default": false,
-        "docs": [],
+        "docs": [
+          " Donates to a specific fundraising campaign.",
+          " Any user can donate to a campaign by calling this function and sending",
+          " a native token value. The donation is only accepted if the campaign is active",
+          " and has not passed its deadline.",
+          "",
+          " On successful donation, a `DonationReceived` event is emitted.",
+          "",
+          " # Arguments",
+          "",
+          " * `campaign_id` - The ID of the campaign to donate to.",
+          "",
+          " # Returns",
+          "",
+          " - `Ok(())`: If the donation was successful.",
+          " - `Err(Error)`: An error variant indicating why the donation failed, such as",
+          "   `CampaignNotFound`, `CampaignNotActive`, or `DeadlinePassed`.",
+          "",
+          " # Errors",
+          " Returns `Error` if the campaign is not in a donatable state."
+        ],
         "label": "donate",
         "mutates": true,
         "payable": true,
@@ -349,7 +565,7 @@
             "ink",
             "MessageResult"
           ],
-          "type": 26
+          "type": 36
         },
         "selector": "0x3a139bdc"
       },
@@ -366,7 +582,28 @@
           }
         ],
         "default": false,
-        "docs": [],
+        "docs": [
+          " Withdraws the funds from a successful or failed campaign.",
+          " This function can only be called by the campaign owner or the contract admin.",
+          " If the campaign was successful, the entire raised amount is transferred to the",
+          " beneficiary. If the campaign failed, this function does not transfer funds,",
+          " but marks the campaign as withdrawn.",
+          "",
+          " On successful withdrawal, a `FundsWithdrawn` event is emitted.",
+          "",
+          " # Arguments",
+          "",
+          " * `campaign_id` - The ID of the campaign to withdraw funds from.",
+          "",
+          " # Returns",
+          "",
+          " - `Ok(())`: If the withdrawal process was completed successfully.",
+          " - `Err(Error)`: An error variant indicating failure, such as `NotCampaignOwner`,",
+          "   `GoalNotReached`, or `FundsAlreadyWithdrawn`.",
+          "",
+          " # Errors",
+          " Returns `Error` if the caller is not authorized or the campaign is not in a withdrawable state."
+        ],
         "label": "withdraw_funds",
         "mutates": true,
         "payable": false,
@@ -375,9 +612,55 @@
             "ink",
             "MessageResult"
           ],
-          "type": 26
+          "type": 36
         },
         "selector": "0xe7cda623"
+      },
+      {
+        "args": [
+          {
+            "label": "campaign_ids",
+            "type": {
+              "displayName": [
+                "Vec"
+              ],
+              "type": 35
+            }
+          }
+        ],
+        "default": false,
+        "docs": [
+          " Withdraws funds from multiple campaigns in a single transaction.",
+          " Allows a user to withdraw funds from multiple owned campaigns in one batch,",
+          " saving on transaction fees.",
+          "",
+          " # Arguments",
+          "",
+          " * `campaign_ids` - A vector of campaign IDs to withdraw from.",
+          "",
+          " # Returns",
+          "",
+          " - `Ok(BatchResult)`: A struct indicating the number of successful and failed",
+          "   withdrawals.",
+          " - `Err(Error)`: An error variant, such as `BatchSizeTooLarge`.",
+          "",
+          " # Errors",
+          "",
+          " Returns `Error::BatchSizeTooLarge` if the input vector exceeds the",
+          " maximum allowed batch size. Each individual withdrawal may also fail with",
+          " errors reported in the `failed` count of the `BatchResult`."
+        ],
+        "label": "withdraw_funds_batch",
+        "mutates": true,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 32
+        },
+        "selector": "0x6bcca3d5"
       },
       {
         "args": [
@@ -392,7 +675,115 @@
           }
         ],
         "default": false,
-        "docs": [],
+        "docs": [
+          " Cancels an active campaign.",
+          "",
+          " This function allows a campaign owner (or admin) to cancel their campaign before",
+          " the deadline. Once cancelled, the campaign state changes to `Failed`, and donors",
+          " can claim refunds.",
+          "",
+          " On success, a `CampaignCancelled` event is emitted.",
+          "",
+          " # Arguments",
+          "",
+          " * `campaign_id` - The ID of the campaign to cancel.",
+          "",
+          " # Returns",
+          "",
+          " - `Ok(())`: If the cancellation was successful.",
+          " - `Err(Error)`: If the caller is not authorized or the campaign cannot be cancelled.",
+          "",
+          " # Errors",
+          "",
+          " Returns `Error::NotCampaignOwner` if the caller is not the owner or admin,",
+          " or `Error::CampaignNotActive` if the campaign is not in an active state."
+        ],
+        "label": "cancel_campaign",
+        "mutates": true,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 36
+        },
+        "selector": "0x80d8bb7c"
+      },
+      {
+        "args": [
+          {
+            "label": "campaign_id",
+            "type": {
+              "displayName": [
+                "u32"
+              ],
+              "type": 0
+            }
+          }
+        ],
+        "default": false,
+        "docs": [
+          " Claims a refund for donations made to a failed campaign.",
+          "",
+          " When a campaign fails (either by missing its deadline or being cancelled),",
+          " donors can call this function to receive a full refund of their contributions.",
+          " Each donor can only claim their refund once.",
+          "",
+          " On success, a `RefundClaimed` event is emitted.",
+          "",
+          " # Arguments",
+          "",
+          " * `campaign_id` - The ID of the failed campaign to claim a refund from.",
+          "",
+          " # Returns",
+          "",
+          " - `Ok(())`: If the refund was successfully processed.",
+          " - `Err(Error)`: If the refund cannot be claimed.",
+          "",
+          " # Errors",
+          "",
+          " Returns `Error::CampaignNotFailed` if the campaign is not in a failed state,",
+          " `Error::NoDonationFound` if the caller has no donations,",
+          " or `Error::RefundAlreadyClaimed` if the refund was already claimed."
+        ],
+        "label": "claim_refund",
+        "mutates": true,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 36
+        },
+        "selector": "0x1f5206a6"
+      },
+      {
+        "args": [
+          {
+            "label": "campaign_id",
+            "type": {
+              "displayName": [
+                "u32"
+              ],
+              "type": 0
+            }
+          }
+        ],
+        "default": false,
+        "docs": [
+          " Retrieves a campaign by its ID.",
+          "",
+          " # Arguments",
+          "",
+          " * `campaign_id` - The ID of the campaign to retrieve.",
+          "",
+          " # Returns",
+          "",
+          " - `Some(Campaign)`: The campaign data if found.",
+          " - `None`: If no campaign with the given ID exists."
+        ],
         "label": "get_campaign",
         "mutates": false,
         "payable": false,
@@ -401,7 +792,7 @@
             "ink",
             "MessageResult"
           ],
-          "type": 28
+          "type": 38
         },
         "selector": "0x342bec92"
       },
@@ -415,10 +806,41 @@
               ],
               "type": 0
             }
+          },
+          {
+            "label": "offset",
+            "type": {
+              "displayName": [
+                "u32"
+              ],
+              "type": 0
+            }
+          },
+          {
+            "label": "limit",
+            "type": {
+              "displayName": [
+                "u32"
+              ],
+              "type": 0
+            }
           }
         ],
         "default": false,
-        "docs": [],
+        "docs": [
+          " Retrieves the details of a campaign, including paginated donations.",
+          "",
+          " # Arguments",
+          "",
+          " * `campaign_id` - The ID of the campaign to retrieve details for.",
+          " * `offset` - The starting index for the donation pagination.",
+          " * `limit` - The maximum number of donations to return.",
+          "",
+          " # Returns",
+          "",
+          " - `Some(CampaignDetails)`: The campaign details if the campaign is found.",
+          " - `None`: If the campaign does not exist."
+        ],
         "label": "get_campaign_details",
         "mutates": false,
         "payable": false,
@@ -427,22 +849,13 @@
             "ink",
             "MessageResult"
           ],
-          "type": 30
+          "type": 40
         },
         "selector": "0x1afd24fc"
       },
       {
         "args": [
           {
-            "label": "campaign_id",
-            "type": {
-              "displayName": [
-                "u32"
-              ],
-              "type": 0
-            }
-          },
-          {
             "label": "offset",
             "type": {
               "displayName": [
@@ -462,58 +875,18 @@
           }
         ],
         "default": false,
-        "docs": [],
-        "label": "get_campaign_donations_paginated",
-        "mutates": false,
-        "payable": false,
-        "returnType": {
-          "displayName": [
-            "ink",
-            "MessageResult"
-          ],
-          "type": 33
-        },
-        "selector": "0x396bcddf"
-      },
-      {
-        "args": [],
-        "default": false,
-        "docs": [],
-        "label": "get_all_campaigns",
-        "mutates": false,
-        "payable": false,
-        "returnType": {
-          "displayName": [
-            "ink",
-            "MessageResult"
-          ],
-          "type": 34
-        },
-        "selector": "0xb289d6ec"
-      },
-      {
-        "args": [
-          {
-            "label": "offset",
-            "type": {
-              "displayName": [
-                "u32"
-              ],
-              "type": 0
-            }
-          },
-          {
-            "label": "limit",
-            "type": {
-              "displayName": [
-                "u32"
-              ],
-              "type": 0
-            }
-          }
+        "docs": [
+          " Retrieves a paginated list of all campaigns.",
+          "",
+          " # Arguments",
+          "",
+          " * `offset` - The starting index for the campaign pagination.",
+          " * `limit` - The maximum number of campaigns to return.",
+          "",
+          " # Returns",
+          "",
+          " A vector of `Campaign` structs."
         ],
-        "default": false,
-        "docs": [],
         "label": "get_campaigns_paginated",
         "mutates": false,
         "payable": false,
@@ -522,14 +895,44 @@
             "ink",
             "MessageResult"
           ],
-          "type": 34
+          "type": 43
         },
         "selector": "0x3b7a8a83"
       },
       {
-        "args": [],
+        "args": [
+          {
+            "label": "offset",
+            "type": {
+              "displayName": [
+                "u32"
+              ],
+              "type": 0
+            }
+          },
+          {
+            "label": "limit",
+            "type": {
+              "displayName": [
+                "u32"
+              ],
+              "type": 0
+            }
+          }
+        ],
         "default": false,
-        "docs": [],
+        "docs": [
+          " Retrieves all active campaigns (paginated).",
+          "",
+          " # Arguments",
+          "",
+          " * `offset` - The starting index for the campaign pagination.",
+          " * `limit` - The maximum number of active campaigns to return.",
+          "",
+          " # Returns",
+          "",
+          " A vector of active `Campaign` structs."
+        ],
         "label": "get_active_campaigns",
         "mutates": false,
         "payable": false,
@@ -538,9 +941,112 @@
             "ink",
             "MessageResult"
           ],
-          "type": 34
+          "type": 43
         },
         "selector": "0x6a8779f0"
+      },
+      {
+        "args": [],
+        "default": false,
+        "docs": [
+          " Gets the contract version.",
+          "",
+          " # Returns",
+          "",
+          " The current version number of the contract logic."
+        ],
+        "label": "get_version",
+        "mutates": false,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 45
+        },
+        "selector": "0x0c1a1d77"
+      },
+      {
+        "args": [],
+        "default": false,
+        "docs": [
+          " Gets the total campaign count.",
+          "",
+          " # Returns",
+          "",
+          " The total number of campaigns ever created in the contract."
+        ],
+        "label": "get_campaign_count",
+        "mutates": false,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 45
+        },
+        "selector": "0x9688dabf"
+      },
+      {
+        "args": [
+          {
+            "label": "size",
+            "type": {
+              "displayName": [
+                "u32"
+              ],
+              "type": 0
+            }
+          }
+        ],
+        "default": false,
+        "docs": [
+          " Updates the maximum batch size (admin only).",
+          "",
+          " # Arguments",
+          "",
+          " * `size` - The new maximum batch size.",
+          "",
+          " # Returns",
+          "",
+          " - `Ok(())` on success.",
+          " - `Err(Error::NotCampaignOwner)` if the caller is not the admin."
+        ],
+        "label": "set_max_batch_size",
+        "mutates": true,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 36
+        },
+        "selector": "0xa5fa46ca"
+      },
+      {
+        "args": [],
+        "default": false,
+        "docs": [
+          " Gets the maximum batch size.",
+          "",
+          " # Returns",
+          "",
+          " The maximum number of operations allowed in a single batch transaction."
+        ],
+        "label": "get_max_batch_size",
+        "mutates": false,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 45
+        },
+        "selector": "0x72cb1f08"
       }
     ]
   },
@@ -558,7 +1064,7 @@
                         {
                           "layout": {
                             "leaf": {
-                              "key": "0x9d7dc2e0",
+                              "key": "0xd7d294f8",
                               "ty": 0
                             }
                           },
@@ -567,7 +1073,7 @@
                         {
                           "layout": {
                             "leaf": {
-                              "key": "0x9d7dc2e0",
+                              "key": "0xd7d294f8",
                               "ty": 1
                             }
                           },
@@ -576,7 +1082,7 @@
                         {
                           "layout": {
                             "leaf": {
-                              "key": "0x9d7dc2e0",
+                              "key": "0xd7d294f8",
                               "ty": 4
                             }
                           },
@@ -585,7 +1091,7 @@
                         {
                           "layout": {
                             "leaf": {
-                              "key": "0x9d7dc2e0",
+                              "key": "0xd7d294f8",
                               "ty": 4
                             }
                           },
@@ -594,7 +1100,7 @@
                         {
                           "layout": {
                             "leaf": {
-                              "key": "0x9d7dc2e0",
+                              "key": "0xd7d294f8",
                               "ty": 5
                             }
                           },
@@ -603,7 +1109,7 @@
                         {
                           "layout": {
                             "leaf": {
-                              "key": "0x9d7dc2e0",
+                              "key": "0xd7d294f8",
                               "ty": 5
                             }
                           },
@@ -612,7 +1118,7 @@
                         {
                           "layout": {
                             "leaf": {
-                              "key": "0x9d7dc2e0",
+                              "key": "0xd7d294f8",
                               "ty": 6
                             }
                           },
@@ -621,7 +1127,7 @@
                         {
                           "layout": {
                             "enum": {
-                              "dispatchKey": "0x9d7dc2e0",
+                              "dispatchKey": "0xd7d294f8",
                               "name": "CampaignState",
                               "variants": {
                                 "0": {
@@ -648,17 +1154,26 @@
                         {
                           "layout": {
                             "leaf": {
-                              "key": "0x9d7dc2e0",
+                              "key": "0xd7d294f8",
                               "ty": 1
                             }
                           },
                           "name": "beneficiary"
+                        },
+                        {
+                          "layout": {
+                            "leaf": {
+                              "key": "0xd7d294f8",
+                              "ty": 0
+                            }
+                          },
+                          "name": "donation_count"
                         }
                       ],
                       "name": "Campaign"
                     }
                   },
-                  "root_key": "0x9d7dc2e0",
+                  "root_key": "0xd7d294f8",
                   "ty": 7
                 }
               },
@@ -669,15 +1184,30 @@
                 "root": {
                   "layout": {
                     "leaf": {
-                      "key": "0x6c4a58b7",
+                      "key": "0x96105c1a",
                       "ty": 14
                     }
                   },
-                  "root_key": "0x6c4a58b7",
+                  "root_key": "0x96105c1a",
                   "ty": 16
                 }
               },
               "name": "campaign_donations"
+            },
+            {
+              "layout": {
+                "root": {
+                  "layout": {
+                    "leaf": {
+                      "key": "0xab6ee19b",
+                      "ty": 19
+                    }
+                  },
+                  "root_key": "0xab6ee19b",
+                  "ty": 20
+                }
+              },
+              "name": "refund_claimed"
             },
             {
               "layout": {
@@ -705,13 +1235,31 @@
                 }
               },
               "name": "locked"
+            },
+            {
+              "layout": {
+                "leaf": {
+                  "key": "0x00000000",
+                  "ty": 0
+                }
+              },
+              "name": "version"
+            },
+            {
+              "layout": {
+                "leaf": {
+                  "key": "0x00000000",
+                  "ty": 0
+                }
+              },
+              "name": "max_batch_size"
             }
           ],
-          "name": "DonationPlatform"
+          "name": "DonationPlatformV2"
         }
       },
       "root_key": "0x00000000",
-      "ty": 20
+      "ty": 24
     }
   },
   "types": [
@@ -864,13 +1412,18 @@
                 "name": "beneficiary",
                 "type": 1,
                 "typeName": "AccountId"
+              },
+              {
+                "name": "donation_count",
+                "type": 0,
+                "typeName": "u32"
               }
             ]
           }
         },
         "path": [
           "donation_platform",
-          "donation_platform",
+          "donation_platform_v2",
           "Campaign"
         ]
       }
@@ -902,7 +1455,7 @@
         },
         "path": [
           "donation_platform",
-          "donation_platform",
+          "donation_platform_v2",
           "CampaignState"
         ]
       }
@@ -1006,7 +1559,7 @@
         },
         "path": [
           "donation_platform",
-          "donation_platform",
+          "donation_platform_v2",
           "Donation"
         ]
       }
@@ -1093,45 +1646,141 @@
       "id": 20,
       "type": {
         "def": {
+          "composite": {}
+        },
+        "params": [
+          {
+            "name": "K",
+            "type": 21
+          },
+          {
+            "name": "V",
+            "type": 19
+          },
+          {
+            "name": "KeyType",
+            "type": 22
+          }
+        ],
+        "path": [
+          "ink_storage",
+          "lazy",
+          "mapping",
+          "Mapping"
+        ]
+      }
+    },
+    {
+      "id": 21,
+      "type": {
+        "def": {
+          "tuple": [
+            0,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "id": 22,
+      "type": {
+        "def": {
+          "composite": {}
+        },
+        "params": [
+          {
+            "name": "L",
+            "type": 11
+          },
+          {
+            "name": "R",
+            "type": 23
+          }
+        ],
+        "path": [
+          "ink_storage_traits",
+          "impls",
+          "ResolverKey"
+        ]
+      }
+    },
+    {
+      "id": 23,
+      "type": {
+        "def": {
+          "composite": {}
+        },
+        "params": [
+          {
+            "name": "ParentKey",
+            "type": 13
+          }
+        ],
+        "path": [
+          "ink_storage_traits",
+          "impls",
+          "ManualKey"
+        ]
+      }
+    },
+    {
+      "id": 24,
+      "type": {
+        "def": {
           "composite": {
             "fields": [
               {
                 "name": "campaigns",
                 "type": 7,
-                "typeName": "<Mapping<u32, Campaign> as::ink::storage::traits::AutoStorableHint\n<::ink::storage::traits::ManualKey<3770842525u32, ()>,>>::Type"
+                "typeName": "<Mapping<u32, Campaign> as::ink::storage::traits::AutoStorableHint\n<::ink::storage::traits::ManualKey<4170502871u32, ()>,>>::Type"
               },
               {
                 "name": "campaign_donations",
                 "type": 16,
-                "typeName": "<Mapping<u32, Vec<Donation>> as::ink::storage::traits::\nAutoStorableHint<::ink::storage::traits::ManualKey<3076016748u32,\n()>,>>::Type"
+                "typeName": "<Mapping<u32, Vec<Donation>> as::ink::storage::traits::\nAutoStorableHint<::ink::storage::traits::ManualKey<442241174u32, ()\n>,>>::Type"
+              },
+              {
+                "name": "refund_claimed",
+                "type": 20,
+                "typeName": "<Mapping<(u32, AccountId), bool> as::ink::storage::traits::\nAutoStorableHint<::ink::storage::traits::ManualKey<2615242411u32,\n()>,>>::Type"
               },
               {
                 "name": "campaign_count",
                 "type": 0,
-                "typeName": "<u32 as::ink::storage::traits::AutoStorableHint<::ink::storage\n::traits::ManualKey<17016325u32, ()>,>>::Type"
+                "typeName": "<u32 as::ink::storage::traits::AutoStorableHint<::ink::storage\n::traits::ManualKey<1976330769u32, ()>,>>::Type"
               },
               {
                 "name": "admin",
                 "type": 1,
-                "typeName": "<AccountId as::ink::storage::traits::AutoStorableHint<::ink::\nstorage::traits::ManualKey<3076860068u32, ()>,>>::Type"
+                "typeName": "<AccountId as::ink::storage::traits::AutoStorableHint<::ink::\nstorage::traits::ManualKey<2362947867u32, ()>,>>::Type"
               },
               {
                 "name": "locked",
                 "type": 19,
-                "typeName": "<bool as::ink::storage::traits::AutoStorableHint<::ink::storage\n::traits::ManualKey<1633500311u32, ()>,>>::Type"
+                "typeName": "<bool as::ink::storage::traits::AutoStorableHint<::ink::storage\n::traits::ManualKey<1058362200u32, ()>,>>::Type"
+              },
+              {
+                "name": "version",
+                "type": 0,
+                "typeName": "<u32 as::ink::storage::traits::AutoStorableHint<::ink::storage\n::traits::ManualKey<1626806915u32, ()>,>>::Type"
+              },
+              {
+                "name": "max_batch_size",
+                "type": 0,
+                "typeName": "<u32 as::ink::storage::traits::AutoStorableHint<::ink::storage\n::traits::ManualKey<2031955031u32, ()>,>>::Type"
               }
             ]
           }
         },
         "path": [
           "donation_platform",
-          "donation_platform",
-          "DonationPlatform"
+          "donation_platform_v2",
+          "DonationPlatformV2"
         ]
       }
     },
     {
-      "id": 21,
+      "id": 25,
       "type": {
         "def": {
           "variant": {
@@ -1148,7 +1797,7 @@
               {
                 "fields": [
                   {
-                    "type": 22
+                    "type": 26
                   }
                 ],
                 "index": 1,
@@ -1164,7 +1813,7 @@
           },
           {
             "name": "E",
-            "type": 22
+            "type": 26
           }
         ],
         "path": [
@@ -1173,7 +1822,7 @@
       }
     },
     {
-      "id": 22,
+      "id": 26,
       "type": {
         "def": {
           "variant": {
@@ -1192,7 +1841,7 @@
       }
     },
     {
-      "id": 23,
+      "id": 27,
       "type": {
         "def": {
           "variant": {
@@ -1200,7 +1849,7 @@
               {
                 "fields": [
                   {
-                    "type": 24
+                    "type": 28
                   }
                 ],
                 "index": 0,
@@ -1209,7 +1858,7 @@
               {
                 "fields": [
                   {
-                    "type": 22
+                    "type": 26
                   }
                 ],
                 "index": 1,
@@ -1221,11 +1870,11 @@
         "params": [
           {
             "name": "T",
-            "type": 24
+            "type": 28
           },
           {
             "name": "E",
-            "type": 22
+            "type": 26
           }
         ],
         "path": [
@@ -1234,7 +1883,7 @@
       }
     },
     {
-      "id": 24,
+      "id": 28,
       "type": {
         "def": {
           "variant": {
@@ -1251,7 +1900,7 @@
               {
                 "fields": [
                   {
-                    "type": 25
+                    "type": 29
                   }
                 ],
                 "index": 1,
@@ -1267,7 +1916,7 @@
           },
           {
             "name": "E",
-            "type": 25
+            "type": 29
           }
         ],
         "path": [
@@ -1276,7 +1925,7 @@
       }
     },
     {
-      "id": 25,
+      "id": 29,
       "type": {
         "def": {
           "variant": {
@@ -1340,19 +1989,71 @@
               {
                 "index": 14,
                 "name": "InsufficientFunds"
+              },
+              {
+                "index": 15,
+                "name": "BatchOperationFailed"
+              },
+              {
+                "index": 16,
+                "name": "BatchSizeTooLarge"
+              },
+              {
+                "index": 17,
+                "name": "ReentrantCall"
+              },
+              {
+                "index": 18,
+                "name": "CampaignFailed"
+              },
+              {
+                "index": 19,
+                "name": "NoDonationFound"
+              },
+              {
+                "index": 20,
+                "name": "RefundAlreadyClaimed"
+              },
+              {
+                "index": 21,
+                "name": "TransferFailed"
               }
             ]
           }
         },
         "path": [
           "donation_platform",
-          "donation_platform",
+          "donation_platform_v2",
           "Error"
         ]
       }
     },
     {
-      "id": 26,
+      "id": 30,
+      "type": {
+        "def": {
+          "sequence": {
+            "type": 31
+          }
+        }
+      }
+    },
+    {
+      "id": 31,
+      "type": {
+        "def": {
+          "tuple": [
+            4,
+            4,
+            5,
+            6,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "id": 32,
       "type": {
         "def": {
           "variant": {
@@ -1360,7 +2061,7 @@
               {
                 "fields": [
                   {
-                    "type": 27
+                    "type": 33
                   }
                 ],
                 "index": 0,
@@ -1369,7 +2070,7 @@
               {
                 "fields": [
                   {
-                    "type": 22
+                    "type": 26
                   }
                 ],
                 "index": 1,
@@ -1381,11 +2082,11 @@
         "params": [
           {
             "name": "T",
-            "type": 27
+            "type": 33
           },
           {
             "name": "E",
-            "type": 22
+            "type": 26
           }
         ],
         "path": [
@@ -1394,7 +2095,132 @@
       }
     },
     {
-      "id": 27,
+      "id": 33,
+      "type": {
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "fields": [
+                  {
+                    "type": 34
+                  }
+                ],
+                "index": 0,
+                "name": "Ok"
+              },
+              {
+                "fields": [
+                  {
+                    "type": 29
+                  }
+                ],
+                "index": 1,
+                "name": "Err"
+              }
+            ]
+          }
+        },
+        "params": [
+          {
+            "name": "T",
+            "type": 34
+          },
+          {
+            "name": "E",
+            "type": 29
+          }
+        ],
+        "path": [
+          "Result"
+        ]
+      }
+    },
+    {
+      "id": 34,
+      "type": {
+        "def": {
+          "composite": {
+            "fields": [
+              {
+                "name": "successful",
+                "type": 0,
+                "typeName": "u32"
+              },
+              {
+                "name": "failed",
+                "type": 0,
+                "typeName": "u32"
+              },
+              {
+                "name": "success_ids",
+                "type": 35,
+                "typeName": "Vec<u32>"
+              }
+            ]
+          }
+        },
+        "path": [
+          "donation_platform",
+          "donation_platform_v2",
+          "BatchResult"
+        ]
+      }
+    },
+    {
+      "id": 35,
+      "type": {
+        "def": {
+          "sequence": {
+            "type": 0
+          }
+        }
+      }
+    },
+    {
+      "id": 36,
+      "type": {
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "fields": [
+                  {
+                    "type": 37
+                  }
+                ],
+                "index": 0,
+                "name": "Ok"
+              },
+              {
+                "fields": [
+                  {
+                    "type": 26
+                  }
+                ],
+                "index": 1,
+                "name": "Err"
+              }
+            ]
+          }
+        },
+        "params": [
+          {
+            "name": "T",
+            "type": 37
+          },
+          {
+            "name": "E",
+            "type": 26
+          }
+        ],
+        "path": [
+          "Result"
+        ]
+      }
+    },
+    {
+      "id": 37,
       "type": {
         "def": {
           "variant": {
@@ -1411,7 +2237,7 @@
               {
                 "fields": [
                   {
-                    "type": 25
+                    "type": 29
                   }
                 ],
                 "index": 1,
@@ -1427,7 +2253,7 @@
           },
           {
             "name": "E",
-            "type": 25
+            "type": 29
           }
         ],
         "path": [
@@ -1436,7 +2262,7 @@
       }
     },
     {
-      "id": 28,
+      "id": 38,
       "type": {
         "def": {
           "variant": {
@@ -1444,7 +2270,7 @@
               {
                 "fields": [
                   {
-                    "type": 29
+                    "type": 39
                   }
                 ],
                 "index": 0,
@@ -1453,7 +2279,7 @@
               {
                 "fields": [
                   {
-                    "type": 22
+                    "type": 26
                   }
                 ],
                 "index": 1,
@@ -1465,11 +2291,11 @@
         "params": [
           {
             "name": "T",
-            "type": 29
+            "type": 39
           },
           {
             "name": "E",
-            "type": 22
+            "type": 26
           }
         ],
         "path": [
@@ -1478,7 +2304,7 @@
       }
     },
     {
-      "id": 29,
+      "id": 39,
       "type": {
         "def": {
           "variant": {
@@ -1511,7 +2337,7 @@
       }
     },
     {
-      "id": 30,
+      "id": 40,
       "type": {
         "def": {
           "variant": {
@@ -1519,7 +2345,7 @@
               {
                 "fields": [
                   {
-                    "type": 31
+                    "type": 41
                   }
                 ],
                 "index": 0,
@@ -1528,7 +2354,7 @@
               {
                 "fields": [
                   {
-                    "type": 22
+                    "type": 26
                   }
                 ],
                 "index": 1,
@@ -1540,11 +2366,11 @@
         "params": [
           {
             "name": "T",
-            "type": 31
+            "type": 41
           },
           {
             "name": "E",
-            "type": 22
+            "type": 26
           }
         ],
         "path": [
@@ -1553,7 +2379,7 @@
       }
     },
     {
-      "id": 31,
+      "id": 41,
       "type": {
         "def": {
           "variant": {
@@ -1565,7 +2391,7 @@
               {
                 "fields": [
                   {
-                    "type": 32
+                    "type": 42
                   }
                 ],
                 "index": 1,
@@ -1577,7 +2403,7 @@
         "params": [
           {
             "name": "T",
-            "type": 32
+            "type": 42
           }
         ],
         "path": [
@@ -1586,7 +2412,7 @@
       }
     },
     {
-      "id": 32,
+      "id": 42,
       "type": {
         "def": {
           "composite": {
@@ -1600,19 +2426,24 @@
                 "name": "donations",
                 "type": 14,
                 "typeName": "Vec<Donation>"
+              },
+              {
+                "name": "total_donations",
+                "type": 0,
+                "typeName": "u32"
               }
             ]
           }
         },
         "path": [
           "donation_platform",
-          "donation_platform",
+          "donation_platform_v2",
           "CampaignDetails"
         ]
       }
     },
     {
-      "id": 33,
+      "id": 43,
       "type": {
         "def": {
           "variant": {
@@ -1620,7 +2451,7 @@
               {
                 "fields": [
                   {
-                    "type": 14
+                    "type": 44
                   }
                 ],
                 "index": 0,
@@ -1629,7 +2460,7 @@
               {
                 "fields": [
                   {
-                    "type": 22
+                    "type": 26
                   }
                 ],
                 "index": 1,
@@ -1641,11 +2472,11 @@
         "params": [
           {
             "name": "T",
-            "type": 14
+            "type": 44
           },
           {
             "name": "E",
-            "type": 22
+            "type": 26
           }
         ],
         "path": [
@@ -1654,49 +2485,7 @@
       }
     },
     {
-      "id": 34,
-      "type": {
-        "def": {
-          "variant": {
-            "variants": [
-              {
-                "fields": [
-                  {
-                    "type": 35
-                  }
-                ],
-                "index": 0,
-                "name": "Ok"
-              },
-              {
-                "fields": [
-                  {
-                    "type": 22
-                  }
-                ],
-                "index": 1,
-                "name": "Err"
-              }
-            ]
-          }
-        },
-        "params": [
-          {
-            "name": "T",
-            "type": 35
-          },
-          {
-            "name": "E",
-            "type": 22
-          }
-        ],
-        "path": [
-          "Result"
-        ]
-      }
-    },
-    {
-      "id": 35,
+      "id": 44,
       "type": {
         "def": {
           "sequence": {
@@ -1706,7 +2495,49 @@
       }
     },
     {
-      "id": 36,
+      "id": 45,
+      "type": {
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "fields": [
+                  {
+                    "type": 0
+                  }
+                ],
+                "index": 0,
+                "name": "Ok"
+              },
+              {
+                "fields": [
+                  {
+                    "type": 26
+                  }
+                ],
+                "index": 1,
+                "name": "Err"
+              }
+            ]
+          }
+        },
+        "params": [
+          {
+            "name": "T",
+            "type": 0
+          },
+          {
+            "name": "E",
+            "type": 26
+          }
+        ],
+        "path": [
+          "Result"
+        ]
+      }
+    },
+    {
+      "id": 46,
       "type": {
         "def": {
           "composite": {
@@ -1726,7 +2557,7 @@
       }
     },
     {
-      "id": 37,
+      "id": 47,
       "type": {
         "def": {
           "variant": {}

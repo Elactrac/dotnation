@@ -17,7 +17,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Elactrac/dotnation.git"
+    "url": "git+https://github.com/Elactrac/dotnation.git"
   },
   "keywords": [
     "polkadot",
@@ -38,5 +38,15 @@
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
-  }
+  },
+  "dependencies": {
+    "18": "^0.0.0",
+    "@polkadot/api": "^16.5.1",
+    "@polkadot/api-contract": "^16.5.1"
+  },
+  "main": "check-mandala-contracts-support.js",
+  "bugs": {
+    "url": "https://github.com/Elactrac/dotnation/issues"
+  },
+  "homepage": "https://github.com/Elactrac/dotnation#readme"
 }

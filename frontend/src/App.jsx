@@ -26,6 +26,7 @@ const SignupPage = React.lazy(() => import('./pages/SignupPage.jsx'));
 const NotFoundPage = React.lazy(() => import('./pages/NotFoundPage.jsx'));
 const BatchCampaignCreator = React.lazy(() => import('./components/BatchCampaignCreator.jsx'));
 const BatchWithdrawal = React.lazy(() => import('./components/BatchWithdrawal.jsx'));
+const DiagnosticPage = React.lazy(() => import('./pages/DiagnosticPage.jsx'));
 
 const router = createBrowserRouter([
   {
@@ -57,7 +58,14 @@ const router = createBrowserRouter([
     path: '/campaign/:id',
     element: <NewDashboardLayout />,
     children: [
-      { index: true, element: <CampaignDetailsPage /> },
+      { 
+        index: true, 
+        element: (
+          <ErrorBoundary>
+            <CampaignDetailsPage />
+          </ErrorBoundary>
+        )
+      },
     ],
   },
   {
@@ -134,6 +142,10 @@ const router = createBrowserRouter([
    {
      path: '/signup',
      element: <SignupPage />,
+   },
+   {
+     path: '/diagnostic',
+     element: <DiagnosticPage />,
    },
    {
      path: '*',

@@ -76,7 +76,7 @@ const PlatformActivity = ({ campaigns }) => {
             <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 {recentCampaigns.map(c => (
                     <div key={c.id} style={{ fontSize: '0.9rem', borderLeft: '2px solid var(--primary-accent)', paddingLeft: '1rem' }}>
-                        A new campaign, <Link to={`/dashboard/campaign/${c.id}`} style={{ color: 'var(--secondary-accent)', fontWeight: 'bold' }}>{c.title}</Link>, was just created.
+                        A new campaign, <Link to={`/campaign/${c.id}`} style={{ color: 'var(--secondary-accent)', fontWeight: 'bold' }}>{c.title}</Link>, was just created.
                     </div>
                 ))}
             </div>
@@ -131,7 +131,7 @@ const CampaignsListPage = () => {
                     </h2>
                     <h1>Creator Dashboard</h1>
                 </div>
-                <Link to="/dashboard/create-campaign" className="btn-primary">+ Create New Campaign</Link>
+                <Link to="/create-campaign" className="btn-primary">+ Create New Campaign</Link>
             </div>
 
             <section className="mission-control">

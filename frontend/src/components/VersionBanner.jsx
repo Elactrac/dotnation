@@ -6,6 +6,7 @@ import { getVersionInfo, formatVersion } from '../utils/contractVersion';
 import { CheckCircle, X, Info } from 'lucide-react';
 
 const VersionBanner = () => {
+  // Use batch operations context
   const { getContractVersion, isBatchOperationsAvailable } = useBatchOperations();
   
   const [version, setVersion] = useState(null);

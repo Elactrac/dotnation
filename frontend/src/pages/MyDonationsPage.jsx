@@ -268,7 +268,7 @@ const MyDonationsPage = () => {
                         Completed
                       </span>
                       <Link
-                        to={`/dashboard/campaign/${donation.campaignId}`}
+                        to={`/campaign/${donation.campaignId}`}
                         className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary/20 to-secondary/20 border-2 border-primary/40 rounded-xl text-primary font-body font-semibold hover:border-primary hover:from-primary/30 hover:to-secondary/30 transition-all duration-300"
                       >
                         <FiExternalLink className="w-4 h-4" />

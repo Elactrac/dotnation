@@ -11,6 +11,8 @@ import {
   FiActivity
 } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
+import { decodeAddress } from '@polkadot/util-crypto';
+import { u8aEq, u8aToHex } from '@polkadot/util';
 import { useCampaign } from '../contexts/CampaignContext.jsx';
 import { useWallet } from '../contexts/WalletContext';
 import {
@@ -31,7 +33,63 @@ const MyCampaignsPage = () => {
   // Filter campaigns created by the current user
   const myCampaigns = useMemo(() => {
     if (!selectedAccount || !campaigns) return [];
-    return campaigns.filter(campaign => campaign.owner === selectedAccount.address);
+    
+    console.log('[MyCampaignsPage] Filtering campaigns:', {
+      totalCampaigns: campaigns.length,
+      selectedAddress: selectedAccount.address,
+      campaignOwners: campaigns.map(c => ({ id: c.id, owner: c.owner, title: c.title }))
+    });
+    
+    // Decode the selected account address to get the raw public key
+    let selectedPublicKey;
+    try {
+      selectedPublicKey = decodeAddress(selectedAccount.address);
+      console.log('[MyCampaignsPage] Decoded selected address:', {
+        address: selectedAccount.address,
+        publicKeyHex: u8aToHex(selectedPublicKey)
+      });
+    } catch (err) {
+      console.error('[MyCampaignsPage] Failed to decode selected address:', err);
+      return [];
+    }
+    
+    const filtered = campaigns.filter(campaign => {
+      try {
+        // Decode the campaign owner address to get the raw public key
+        const ownerPublicKey = decodeAddress(campaign.owner);
+        
+        // Compare the raw public keys (byte arrays)
+        const isMatch = u8aEq(selectedPublicKey, ownerPublicKey);
+        
+        console.log('[MyCampaignsPage] Comparing campaign:', {
+          campaignId: campaign.id,
+          title: campaign.title,
+          owner: campaign.owner,
+          ownerPublicKeyHex: u8aToHex(ownerPublicKey),
+          isMatch
+        });
+        
+        return isMatch;
+      } catch (err) {
+        console.error('[MyCampaignsPage] Failed to decode campaign owner address:', {
+          campaignId: campaign.id,
+          owner: campaign.owner,
+          error: err.message
+        });
+        return false;
+      }
+    });
+    
+    console.log('[MyCampaignsPage] Filtered campaigns:', {
+      count: filtered.length,
+      campaigns: filtered.map(c => ({ id: c.id, title: c.title }))
+    });
+    
+    if (filtered.length === 0 && campaigns.length > 0) {
+      console.warn('[MyCampaignsPage] ⚠️  No campaigns matched! This means the decoded public keys do not match.');
+    }
+    
+    return filtered;
   }, [campaigns, selectedAccount]);
 
   // Calculate stats for user's campaigns
@@ -140,7 +198,7 @@ const MyCampaignsPage = () => {
                 Refresh
               </button>
               <button
-                onClick={() => navigate('/dashboard/create-campaign')}
+                onClick={() => navigate('/create-campaign')}
                 className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-secondary text-white rounded-xl font-body font-bold hover:scale-105 transition-all duration-300 shadow-lg shadow-primary/20"
               >
                 <FiPlus className="w-5 h-5" />
@@ -222,7 +280,7 @@ const MyCampaignsPage = () => {
                   You haven&apos;t created any campaigns yet. Start your first crowdfunding campaign to make a difference!
                 </p>
                 <button
-                  onClick={() => navigate('/dashboard/create-campaign')}
+                  onClick={() => navigate('/create-campaign')}
                   className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-primary to-secondary text-white rounded-xl font-body font-bold text-lg hover:scale-105 transition-all duration-300 shadow-lg shadow-primary/20"
                 >
                   <FiPlus className="w-5 h-5" />
@@ -304,7 +362,7 @@ const MyCampaignsPage = () => {
                     {/* Actions */}
                     <div className="flex gap-2 pt-2">
                       <Link
-                        to={`/dashboard/campaign/${campaign.id}`}
+                        to={`/campaign/${campaign.id}`}
                         className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-900/50 border-2 border-gray-700 rounded-xl text-white font-body font-semibold hover:border-primary/50 hover:bg-gray-800/50 transition-all duration-300"
                       >
                         <FiEye className="w-4 h-4" />
@@ -312,7 +370,7 @@ const MyCampaignsPage = () => {
                       </Link>
                       {campaign.state === 'Active' && (
                         <button
-                          onClick={() => navigate(`/dashboard/campaign/${campaign.id}/edit`)}
+                          onClick={() => navigate(`/campaign/${campaign.id}/edit`)}
                           className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary/20 to-secondary/20 border-2 border-primary/40 rounded-xl text-primary font-body font-semibold hover:border-primary hover:from-primary/30 hover:to-secondary/30 transition-all duration-300"
                         >
                           <FiEdit className="w-4 h-4" />
