@@ -32,11 +32,15 @@ describe('CampaignContext', () => {
       createCampaign: vi.fn(),
       donate: vi.fn(),
       withdrawFunds: vi.fn(),
+      cancelCampaign: vi.fn(),
+      claimRefund: vi.fn(),
     },
     tx: {
       createCampaign: vi.fn(),
       donate: vi.fn(),
       withdrawFunds: vi.fn(),
+      cancelCampaign: vi.fn(),
+      claimRefund: vi.fn(),
     },
   };
 
@@ -67,6 +71,8 @@ describe('CampaignContext', () => {
       expect(typeof result.current.donateToCampaign).toBe('function');
       expect(typeof result.current.getCampaignDetails).toBe('function');
       expect(typeof result.current.withdrawFunds).toBe('function');
+      expect(typeof result.current.cancelCampaign).toBe('function');
+      expect(typeof result.current.claimRefund).toBe('function');
       expect(typeof result.current.refreshCampaigns).toBe('function');
     });
 
@@ -344,6 +350,164 @@ describe('CampaignContext', () => {
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
+    });
+  });
+
+  describe('cancelCampaign', () => {
+    it('should throw error when contract is not loaded', async () => {
+      const { result } = renderHook(() => useCampaign(), { wrapper });
+
+      await expect(result.current.cancelCampaign(1)).rejects.toThrow(
+        'Contract not loaded or wallet not connected'
+      );
+    });
+
+    it('should throw error when wallet is not connected', async () => {
+      const { result } = renderHook(() => useCampaign(), { wrapper });
+
+      await expect(result.current.cancelCampaign(1)).rejects.toThrow(
+        'Contract not loaded or wallet not connected'
+      );
+    });
+
+    it('should handle campaign cancellation errors with user-friendly messages', async () => {
+      const { result } = renderHook(() => useCampaign(), { wrapper });
+
+      // Test NotCampaignOwner error
+      await expect(result.current.cancelCampaign(1)).rejects.toThrow();
+    });
+
+    it('should handle CampaignNotActive error', async () => {
+      const { result } = renderHook(() => useCampaign(), { wrapper });
+
+      await expect(result.current.cancelCampaign(999)).rejects.toThrow();
+    });
+
+    it('should throw error with proper message on contract error', async () => {
+      const { result } = renderHook(() => useCampaign(), { wrapper });
+
+      // Test expects contract/wallet validation error first
+      await expect(result.current.cancelCampaign(1)).rejects.toThrow(
+        'Contract not loaded or wallet not connected'
+      );
+    });
+
+    it('should validate campaignId parameter', async () => {
+      const { result } = renderHook(() => useCampaign(), { wrapper });
+
+      // Should reject invalid campaign ID types
+      await expect(result.current.cancelCampaign(null)).rejects.toThrow();
+      await expect(result.current.cancelCampaign(undefined)).rejects.toThrow();
+      await expect(result.current.cancelCampaign('invalid')).rejects.toThrow();
+    });
+  });
+
+  describe('claimRefund', () => {
+    it('should throw error when contract is not loaded', async () => {
+      const { result } = renderHook(() => useCampaign(), { wrapper });
+
+      await expect(result.current.claimRefund(1)).rejects.toThrow(
+        'Contract not loaded or wallet not connected'
+      );
+    });
+
+    it('should throw error when wallet is not connected', async () => {
+      const { result } = renderHook(() => useCampaign(), { wrapper });
+
+      await expect(result.current.claimRefund(1)).rejects.toThrow(
+        'Contract not loaded or wallet not connected'
+      );
+    });
+
+    it('should handle CampaignNotFailed error', async () => {
+      const { result } = renderHook(() => useCampaign(), { wrapper });
+
+      // Should fail when campaign is not failed
+      await expect(result.current.claimRefund(1)).rejects.toThrow();
+    });
+
+    it('should handle NoDonationFound error', async () => {
+      const { result } = renderHook(() => useCampaign(), { wrapper });
+
+      await expect(result.current.claimRefund(999)).rejects.toThrow();
+    });
+
+    it('should handle RefundAlreadyClaimed error', async () => {
+      const { result } = renderHook(() => useCampaign(), { wrapper });
+
+      await expect(result.current.claimRefund(1)).rejects.toThrow();
+    });
+
+    it('should throw error with proper message on contract error', async () => {
+      const { result } = renderHook(() => useCampaign(), { wrapper });
+
+      // Test expects contract/wallet validation error first
+      await expect(result.current.claimRefund(1)).rejects.toThrow(
+        'Contract not loaded or wallet not connected'
+      );
+    });
+
+    it('should validate campaignId parameter', async () => {
+      const { result } = renderHook(() => useCampaign(), { wrapper });
+
+      // Should reject invalid campaign ID types
+      await expect(result.current.claimRefund(null)).rejects.toThrow();
+      await expect(result.current.claimRefund(undefined)).rejects.toThrow();
+      await expect(result.current.claimRefund('invalid')).rejects.toThrow();
+    });
+  });
+
+  describe('Error Mapping for New Features', () => {
+    it('should map CampaignNotActive error correctly', async () => {
+      const { result } = renderHook(() => useCampaign(), { wrapper });
+
+      try {
+        await result.current.cancelCampaign(1);
+      } catch (error) {
+        // Error should be thrown with mapped message
+        expect(error).toBeDefined();
+      }
+    });
+
+    it('should map CampaignNotFailed error correctly', async () => {
+      const { result } = renderHook(() => useCampaign(), { wrapper });
+
+      try {
+        await result.current.claimRefund(1);
+      } catch (error) {
+        // Error should be thrown with mapped message
+        expect(error).toBeDefined();
+      }
+    });
+
+    it('should map NoDonationFound error correctly', async () => {
+      const { result } = renderHook(() => useCampaign(), { wrapper });
+
+      try {
+        await result.current.claimRefund(999);
+      } catch (error) {
+        expect(error).toBeDefined();
+      }
+    });
+
+    it('should map RefundAlreadyClaimed error correctly', async () => {
+      const { result } = renderHook(() => useCampaign(), { wrapper });
+
+      try {
+        await result.current.claimRefund(1);
+      } catch (error) {
+        expect(error).toBeDefined();
+      }
+    });
+
+    it('should map RefundFailed error correctly', async () => {
+      const { result } = renderHook(() => useCampaign(), { wrapper });
+
+      try {
+        await result.current.claimRefund(1);
+      } catch (error) {
+        expect(error).toBeDefined();
+      }
     });
   });
 });

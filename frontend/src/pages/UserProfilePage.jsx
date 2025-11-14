@@ -192,7 +192,7 @@ const UserProfilePage = () => {
             Total Raised
           </p>
           <p className="text-4xl font-bold font-display text-green-400 mb-1">
-            {formatDOT(userStats?.totalRaised || 0n)}
+            {formatDOT(userStats?.totalRaised || 0n)} DOT
           </p>
           <p className="text-sm text-gray-400 font-body">
             DOT from campaigns
@@ -216,7 +216,7 @@ const UserProfilePage = () => {
             Total Donated
           </p>
           <p className="text-4xl font-bold font-display text-secondary mb-1">
-            {formatDOT(userStats?.totalDonated || 0n)}
+            {formatDOT(userStats?.totalDonated || 0n)} DOT
           </p>
           <p className="text-sm text-gray-400 font-body">
             to {userStats?.campaignsSupported || 0} campaigns

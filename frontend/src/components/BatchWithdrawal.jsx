@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { decodeAddress } from '@polkadot/util-crypto';
+import { u8aEq } from '@polkadot/util';
 import { useBatchOperations } from '../contexts/BatchOperationsContext';
 import { useCampaign } from '../contexts/CampaignContext';
 import { useWallet } from '../contexts/WalletContext';
@@ -17,9 +19,21 @@ const BatchWithdrawal = () => {
   useEffect(() => {
     if (!campaigns || !selectedAccount) return;
 
+    // Helper function to compare addresses regardless of SS58 format
+    const addressesMatch = (addr1, addr2) => {
+      try {
+        const decoded1 = decodeAddress(addr1);
+        const decoded2 = decodeAddress(addr2);
+        return u8aEq(decoded1, decoded2);
+      } catch (error) {
+        console.error('Error comparing addresses:', error);
+        return false;
+      }
+    };
+
     // Filter campaigns that are eligible for withdrawal
     const eligible = campaigns.filter(campaign => {
-      const isOwner = campaign.owner === selectedAccount.address;
+      const isOwner = addressesMatch(campaign.owner, selectedAccount.address);
       const isSuccessful = campaign.state === 'Successful';
       const notWithdrawn = campaign.state !== 'Withdrawn';
       const hasBalance = campaign.raised > 0;
@@ -41,7 +55,8 @@ const BatchWithdrawal = () => {
 
   const showNotification = (title, description, type = 'info') => {
     setNotification({ title, description, type });
-    setTimeout(() => setNotification(null), 3000);
+    // Auto-dismiss after 5 seconds (increased from 3s)
+    setTimeout(() => setNotification(null), 5000);
   };
 
   const toggleCampaign = (campaignId) => {
@@ -68,6 +83,17 @@ const BatchWithdrawal = () => {
       return;
     }
 
+    const selectedCount = selectedCampaigns.size;
+    
+    // Inform user about batch splitting for large selections
+    if (selectedCount > 5) {
+      showNotification(
+        'Processing Large Batch', 
+        `Your ${selectedCount} campaigns will be processed in multiple batches to ensure transaction success`, 
+        'info'
+      );
+    }
+
     try {
       const campaignIds = Array.from(selectedCampaigns);
       const result = await withdrawFundsBatch(campaignIds);
@@ -75,9 +101,25 @@ const BatchWithdrawal = () => {
       if (result.failed === 0) {
         // Clear selection on success
         setSelectedCampaigns(new Set());
+        showNotification(
+          'All Withdrawals Complete!',
+          `Successfully withdrew from ${result.successful} campaign${result.successful > 1 ? 's' : ''}`,
+          'success'
+        );
+      } else {
+        showNotification(
+          'Partial Success',
+          `${result.successful} succeeded, ${result.failed} failed. Please check and retry failed campaigns.`,
+          'warning'
+        );
       }
     } catch (error) {
       console.error('Batch withdrawal error:', error);
+      showNotification(
+        'Withdrawal Error',
+        error.message || 'An unexpected error occurred',
+        'error'
+      );
     }
   };
 
@@ -144,8 +186,17 @@ const BatchWithdrawal = () => {
             exit={{ opacity: 0, y: -50, scale: 0.9 }}
             className="fixed top-4 right-4 z-50"
           >
-            <div className={`p-4 rounded-xl border backdrop-blur-lg ${getNotificationStyles(notification.type)} shadow-xl min-w-[300px]`}>
-              <div className="font-bold text-lg mb-1">{notification.title}</div>
+            <div className={`p-4 rounded-xl border backdrop-blur-lg ${getNotificationStyles(notification.type)} shadow-xl min-w-[300px] relative`}>
+              <button
+                onClick={() => setNotification(null)}
+                className="absolute top-2 right-2 text-white/80 hover:text-white transition-colors"
+                aria-label="Close notification"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+              <div className="font-bold text-lg mb-1 pr-6">{notification.title}</div>
               <div className="text-sm opacity-90">{notification.description}</div>
             </div>
           </motion.div>
@@ -216,6 +267,34 @@ const BatchWithdrawal = () => {
             </div>
           </motion.div>
 
+          {/* Smart Batch Info Banner */}
+          <AnimatePresence>
+            {selectedCampaigns.size > 5 && !batchLoading && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mb-6 overflow-hidden"
+              >
+                <div className="p-6 bg-gradient-to-r from-blue-600/20 to-cyan-600/20 border border-blue-500/30 rounded-xl backdrop-blur-sm">
+                  <div className="flex items-start gap-3">
+                    <svg className="w-6 h-6 text-blue-400 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div>
+                      <div className="font-bold text-blue-400 text-lg mb-1">Smart Batch Processing</div>
+                      <div className="text-gray-300 text-sm">
+                        You&apos;ve selected {selectedCampaigns.size} campaigns. To ensure transaction success, 
+                        these will be automatically split into smaller batches (~5 campaigns per batch).
+                        You&apos;ll need to approve {Math.ceil(selectedCampaigns.size / 5)} transaction{Math.ceil(selectedCampaigns.size / 5) > 1 ? 's' : ''}.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {/* Progress Bar */}
           <AnimatePresence>
             {batchLoading && (
@@ -231,7 +310,8 @@ const BatchWithdrawal = () => {
                     <div className="font-bold text-white">Processing Withdrawals...</div>
                   </div>
                   <div className="text-sm text-gray-300 mb-3">
-                    Please wait while we process {selectedCampaigns.size} withdrawal{selectedCampaigns.size > 1 ? 's' : ''}
+                    Please wait while we process {selectedCampaigns.size} withdrawal{selectedCampaigns.size > 1 ? 's' : ''}.
+                    {selectedCampaigns.size > 5 && ` Processing in batches of ~5 campaigns.`}
                   </div>
                   <div className="w-full bg-gray-700/50 rounded-full h-3 overflow-hidden">
                     <motion.div
@@ -240,6 +320,9 @@ const BatchWithdrawal = () => {
                       className="h-full bg-gradient-to-r from-green-500 to-blue-500 rounded-full"
                       transition={{ duration: 0.3 }}
                     />
+                  </div>
+                  <div className="text-xs text-gray-400 mt-2 text-right">
+                    {batchProgress.current} / {batchProgress.total} withdrawals
                   </div>
                 </div>
               </motion.div>
@@ -368,9 +451,21 @@ const BatchWithdrawal = () => {
                   <div>
                     <div className="font-bold text-green-400 text-lg mb-1">Gas Savings!</div>
                     <div className="text-gray-300 text-sm">
-                      Withdrawing from {selectedCampaigns.size} campaigns in batch saves approximately{' '}
-                      <span className="font-bold text-green-400">{Math.round((selectedCampaigns.size - 1) * 15)}%</span>{' '}
-                      on gas fees compared to individual transactions.
+                      {selectedCampaigns.size <= 5 ? (
+                        <>
+                          Withdrawing from {selectedCampaigns.size} campaigns in a single batch saves approximately{' '}
+                          <span className="font-bold text-green-400">{Math.round((selectedCampaigns.size - 1) * 15)}%</span>{' '}
+                          on gas fees compared to individual transactions.
+                        </>
+                      ) : (
+                        <>
+                          Processing {selectedCampaigns.size} campaigns in {Math.ceil(selectedCampaigns.size / 5)} batch{Math.ceil(selectedCampaigns.size / 5) > 1 ? 'es' : ''} saves approximately{' '}
+                          <span className="font-bold text-green-400">
+                            {Math.round((selectedCampaigns.size - Math.ceil(selectedCampaigns.size / 5)) * 12)}%
+                          </span>{' '}
+                          on gas fees compared to {selectedCampaigns.size} individual transactions.
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>

@@ -5,6 +5,34 @@
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 const API_KEY = import.meta.env.VITE_BACKEND_API_KEY || 'dev_api_key_12345';
+const REQUEST_TIMEOUT = 10000; // 10 seconds
+
+/**
+ * Fetch with timeout
+ * @param {string} url - URL to fetch
+ * @param {Object} options - Fetch options
+ * @param {number} timeout - Timeout in milliseconds
+ * @returns {Promise<Response>}
+ */
+async function fetchWithTimeout(url, options = {}, timeout = REQUEST_TIMEOUT) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+  
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal
+    });
+    clearTimeout(id);
+    return response;
+  } catch (error) {
+    clearTimeout(id);
+    if (error.name === 'AbortError') {
+      throw new Error('Request timeout - backend server may be down');
+    }
+    throw error;
+  }
+}
 
 /**
  * Get authentication headers for API requests
@@ -23,7 +51,7 @@ function getAuthHeaders() {
  */
 export async function createCaptchaSession() {
   try {
-    const response = await fetch(`${BACKEND_URL}/api/captcha/session`, {
+    const response = await fetchWithTimeout(`${BACKEND_URL}/api/captcha/session`, {
       method: 'POST',
       headers: getAuthHeaders(),
     });
@@ -54,7 +82,7 @@ export async function generateCaptchaChallenge({
   difficulty = 0
 }) {
   try {
-    const response = await fetch(`${BACKEND_URL}/api/captcha/challenge`, {
+    const response = await fetchWithTimeout(`${BACKEND_URL}/api/captcha/challenge`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify({
@@ -96,7 +124,7 @@ export async function verifyCaptcha({
   options = {}
 }) {
   try {
-    const response = await fetch(`${BACKEND_URL}/api/captcha/verify`, {
+    const response = await fetchWithTimeout(`${BACKEND_URL}/api/captcha/verify`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify({
@@ -128,7 +156,7 @@ export async function verifyCaptcha({
  */
 export async function validateCaptchaToken(token) {
   try {
-    const response = await fetch(`${BACKEND_URL}/api/captcha/validate-token`, {
+    const response = await fetchWithTimeout(`${BACKEND_URL}/api/captcha/validate-token`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify({ token }),
@@ -152,7 +180,7 @@ export async function validateCaptchaToken(token) {
  */
 export async function getCaptchaStats() {
   try {
-    const response = await fetch(`${BACKEND_URL}/api/captcha/stats`, {
+    const response = await fetchWithTimeout(`${BACKEND_URL}/api/captcha/stats`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });

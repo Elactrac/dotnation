@@ -1,9 +1,55 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { useWallet } from './WalletContext';
-import { useApi } from './ApiContext';
+import { useApi, createGasLimit } from './ApiContext';
+import { prepareContractTransaction, defaultRetryOptions } from '../utils/contractRetry';
+import { formatDOT } from '../utils/formatters';
+import {
+  validateCampaignTitle,
+  validateCampaignDescription,
+  validateSubstrateAddress,
+  sanitizeText,
+  validateGoalAmount,
+  validateDonationAmount,
+} from '../utils/validation';
+import { CONTRACT_LIMITS } from '../config/constants';
+import { 
+  getMockCampaigns, 
+  addMockCampaign, 
+  getMockCampaignById, 
+  getMockDonations,
+  addMockDonation,
+  updateMockCampaignState 
+} from '../utils/mockStorage';
 
 const CampaignContext = createContext({});
+
+// Map contract errors to user-friendly messages
+const mapError = (error) => {
+  const errorMappings = {
+    'InvalidTitle': 'Title must be between 1 and 100 characters.',
+    'InvalidDescription': 'Description must be less than 1000 characters.',
+    'InvalidGoal': 'Goal must be between 1 and 1,000,000 DOT.',
+    'InvalidBeneficiary': 'Invalid beneficiary address.',
+    'InvalidDeadline': 'Deadline must be between 1 hour and 1 year from now.',
+    'InvalidDonationAmount': 'Donation amount must be greater than 0 and less than 100,000 DOT.',
+    'CampaignNotFound': 'Campaign not found.',
+    'CampaignNotActive': 'Campaign is not active.',
+    'GoalReached': 'Campaign goal has already been reached.',
+    'DeadlinePassed': 'Campaign deadline has passed.',
+    'NotCampaignOwner': 'Only the campaign owner can perform this action.',
+    'GoalNotReached': 'Campaign goal has not been reached.',
+    'FundsAlreadyWithdrawn': 'Funds have already been withdrawn.',
+    'InsufficientFunds': 'Insufficient funds for withdrawal.',
+    'WithdrawalFailed': 'Withdrawal failed.',
+    'Unauthorized': 'You are not authorized to perform this action.',
+    'CampaignNotFailed': 'Campaign has not failed - refunds are only available for failed campaigns.',
+    'NoDonationFound': 'You have no donation to refund for this campaign.',
+    'RefundAlreadyClaimed': 'You have already claimed your refund for this campaign.',
+    'RefundFailed': 'Refund transfer failed. Please try again.',
+  };
+  return errorMappings[error] || 'An unexpected error occurred.';
+};
 
 export const CampaignProvider = ({ children }) => {
   const { api, contract } = useApi();
@@ -13,57 +59,128 @@ export const CampaignProvider = ({ children }) => {
   const [error, setError] = useState(null);
 
   const fetchCampaigns = useCallback(async () => {
+    console.log('[CampaignContext] fetchCampaigns called');
+    console.log('[CampaignContext] contract exists:', !!contract);
+    console.log('[CampaignContext] contract address:', contract?.address?.toString());
+    
     if (!contract) {
-      // Fallback to mock data if contract not available
-      const mockCampaigns = [
-        {
-          id: 1,
-          owner: '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY',
-          title: 'Decentralized Education Platform',
-          description: 'Building the future of learning with blockchain technology.',
-          goal: 1000000000000n, // 1000 DOT
-          raised: 500000000000n, // 500 DOT
-          deadline: Date.now() + 86400000 * 30, // 30 days
-          state: 'Active',
-          beneficiary: '5FHneW46xGXgs5mUiveU4sbTyGBzmvcE1QP9KG1Yqk5j9',
-        },
-        {
-          id: 2,
-          owner: '5FHneW46xGXgs5mUiveU4sbTyGBzmvcE1QP9KG1Yqk5j9',
-          title: 'Green Energy Initiative',
-          description: 'Funding renewable energy projects for a sustainable future.',
-          goal: 2000000000000n, // 2000 DOT
-          raised: 800000000000n, // 800 DOT
-          deadline: Date.now() + 86400000 * 15, // 15 days
-          state: 'Active',
-          beneficiary: '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY',
-        },
-      ];
-      setCampaigns(mockCampaigns);
+      // Use mock storage if contract not available
+      console.log('[CampaignContext] ⚠️  Using mock storage - contract not loaded');
+      console.log('[CampaignContext] Check: VITE_CONTRACT_ADDRESS in .env.local');
+      const mockCampaigns = getMockCampaigns();
+      // Convert string to BigInt if needed and sanitize user-facing text
+      const parsedCampaigns = mockCampaigns.map(c => ({
+        ...c,
+        title: sanitizeText(c.title),
+        description: sanitizeText(c.description),
+        goal: typeof c.goal === 'string' ? BigInt(c.goal) : c.goal,
+        raised: typeof c.raised === 'string' ? BigInt(c.raised) : c.raised,
+      }));
+      setCampaigns(parsedCampaigns);
       setIsLoading(false);
       return;
     }
+    
+    console.log('[CampaignContext] ✅ Using blockchain mode - querying contract');
+    console.log('[CampaignContext] contract.query:', contract.query);
+    console.log('[CampaignContext] Available methods:', Object.keys(contract.query || {}));
 
     try {
-      const { result, output } = await contract.query.getCampaigns(selectedAccount?.address || '', { gasLimit: -1 });
-
-      if (result.isErr) {
-        throw new Error(`Contract error: ${result.asErr.toString()}`);
+      // Check if the method exists (Polkadot.js converts snake_case to camelCase)
+      if (!contract.query || typeof contract.query.getCampaignsPaginated !== 'function') {
+        console.error('[CampaignContext] ❌ contract.query.getCampaignsPaginated is not a function');
+        console.error('[CampaignContext] Available query methods:', Object.keys(contract.query || {}));
+        console.warn('[CampaignContext] ⚠️  Falling back to mock storage - contract method not available');
+        
+        // Fall back to mock storage
+        const mockCampaigns = getMockCampaigns();
+        const parsedCampaigns = mockCampaigns.map(c => ({
+          ...c,
+          title: sanitizeText(c.title),
+          description: sanitizeText(c.description),
+          goal: typeof c.goal === 'string' ? BigInt(c.goal) : c.goal,
+          raised: typeof c.raised === 'string' ? BigInt(c.raised) : c.raised,
+        }));
+        setCampaigns(parsedCampaigns);
+        setIsLoading(false);
+        setError('Contract not compatible. Using demo mode.');
+        return;
       }
 
-      const campaignsData = output.toHuman() || [];
-      const formattedCampaigns = campaignsData.map(campaign => ({
-        id: parseInt(campaign.id),
-        owner: campaign.owner,
-        title: campaign.title,
-        description: campaign.description,
-        goal: BigInt(campaign.goal.replace(/,/g, '')),
-        raised: BigInt(campaign.raised.replace(/,/g, '')),
-        deadline: parseInt(campaign.deadline),
-        state: campaign.state,
-        beneficiary: campaign.beneficiary,
-      }));
+      // Use getCampaignsPaginated method (Polkadot.js converts snake_case to camelCase)
+      const { result, output } = await contract.query.getCampaignsPaginated(
+        selectedAccount?.address || '', 
+        { gasLimit: createGasLimit(api) },
+        0, // start index
+        100 // max count
+      );
 
+      if (result.isErr) {
+        const errorMsg = result.asErr.toString();
+        console.error('[CampaignContext] ❌ Contract query failed:', errorMsg);
+        console.error('[CampaignContext] Error details:', JSON.stringify(result.asErr, null, 2));
+        
+        // If contract traps, it might be an old version - use mock mode
+        if (errorMsg.includes('ContractTrapped') || errorMsg.includes('module')) {
+          console.warn('[CampaignContext] ⚠️  Contract trapped - likely version mismatch. Using mock mode.');
+          const mockCampaigns = getMockCampaigns();
+          const parsedCampaigns = mockCampaigns.map(c => ({
+            ...c,
+            title: sanitizeText(c.title),
+            description: sanitizeText(c.description),
+            goal: typeof c.goal === 'string' ? BigInt(c.goal) : c.goal,
+            raised: typeof c.raised === 'string' ? BigInt(c.raised) : c.raised,
+          }));
+          setCampaigns(parsedCampaigns);
+          setIsLoading(false);
+          setError('Contract version mismatch. Using demo mode. Please redeploy the latest contract.');
+          return;
+        }
+        
+        throw new Error(`Contract error: ${errorMsg}`);
+      }
+
+      // Contract returns Result<Vec<Campaign>, Error> so we need to unwrap it
+      const outputHuman = output.toHuman();
+      console.log('[CampaignContext] Output:', outputHuman);
+      
+      // Handle Result type (either { Ok: [...] } or { Err: ... })
+      const campaignsData = outputHuman?.Ok || outputHuman || [];
+      console.log('[CampaignContext] Campaigns data:', campaignsData);
+      console.log('[CampaignContext] Is array?', Array.isArray(campaignsData));
+      
+      if (!Array.isArray(campaignsData)) {
+        console.warn('[CampaignContext] ⚠️  Campaigns data is not an array, setting empty array');
+        setCampaigns([]);
+        setIsLoading(false);
+        return;
+      }
+      
+      const formattedCampaigns = campaignsData.map(campaign => {
+        console.log('[CampaignContext] 🔍 Raw campaign data from contract:', campaign);
+        
+        const formatted = {
+          id: parseInt(campaign.id),
+          owner: campaign.owner,
+          title: sanitizeText(campaign.title),
+          description: sanitizeText(campaign.description),
+          goal: BigInt(campaign.goal.replace(/,/g, '')),
+          raised: BigInt(campaign.raised.replace(/,/g, '')),
+          deadline: parseInt(campaign.deadline.replace(/,/g, '')),
+          state: campaign.state,
+          beneficiary: campaign.beneficiary,
+        };
+        console.log('[CampaignContext] 📋 Formatted campaign:', {
+          rawId: campaign.id,
+          parsedId: formatted.id,
+          title: formatted.title,
+          state: formatted.state,
+          owner: formatted.owner
+        });
+        return formatted;
+      });
+
+      console.log('[CampaignContext] ✅ Total campaigns fetched:', formattedCampaigns.length);
       setCampaigns(formattedCampaigns);
     } catch (err) {
       console.error('Failed to fetch campaigns:', err);
@@ -74,134 +191,289 @@ export const CampaignProvider = ({ children }) => {
   }, [contract, selectedAccount]);
 
   const getCampaignDetails = useCallback(async (campaignId) => {
+    // Convert to number if it's a string
+    const numericId = typeof campaignId === 'string' ? parseInt(campaignId, 10) : campaignId;
+    
+    console.log('[CampaignContext] getCampaignDetails called:', {
+      originalId: campaignId,
+      numericId,
+      idType: typeof campaignId,
+      hasContract: !!contract
+    });
+    
     if (!contract) {
-      throw new Error('Contract not loaded');
+      // Use mock storage
+      console.log('[CampaignContext] Using mock storage for campaign:', numericId);
+      const campaign = getMockCampaignById(numericId);
+      if (!campaign) {
+        console.error('[CampaignContext] Campaign not found in mock storage:', numericId);
+        throw new Error('Campaign not found');
+      }
+      
+      const donations = getMockDonations(numericId);
+      
+      return {
+        campaign: {
+          ...campaign,
+          title: sanitizeText(campaign.title),
+          description: sanitizeText(campaign.description),
+        },
+        donations,
+      };
     }
 
     try {
-      const { result, output } = await contract.query.getCampaignDetails(selectedAccount?.address || '', { gasLimit: -1 }, campaignId);
+      console.log('[CampaignContext] Querying blockchain for campaign:', numericId);
+      const { result, output } = await contract.query.getCampaignDetails(
+        selectedAccount?.address || '', 
+        { gasLimit: createGasLimit(api) }, 
+        numericId,
+        0, // offset for donations pagination
+        100 // limit - get up to 100 donations
+      );
 
       if (result.isErr) {
-        throw new Error(`Contract error: ${result.asErr.toString()}`);
+        const errorMsg = result.asErr.toString();
+        console.error('[CampaignContext] Query error:', errorMsg);
+        throw new Error(`Contract error: ${errorMsg}`);
       }
 
-      if (!output) throw new Error('Campaign not found');
+      if (!output) {
+        console.error('[CampaignContext] No output from contract for campaign:', numericId);
+        throw new Error('Campaign not found');
+      }
 
-      const campaign = output.toHuman();
-      const donations = campaign.donations || [];
+      const outputHuman = output.toHuman();
+      console.log('[CampaignContext] Campaign details retrieved:', outputHuman);
+      
+      // Contract returns Result<CampaignDetails, Error>, so unwrap the Ok value
+      const details = outputHuman.Ok || outputHuman;
+      
+      if (!details || !details.campaign) {
+        console.error('[CampaignContext] Campaign not found or invalid response:', details);
+        throw new Error('Campaign not found');
+      }
+      
+      // Contract returns CampaignDetails { campaign, donations, total_donations }
+      const campaign = details.campaign;
+      const donations = details.donations || [];
+      
+      console.log('[CampaignContext] ✅ Parsed campaign:', {
+        id: campaign.id,
+        title: campaign.title,
+        owner: campaign.owner,
+        donationsCount: donations.length
+      });
 
       return {
         campaign: {
           id: parseInt(campaign.id),
           owner: campaign.owner,
-          title: campaign.title,
-          description: campaign.description,
+          title: sanitizeText(campaign.title),
+          description: sanitizeText(campaign.description),
           goal: BigInt(campaign.goal.replace(/,/g, '')),
           raised: BigInt(campaign.raised.replace(/,/g, '')),
-          deadline: parseInt(campaign.deadline),
+          deadline: parseInt(campaign.deadline.replace(/,/g, '')),
           state: campaign.state,
           beneficiary: campaign.beneficiary,
         },
         donations: donations.map(donation => ({
           donor: donation.donor,
           amount: BigInt(donation.amount.replace(/,/g, '')),
-          timestamp: parseInt(donation.timestamp)
-        }))
+          timestamp: parseInt(donation.timestamp.replace(/,/g, ''))
+        })),
+        totalDonations: parseInt(details.totalDonations || details.total_donations || '0')
       };
     } catch (err) {
       throw new Error(`Failed to get campaign details: ${err.message}`);
     }
-  }, [api]);
-
-  const mapError = (error) => {
-    // Map contract errors to user-friendly messages
-    const errorMappings = {
-      'InvalidTitle': 'Title must be between 1 and 100 characters.',
-      'InvalidDescription': 'Description must be less than 1000 characters.',
-      'InvalidGoal': 'Goal must be between 1 and 1,000,000 DOT.',
-      'InvalidBeneficiary': 'Invalid beneficiary address.',
-      'InvalidDeadline': 'Deadline must be between 1 hour and 1 year from now.',
-      'InvalidDonationAmount': 'Donation amount must be greater than 0 and less than 100,000 DOT.',
-      'CampaignNotFound': 'Campaign not found.',
-      'CampaignNotActive': 'Campaign is not active.',
-      'GoalReached': 'Campaign goal has already been reached.',
-      'DeadlinePassed': 'Campaign deadline has passed.',
-      'NotCampaignOwner': 'Only the campaign owner can perform this action.',
-      'GoalNotReached': 'Campaign goal has not been reached.',
-      'FundsAlreadyWithdrawn': 'Funds have already been withdrawn.',
-      'InsufficientFunds': 'Insufficient funds for withdrawal.',
-      'WithdrawalFailed': 'Withdrawal failed.',
-    };
-    return errorMappings[error] || 'An unexpected error occurred.';
-  };
+  }, [contract, selectedAccount]);
 
   const createCampaign = useCallback(async (campaignData) => {
-    if (!contract || !selectedAccount) {
+    console.log('[CampaignContext] createCampaign called with:', campaignData);
+    console.log('[CampaignContext] contract exists:', !!contract);
+    console.log('[CampaignContext] selectedAccount:', selectedAccount?.address);
+    
+    if (!contract) {
+      // Use mock storage
+      console.log('[CampaignContext] Using mock storage for campaign creation');
+      console.log('[CampaignContext] Campaign data:', campaignData);
+      
+      try {
+        if (!selectedAccount) {
+          throw new Error('Wallet not connected');
+        }
+        
+        const sanitizedTitle = validateCampaignTitle(campaignData.title);
+        const sanitizedDescription = validateCampaignDescription(campaignData.description);
+        const goalInPlancks = validateGoalAmount(campaignData.goal);
+        if (!validateSubstrateAddress(campaignData.beneficiary)) {
+          throw new Error('Invalid beneficiary address.');
+        }
+        
+        console.log('[CampaignContext] Validation passed, creating mock campaign');
+        
+        const newCampaign = addMockCampaign({
+          ...campaignData,
+          title: sanitizedTitle,
+          description: sanitizedDescription,
+          owner: selectedAccount.address,
+          goal: goalInPlancks,
+        });
+        
+        console.log('[CampaignContext] Mock campaign created:', newCampaign);
+        
+        // Refresh campaigns list
+        await fetchCampaigns();
+        
+        console.log('[CampaignContext] Campaigns refreshed, returning success');
+        return { success: true, campaignId: newCampaign.id };
+      } catch (mockErr) {
+        console.error('[CampaignContext] Error in mock campaign creation:', mockErr);
+        throw mockErr;
+      }
+    }
+
+    console.log('[CampaignContext] Contract exists, using blockchain mode');
+    
+    if (!selectedAccount) {
       throw new Error('Contract not loaded or wallet not connected');
     }
 
     try {
-      const { gasRequired, storageDeposit, result } = await contract.query.createCampaign(
-        selectedAccount.address,
-        { gasLimit: -1, storageDepositLimit: null },
-        campaignData.title,
-        campaignData.description,
-        campaignData.goal,
-        campaignData.deadline,
-        campaignData.beneficiary
-      );
+      // Log exact parameters being sent
+      console.log('[CampaignContext] 🔍 Creating campaign with parameters:', {
+        title: campaignData.title,
+        titleLength: campaignData.title?.length,
+        description: campaignData.description,
+        descriptionLength: campaignData.description?.length,
+        goal: campaignData.goal,
+        goalType: typeof campaignData.goal,
+        deadline: campaignData.deadline,
+        deadlineType: typeof campaignData.deadline,
+        beneficiary: campaignData.beneficiary,
+      });
+      
+      const sanitizedTitle = validateCampaignTitle(campaignData.title);
+      const sanitizedDescription = validateCampaignDescription(campaignData.description);
+      const goalInPlancks = validateGoalAmount(campaignData.goal);
 
-      if (result.isErr) {
-        const error = result.asErr.toString();
-        throw new Error(mapError(error) || error);
+      if (!validateSubstrateAddress(campaignData.beneficiary)) {
+        throw new Error('Invalid beneficiary address.');
       }
 
-      // Execute the transaction
-      const tx = contract.tx.createCampaign(
-        { gasLimit: gasRequired, storageDepositLimit: storageDeposit },
-        campaignData.title,
-        campaignData.description,
-        campaignData.goal,
-        campaignData.deadline,
-        campaignData.beneficiary
+      // Prepare transaction with automatic retry on transient errors
+      const tx = await prepareContractTransaction(
+        contract,
+        'createCampaign', // Use camelCase - Polkadot.js converts snake_case ABI methods to camelCase
+        selectedAccount.address,
+        [
+          sanitizedTitle,
+          sanitizedDescription,
+          goalInPlancks.toString(),
+          Number(campaignData.deadline),
+          campaignData.beneficiary,
+        ],
+        {
+          ...defaultRetryOptions,
+          queryOptions: { 
+            storageDepositLimit: CONTRACT_LIMITS.MAX_STORAGE_DEPOSIT.toString()
+          },
+          txOptions: { 
+            storageDepositLimit: CONTRACT_LIMITS.MAX_STORAGE_DEPOSIT.toString()
+          },
+          api,
+          onRetry: (attempt, maxRetries, delay, error) => {
+            console.warn(
+              `Retrying create campaign (attempt ${attempt}/${maxRetries}) after ${delay}ms:`,
+              error.message
+            );
+          },
+        }
       );
 
       return tx;
     } catch (err) {
-      throw new Error(`Failed to create campaign: ${err.message}`);
+      // Map error to user-friendly message
+      console.error('[CampaignContext] Error creating campaign:', err);
+      console.error('[CampaignContext] Error message:', err.message);
+      console.error('[CampaignContext] Error stack:', err.stack);
+      const errorMessage = mapError(err.message) || err.message;
+      throw new Error(`Failed to create campaign: ${errorMessage}`);
     }
-  }, [contract, selectedAccount, mapError]);
+  }, [contract, selectedAccount, fetchCampaigns]);
 
   const donateToCampaign = useCallback(async (campaignId, amount) => {
-    if (!contract || !selectedAccount) {
+    console.log('[CampaignContext] donateToCampaign called:', {
+      campaignId,
+      amount: amount.toString(),
+      hasContract: !!contract,
+      hasAccount: !!selectedAccount
+    });
+    
+    if (!contract) {
+      // Use mock storage
+      console.log('[CampaignContext] ⚠️  No contract - using mock mode');
+      if (!selectedAccount) {
+        throw new Error('Wallet not connected');
+      }
+      
+      // amount is already in plancks (converted by parseDOT)
+      const amountInPlanks = BigInt(amount);
+      addMockDonation(campaignId, selectedAccount.address, amountInPlanks);
+      
+      // Refresh campaigns list
+      await fetchCampaigns();
+      
+      return { success: true, mock: true };
+    }
+
+    if (!selectedAccount) {
       throw new Error('Contract not loaded or wallet not connected');
     }
 
+    console.log('[CampaignContext] ✅ Blockchain mode - preparing donation transaction');
+    
     try {
-      const amountInPlanks = BigInt(amount) * BigInt(1_000_000_000_000); // Convert DOT to planks
+      // amount is already in plancks (converted by parseDOT in DonationInterface)
+      const amountInPlanks = validateDonationAmount(amount);
 
-      const { gasRequired, storageDeposit, result } = await contract.query.donate(
+      console.log('[CampaignContext] Donating:', {
+        campaignId,
+        amountInPlanks: amountInPlanks.toString(),
+        amountInDOT: formatDOT(amountInPlanks)
+      });
+
+      // Prepare transaction with automatic retry on transient errors
+      const tx = await prepareContractTransaction(
+        contract,
+        'donate',
         selectedAccount.address,
-        { gasLimit: -1, storageDepositLimit: null, value: amountInPlanks },
-        campaignId
-      );
-
-      if (result.isErr) {
-        const error = result.asErr.toString();
-        throw new Error(mapError(error) || error);
-      }
-
-      // Execute the transaction
-      const tx = contract.tx.donate(
-        { gasLimit: gasRequired, storageDepositLimit: storageDeposit, value: amountInPlanks },
-        campaignId
+        [campaignId],
+        {
+          ...defaultRetryOptions,
+          api,
+          queryOptions: { value: amountInPlanks },
+          txOptions: { value: amountInPlanks },
+          onRetry: (attempt, maxRetries, delay, error) => {
+            console.warn(
+              `Retrying donation (attempt ${attempt}/${maxRetries}) after ${delay}ms:`,
+              error.message
+            );
+          },
+        }
       );
 
       return tx;
     } catch (err) {
-      throw new Error(`Failed to donate: ${err.message}`);
+      // Map error to user-friendly message
+      console.error('[CampaignContext] ❌ Error donating:', err);
+      console.error('[CampaignContext] Error message:', err.message);
+      console.error('[CampaignContext] Error stack:', err.stack);
+      const errorMessage = mapError(err.message) || err.message;
+      throw new Error(`Failed to donate: ${errorMessage}`);
     }
-  }, [contract, selectedAccount, mapError]);
+  }, [contract, selectedAccount, fetchCampaigns]);
 
   const withdrawFunds = useCallback(async (campaignId) => {
     if (!contract || !selectedAccount) {
@@ -209,28 +481,124 @@ export const CampaignProvider = ({ children }) => {
     }
 
     try {
-      const { gasRequired, storageDeposit, result } = await contract.query.withdrawFunds(
+      // Prepare transaction with automatic retry on transient errors
+      const tx = await prepareContractTransaction(
+        contract,
+        'withdrawFunds', // Use camelCase - Polkadot.js converts snake_case ABI methods to camelCase
         selectedAccount.address,
-        { gasLimit: -1, storageDepositLimit: null },
-        campaignId
-      );
-
-      if (result.isErr) {
-        const error = result.asErr.toString();
-        throw new Error(mapError(error) || error);
-      }
-
-      // Execute the transaction
-      const tx = contract.tx.withdrawFunds(
-        { gasLimit: gasRequired, storageDepositLimit: storageDeposit },
-        campaignId
+        [campaignId],
+        {
+          ...defaultRetryOptions,
+          api,
+          queryOptions: {
+            storageDepositLimit: CONTRACT_LIMITS.MAX_STORAGE_DEPOSIT.toString(),
+          },
+          txOptions: {
+            storageDepositLimit: CONTRACT_LIMITS.MAX_STORAGE_DEPOSIT.toString(),
+          },
+          onRetry: (attempt, maxRetries, delay, error) => {
+            console.warn(
+              `Retrying withdraw funds (attempt ${attempt}/${maxRetries}) after ${delay}ms:`,
+              error.message
+            );
+          },
+        }
       );
 
       return tx;
     } catch (err) {
-      throw new Error(`Failed to withdraw funds: ${err.message}`);
+      // Map error to user-friendly message
+      const errorMessage = mapError(err.message) || err.message;
+      throw new Error(`Failed to withdraw funds: ${errorMessage}`);
     }
-  }, [contract, selectedAccount, mapError]);
+  }, [contract, selectedAccount]);
+
+  const cancelCampaign = useCallback(async (campaignId) => {
+    if (!contract) {
+      // Use mock storage
+      if (!selectedAccount) {
+        throw new Error('Wallet not connected');
+      }
+      
+      const campaign = getMockCampaignById(campaignId);
+      if (!campaign) {
+        throw new Error('Campaign not found.');
+      }
+      
+      if (campaign.owner !== selectedAccount.address) {
+        throw new Error('Only the campaign owner can perform this action.');
+      }
+      
+      updateMockCampaignState(campaignId, 'Cancelled');
+      
+      // Refresh campaigns list
+      await fetchCampaigns();
+      
+      return { success: true };
+    }
+
+    if (!selectedAccount) {
+      throw new Error('Contract not loaded or wallet not connected');
+    }
+
+    try {
+      // Prepare transaction with automatic retry on transient errors
+      const tx = await prepareContractTransaction(
+        contract,
+        'cancelCampaign', // Use camelCase - Polkadot.js converts snake_case ABI methods to camelCase
+        selectedAccount.address,
+        [campaignId],
+        {
+          ...defaultRetryOptions,
+          api,
+          onRetry: (attempt, maxRetries, delay, error) => {
+            console.warn(
+              `Retrying cancel campaign (attempt ${attempt}/${maxRetries}) after ${delay}ms:`,
+              error.message
+            );
+          },
+        }
+      );
+
+      return tx;
+    } catch (err) {
+      // Map error to user-friendly message
+      const errorMessage = mapError(err.message) || err.message;
+      throw new Error(`Failed to cancel campaign: ${errorMessage}`);
+    }
+  }, [contract, selectedAccount, fetchCampaigns]);
+
+  const claimRefund = useCallback(async (campaignId) => {
+    if (!contract || !selectedAccount) {
+      throw new Error('Contract not loaded or wallet not connected');
+    }
+
+    try {
+      // Prepare transaction with automatic retry on transient errors
+      const tx = await prepareContractTransaction(
+        contract,
+        'claimRefund', // Use camelCase - Polkadot.js converts snake_case ABI methods to camelCase
+        selectedAccount.address,
+        [campaignId],
+        {
+          ...defaultRetryOptions,
+          api,
+          onRetry: (attempt, maxRetries, delay, error) => {
+            console.warn(
+              `Retrying claim refund (attempt ${attempt}/${maxRetries}) after ${delay}ms:`,
+              error.message
+            );
+          },
+        }
+      );
+
+      return tx;
+    } catch (err) {
+      // Map error to user-friendly message
+      const errorMessage = mapError(err.message) || err.message;
+      throw new Error(`Failed to claim refund: ${errorMessage}`);
+    }
+  }, [contract, selectedAccount]);
 
   useEffect(() => {
     if (contract) {
@@ -246,10 +614,13 @@ export const CampaignProvider = ({ children }) => {
         campaigns,
         isLoading,
         error,
+        contract, // Export contract so components can check if blockchain mode is active
         createCampaign,
         donateToCampaign,
         getCampaignDetails,
         withdrawFunds,
+        cancelCampaign,
+        claimRefund,
         refreshCampaigns: fetchCampaigns,
       }}
     >

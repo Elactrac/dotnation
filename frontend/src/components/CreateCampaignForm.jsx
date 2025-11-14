@@ -4,6 +4,13 @@ import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWallet } from '../contexts/WalletContext';
 import { useCampaign } from '../contexts/CampaignContext';
+import { useApi } from '../contexts/ApiContext';
+import {
+  validateCampaignTitle,
+  validateCampaignDescription,
+  validateSubstrateAddress,
+  validateGoalAmount,
+} from '../utils/validation';
 import { generateDescription, generateTitles, detectFraud, generateContractSummary } from '../utils/aiApi';
 
 // Reusable form components for consistent styling
@@ -39,7 +46,8 @@ TextareaField.propTypes = { className: PropTypes.string };
  */
 export const CreateCampaignForm = ({ onSuccess }) => {
   const { selectedAccount } = useWallet();
-  const { createCampaign } = useCampaign();
+  const { createCampaign, refreshCampaigns } = useCampaign();
+  const { contract } = useApi();
 
   console.log('CreateCampaignForm render - selectedAccount:', selectedAccount);
   
@@ -70,16 +78,59 @@ export const CreateCampaignForm = ({ onSuccess }) => {
   const [isCheckingFraud, setIsCheckingFraud] = useState(false);
 
   const validateForm = () => {
+    console.log('[CreateCampaignForm] Validating form...');
     const newErrors = {};
-    if (!formData.title.trim()) newErrors.title = 'Title is required';
-    if (!formData.description.trim()) newErrors.description = 'Description is required';
-    if (!formData.goal || formData.goal <= 0) newErrors.goal = 'Goal must be greater than 0';
+    
+    // Title validation
+    try {
+      validateCampaignTitle(formData.title);
+    } catch (validationError) {
+      newErrors.title = validationError.message;
+    }
+    
+    // Description validation
+    try {
+      validateCampaignDescription(formData.description);
+      if (formData.description.length < 50) {
+        newErrors.description = 'Description must be at least 50 characters';
+      }
+    } catch (validationError) {
+      newErrors.description = validationError.message;
+    }
+    
+    // Goal validation
+    try {
+      validateGoalAmount(formData.goal);
+    } catch (validationError) {
+      newErrors.goal = validationError.message;
+    }
+    
+    // Deadline validation
     if (!formData.deadline) {
       newErrors.deadline = 'Deadline is required';
-    } else if (new Date(formData.deadline) <= new Date()) {
-      newErrors.deadline = 'Deadline must be in the future';
+    } else {
+      const deadlineDate = new Date(formData.deadline);
+      const now = new Date();
+      const oneHourFromNow = new Date(now.getTime() + 60 * 60 * 1000);
+      const oneYearFromNow = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
+      
+      if (deadlineDate <= oneHourFromNow) {
+        newErrors.deadline = 'Deadline must be at least 1 hour in the future';
+      } else if (deadlineDate > oneYearFromNow) {
+        newErrors.deadline = 'Deadline must be within 1 year';
+      }
     }
-    if (!formData.beneficiary.trim()) newErrors.beneficiary = 'Beneficiary address is required';
+    
+    // Beneficiary validation
+    if (!formData.beneficiary.trim()) {
+      newErrors.beneficiary = 'Beneficiary address is required';
+    } else if (!validateSubstrateAddress(formData.beneficiary)) {
+      newErrors.beneficiary = 'Invalid Polkadot address format';
+    }
+    
+    console.log('[CreateCampaignForm] Validation errors:', newErrors);
+    console.log('[CreateCampaignForm] Has errors:', Object.keys(newErrors).length > 0);
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -139,7 +190,7 @@ export const CreateCampaignForm = ({ onSuccess }) => {
       const result = await detectFraud({
         title: formData.title,
         description: formData.description,
-        goal: formData.goal,
+        goal: parseFloat(formData.goal),
         beneficiary: formData.beneficiary,
         category: formData.category,
       });
@@ -157,8 +208,9 @@ export const CreateCampaignForm = ({ onSuccess }) => {
   };
 
   const handleGenerateContractSummary = async () => {
+    console.log('[CreateCampaignForm] Starting contract summary generation...');
     setIsGeneratingSummary(true);
-    console.log('Generating contract summary with data:', {
+    console.log('[CreateCampaignForm] Generating contract summary with data:', {
       title: formData.title,
       description: formData.description,
       goal: formData.goal,
@@ -169,30 +221,43 @@ export const CreateCampaignForm = ({ onSuccess }) => {
       const data = await generateContractSummary({
         title: formData.title,
         description: formData.description,
-        goal: formData.goal,
+        goal: parseFloat(formData.goal),
         deadline: formData.deadline,
         beneficiary: formData.beneficiary,
       });
-      console.log('Received summary:', data.summary);
+      console.log('[CreateCampaignForm] ✅ Received summary:', data.summary);
       setContractSummary(data.summary);
+      console.log('[CreateCampaignForm] Opening confirmation modal...');
       setShowModal(true);
+      console.log('[CreateCampaignForm] Modal state set to true');
     } catch (error) {
-      console.error("Contract summary generation error:", error);
+      console.error('[CreateCampaignForm] ❌ Contract summary generation error:', error);
       toast.error(`Summary Generation Failed: ${error.message}`);
     } finally {
+      console.log('[CreateCampaignForm] Summary generation complete, setting isGeneratingSummary to false');
       setIsGeneratingSummary(false);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted, validating...');
+    console.log('[CreateCampaignForm] Form submitted, validating...');
+    console.log('[CreateCampaignForm] Form data:', formData);
+    console.log('[CreateCampaignForm] Selected account:', selectedAccount);
+    
     if (!validateForm()) {
-      console.log('Form validation failed');
+      console.log('[CreateCampaignForm] ❌ Form validation failed');
+      console.log('[CreateCampaignForm] Validation errors:', errors);
       return;
     }
-    console.log('Form validation passed, generating summary...');
-    await handleGenerateContractSummary();
+    
+    console.log('[CreateCampaignForm] ✅ Form validation passed, generating AI summary...');
+    try {
+      await handleGenerateContractSummary();
+    } catch (error) {
+      console.error('[CreateCampaignForm] ❌ Error in handleSubmit:', error);
+      toast.error(`Form submission error: ${error.message}`);
+    }
   };
 
   const handleConfirmCreate = async () => {
@@ -210,32 +275,60 @@ export const CreateCampaignForm = ({ onSuccess }) => {
       const campaignData = {
         title: formData.title,
         description: formData.description,
-        goal: Math.floor(parseFloat(formData.goal) * 1_000_000_000_000), // Convert DOT to planks
+        goal: formData.goal,
         deadline: new Date(formData.deadline).getTime(),
-        beneficiary: formData.beneficiary
+        beneficiary: formData.beneficiary,
       };
 
       console.log('Creating campaign with data:', campaignData);
 
       // Call the createCampaign function from CampaignContext
-      const tx = await createCampaign(campaignData);
+      const result = await createCampaign(campaignData);
 
-      // Sign and send the transaction
-      await tx.signAndSend(selectedAccount.address, ({ status, events }) => {
+      // Check if we're in mock mode (no contract)
+      if (!contract) {
+        // Mock mode - campaign created successfully
+        console.log('Campaign created in mock mode:', result);
+        toast.success('Campaign created successfully!');
+        
+        // Refresh campaigns list
+        await refreshCampaigns();
+        
+        setIsSubmitting(false);
+        onSuccess();
+        return;
+      }
+
+      // Real blockchain mode - sign and send transaction
+      const injector = await import('@polkadot/extension-dapp').then(m => m.web3FromAddress(selectedAccount.address));
+      const signer = (await injector).signer;
+
+      await result.signAndSend(selectedAccount.address, { signer }, ({ status, events }) => {
         if (status.isInBlock) {
           console.log(`Transaction included in block hash: ${status.asInBlock.toHex()}`);
         } else if (status.isFinalized) {
           console.log(`Transaction finalized in block hash: ${status.asFinalized.toHex()}`);
           
           // Check for success event
+          let success = false;
           events.forEach(({ event }) => {
             if (event.method === 'ExtrinsicSuccess') {
-              toast.success('Campaign created successfully!');
-              onSuccess();
+              success = true;
             } else if (event.method === 'ExtrinsicFailed') {
+              console.error('Extrinsic failed:', event.data);
               toast.error('Campaign creation failed');
+              setIsSubmitting(false);
             }
           });
+          
+          if (success) {
+            toast.success('Campaign created successfully!');
+            
+            // Refresh campaigns list
+            refreshCampaigns();
+            
+            onSuccess();
+          }
           
           setIsSubmitting(false);
         }
@@ -334,6 +427,7 @@ export const CreateCampaignForm = ({ onSuccess }) => {
                 onChange={handleChange} 
                 placeholder="Enter a compelling campaign title" 
                 className="flex-1"
+                maxLength={100}
               />
               <button
                 type="button"
@@ -353,6 +447,9 @@ export const CreateCampaignForm = ({ onSuccess }) => {
                   </>
                 )}
               </button>
+            </div>
+            <div className="text-xs text-gray-400 text-right">
+              {formData.title.length}/100 characters
             </div>
             
             {/* Title Suggestions */}
@@ -401,6 +498,7 @@ export const CreateCampaignForm = ({ onSuccess }) => {
               placeholder="Tell your story... or use AI to generate a compelling description based on your title"
               rows={8}
               className="pr-32"
+              maxLength={1000}
             />
             <button
               type="button"
@@ -411,6 +509,9 @@ export const CreateCampaignForm = ({ onSuccess }) => {
               <span>{isGenerating ? '⏳' : '✨'}</span>
               {isGenerating ? 'Generating...' : 'Generate AI'}
             </button>
+          </div>
+          <div className="text-xs text-gray-400 text-right mt-1">
+            {formData.description.length}/1000 characters
           </div>
         </FormField>
 
@@ -433,19 +534,43 @@ export const CreateCampaignForm = ({ onSuccess }) => {
                type="datetime-local" 
                value={formData.deadline} 
                onChange={handleChange} 
-               min={new Date().toISOString().slice(0, 16)} 
+               min={new Date(Date.now() + 60 * 60 * 1000).toISOString().slice(0, 16)}
+               max={new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16)}
              />
+             <p className="text-xs text-gray-400 font-body mt-1">
+               Must be between 1 hour and 1 year from now
+             </p>
            </FormField>
          </div>
 
         {/* Beneficiary */}
         <FormField label="Beneficiary Address" name="beneficiary" error={errors.beneficiary} required>
-          <InputField 
-            name="beneficiary" 
-            value={formData.beneficiary} 
-            onChange={handleChange} 
-            placeholder="Enter the beneficiary's Polkadot address" 
-          />
+          <div className="space-y-2">
+            <div className="flex gap-2">
+              <InputField 
+                name="beneficiary" 
+                value={formData.beneficiary} 
+                onChange={handleChange} 
+                placeholder="Enter the beneficiary's Polkadot address"
+                className="flex-1"
+              />
+              {selectedAccount && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFormData(prev => ({ ...prev, beneficiary: selectedAccount.address }));
+                    setErrors(prev => ({ ...prev, beneficiary: undefined }));
+                  }}
+                  className="px-4 py-3 bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 rounded-xl transition-all duration-200 font-body font-medium whitespace-nowrap"
+                >
+                  Use My Address
+                </button>
+              )}
+            </div>
+            <p className="text-xs text-gray-400 font-body">
+              The Polkadot address that will receive the funds when the goal is reached
+            </p>
+          </div>
         </FormField>
 
         {/* Category and Image */}
@@ -550,6 +675,12 @@ export const CreateCampaignForm = ({ onSuccess }) => {
         {/* Submit Button */}
         <button
           type="submit"
+          onClick={() => {
+            console.log('[CreateCampaignForm] ✨ Submit button clicked!');
+            console.log('[CreateCampaignForm] Button disabled:', isSubmitting || isGeneratingSummary);
+            console.log('[CreateCampaignForm] isSubmitting:', isSubmitting);
+            console.log('[CreateCampaignForm] isGeneratingSummary:', isGeneratingSummary);
+          }}
           disabled={isSubmitting || isGeneratingSummary}
           className="w-full h-14 text-lg font-bold font-display bg-gradient-to-r from-primary to-secondary hover:shadow-glow text-white rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none hover:scale-[1.02] active:scale-[0.98]"
         >

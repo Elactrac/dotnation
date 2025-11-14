@@ -14,7 +14,7 @@ const logger = require('./logger');
 function initializeFraudDetectionModel(apiKey) {
   const genAI = new GoogleGenerativeAI(apiKey);
   return genAI.getGenerativeModel({
-    model: 'gemini-2.0-flash-exp',
+    model: 'gemini-1.5-flash',
     generationConfig: {
       temperature: 0.3, // Lower temperature for more consistent analysis
       topK: 20,

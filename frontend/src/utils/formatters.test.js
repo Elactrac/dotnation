@@ -26,7 +26,7 @@ vi.mock('@polkadot/util', () => ({
   },
   formatBalance: (balance, options) => {
     const value = balance.value || balance.toString();
-    const num = Number(value) / 1e10;
+    const num = Number(value) / 1e12;
     return `${num} ${options.withUnit}`;
   }
 }));
@@ -52,8 +52,18 @@ describe('formatDotBalance', () => {
 });
 
 describe('formatDOT', () => {
-  it('should be an alias for formatDotBalance', () => {
-    expect(formatDOT).toBe(formatDotBalance);
+  it('should convert plancks to DOT string without unit', () => {
+    const plancks = BigInt('2500000000000');
+    expect(formatDOT(plancks)).toBe('2.5');
+  });
+
+  it('should trim trailing zeros in fractional part', () => {
+    const plancks = BigInt('1234500000000');
+    expect(formatDOT(plancks)).toBe('1.2345');
+  });
+
+  it('should return "0" for zero plancks', () => {
+    expect(formatDOT(0n)).toBe('0');
   });
 });
 
@@ -222,18 +232,18 @@ describe('parseDOT', () => {
     expect(parseDOT(undefined)).toBe(0n);
   });
 
-  it('should return 0n for non-string values', () => {
-    expect(parseDOT(123)).toBe(0n);
+  it('should support numeric input values', () => {
+    expect(parseDOT(123)).toBe(BigInt('123000000000000'));
   });
 
   it('should parse DOT string without unit', () => {
-    const result = parseDOT('10.5');
-    expect(result).toBe(BigInt('105000000000'));
+  const result = parseDOT('10.5');
+  expect(result).toBe(BigInt('10500000000000'));
   });
 
   it('should parse DOT string with unit', () => {
-    const result = parseDOT('10.5 DOT');
-    expect(result).toBe(BigInt('105000000000'));
+  const result = parseDOT('10.5 DOT');
+  expect(result).toBe(BigInt('10500000000000'));
   });
 
   it('should return 0n for invalid number strings', () => {
@@ -242,13 +252,13 @@ describe('parseDOT', () => {
   });
 
   it('should handle whole numbers', () => {
-    const result = parseDOT('100');
-    expect(result).toBe(BigInt('1000000000000'));
+  const result = parseDOT('100');
+  expect(result).toBe(BigInt('100000000000000'));
   });
 
   it('should handle small decimal values', () => {
-    const result = parseDOT('0.1');
-    expect(result).toBe(BigInt('1000000000'));
+  const result = parseDOT('0.1');
+  expect(result).toBe(BigInt('100000000000'));
   });
 });
 

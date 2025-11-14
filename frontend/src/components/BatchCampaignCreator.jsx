@@ -34,7 +34,8 @@ const BatchCampaignCreator = () => {
 
   const showNotification = (title, description, type = 'info') => {
     setNotification({ title, description, type });
-    setTimeout(() => setNotification(null), 3000);
+    // Auto-dismiss after 5 seconds (increased from 3s)
+    setTimeout(() => setNotification(null), 5000);
   };
 
   const addCampaign = () => {
@@ -290,8 +291,17 @@ const BatchCampaignCreator = () => {
             exit={{ opacity: 0, y: -50, scale: 0.9 }}
             className="fixed top-4 right-4 z-50"
           >
-            <div className={`p-4 rounded-xl border backdrop-blur-lg ${getNotificationStyles(notification.type)} shadow-xl min-w-[300px]`}>
-              <div className="font-bold text-lg mb-1">{notification.title}</div>
+            <div className={`p-4 rounded-xl border backdrop-blur-lg ${getNotificationStyles(notification.type)} shadow-xl min-w-[300px] relative`}>
+              <button
+                onClick={() => setNotification(null)}
+                className="absolute top-2 right-2 text-white/80 hover:text-white transition-colors"
+                aria-label="Close notification"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+              <div className="font-bold text-lg mb-1 pr-6">{notification.title}</div>
               <div className="text-sm opacity-90">{notification.description}</div>
             </div>
           </motion.div>

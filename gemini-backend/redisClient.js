@@ -4,6 +4,7 @@
  */
 
 const redis = require('redis');
+const logger = require('./logger');
 
 let redisClient = null;
 
@@ -20,7 +21,7 @@ async function initializeRedis() {
     socket: {
       reconnectStrategy: (retries) => {
         if (retries > 10) {
-          console.error('[Redis] Max reconnection attempts reached');
+          logger.error('[Redis] Max reconnection attempts reached');
           return new Error('Max reconnection attempts reached');
         }
         // Exponential backoff: 50ms * 2^retries (max 3 seconds)
@@ -44,7 +45,7 @@ async function initializeRedis() {
   });
 
   redisClient.on('connect', () => {
-    console.log('[Redis] Connected successfully');
+    logger.info('[Redis] Connected successfully');
   });
 
   redisClient.on('reconnecting', () => {

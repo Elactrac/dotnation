@@ -19,6 +19,7 @@ const CaptchaModal = ({ isOpen, onClose, onVerify }) => {
   const [failureCount, setFailureCount] = useState(0);
   const [sessionToken, setSessionToken] = useState(null);
   const [startTime, setStartTime] = useState(null);
+  const [isInitializing, setIsInitializing] = useState(false);
 
   // Captcha type configuration
   const captchaTypes = {
@@ -60,6 +61,7 @@ const CaptchaModal = ({ isOpen, onClose, onVerify }) => {
 
   // Initialize captcha session
   const initializeSession = useCallback(async () => {
+    setIsInitializing(true);
     try {
       const session = await createCaptchaSession();
       setSessionToken(session.sessionToken);
@@ -69,6 +71,8 @@ const CaptchaModal = ({ isOpen, onClose, onVerify }) => {
       console.error('[CaptchaModal] Failed to create session:', error);
       setError('Failed to initialize captcha. Please try again.');
       return null;
+    } finally {
+      setIsInitializing(false);
     }
   }, []);
 
@@ -88,7 +92,8 @@ const CaptchaModal = ({ isOpen, onClose, onVerify }) => {
         }
       })();
     }
-  }, [isOpen, initializeSession, generateMathCaptcha]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   // Progressive difficulty: escalate on failures
   useEffect(() => {
@@ -184,11 +189,26 @@ const CaptchaModal = ({ isOpen, onClose, onVerify }) => {
   };
 
   // Handle manual captcha type change
-  const changeCaptchaType = (newType) => {
+  const changeCaptchaType = async (newType) => {
     setCaptchaType(newType);
     setError('');
+    
+    // Ensure we have a session token before generating challenges
     if (newType === 'math') {
-      generateMathCaptcha();
+      if (!sessionToken) {
+        // Initialize session if not already done
+        const token = await initializeSession();
+        if (token) {
+          await generateMathCaptcha(token);
+        }
+      } else {
+        await generateMathCaptcha();
+      }
+    } else {
+      // For other captcha types, ensure session exists
+      if (!sessionToken) {
+        await initializeSession();
+      }
     }
   };
 
@@ -258,7 +278,7 @@ const CaptchaModal = ({ isOpen, onClose, onVerify }) => {
                 key={type}
                 type="button"
                 onClick={() => changeCaptchaType(type)}
-                disabled={isVerifying}
+                disabled={isVerifying || isInitializing}
                 className={`
                   flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-all whitespace-nowrap
                   ${captchaType === type
@@ -280,7 +300,19 @@ const CaptchaModal = ({ isOpen, onClose, onVerify }) => {
 
         {/* Captcha Content */}
         <div className="mb-6">
-          {captchaType === 'math' && (
+          {/* Loading state while session initializes */}
+          {isInitializing && (
+            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-12 flex flex-col items-center justify-center gap-4">
+              <svg className="animate-spin h-10 w-10 text-primary" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <p className="text-white/70 text-sm">Initializing secure session...</p>
+            </div>
+          )}
+
+          {/* Show captcha only when session is ready */}
+          {!isInitializing && captchaType === 'math' && (
             <form onSubmit={handleMathSubmit} className="space-y-6">
               {/* Math Question */}
               <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6">
@@ -349,7 +381,7 @@ const CaptchaModal = ({ isOpen, onClose, onVerify }) => {
             </form>
           )}
 
-          {captchaType === 'image' && (
+          {!isInitializing && captchaType === 'image' && (
             <ImageCaptcha 
               sessionToken={sessionToken}
               onVerify={handleOtherCaptchaVerify}
@@ -357,7 +389,7 @@ const CaptchaModal = ({ isOpen, onClose, onVerify }) => {
             />
           )}
 
-          {captchaType === 'slider' && (
+          {!isInitializing && captchaType === 'slider' && (
             <SliderCaptcha 
               sessionToken={sessionToken}
               onVerify={handleOtherCaptchaVerify}
@@ -365,7 +397,7 @@ const CaptchaModal = ({ isOpen, onClose, onVerify }) => {
             />
           )}
 
-          {captchaType === 'pattern' && (
+          {!isInitializing && captchaType === 'pattern' && (
             <PatternCaptcha 
               sessionToken={sessionToken}
               onVerify={handleOtherCaptchaVerify}

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { formatDotBalance, getCampaignStatus, calculateProgress } from '../utils/formatters';
+import { summarizeContent } from '../utils/aiApi';
 
 /**
  * A card component that displays a summary of a fundraising campaign.
@@ -39,21 +40,14 @@ const CampaignCard = ({ campaign }) => {
 
         setIsSummarizing(true);
         try {
-            const response = await fetch('http://localhost:3001/api/summarize', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ description: campaign.description }),
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Failed to get summary from AI service.');
+            const result = await summarizeContent(campaign.description, 150);
+            setSummary(result.summary);
+            if (result.fallback) {
+                console.warn('[CampaignCard] Using fallback summary (backend unavailable)');
             }
-
-            const data = await response.json();
-            setSummary(data.summary);
         } catch (error) {
-            setSummaryError(error.message);
+            console.error('[CampaignCard] Error getting summary:', error);
+            setSummaryError(error.message || 'Failed to get summary from AI service.');
         } finally {
             setIsSummarizing(false);
         }
@@ -107,7 +101,7 @@ const CampaignCard = ({ campaign }) => {
                     <ActionButton title="Summarize with AI" onClick={handleSummarize} disabled={isSummarizing}>
                         {isSummarizing ? <SpinnerIcon /> : <MagicIcon />}
                     </ActionButton>
-                    <Link to={`/dashboard/campaign/${campaign.id}`}>
+                    <Link to={`/campaign/${campaign.id}`}>
                         <ActionButton title="View Details">
                             <ViewIcon />
                         </ActionButton>

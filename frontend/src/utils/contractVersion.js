@@ -17,7 +17,7 @@ export const detectContractVersion = async (contract, callerAddress = null) => {
     // Try to call getVersion method (only available in V2+)
     const { result, output } = await contract.query.getVersion(
       callerAddress || '5C4hrfjw9DjXZTzV3MwzrrAr9P1MJhSrvWGWqi1eSuyUpnhM',
-      { value: 0, gasLimit: -1 }
+      { value: 0, gasLimit: { refTime: 30000000000, proofSize: 5000000 } }
     );
 
     if (result.isOk && output) {
