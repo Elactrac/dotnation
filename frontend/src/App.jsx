@@ -5,7 +5,7 @@ import { WalletProvider } from './contexts/WalletContext.jsx';
 import { CampaignProvider } from './contexts/CampaignContext.jsx';
 import { BatchOperationsProvider } from './contexts/BatchOperationsContext.jsx';
 import ErrorBoundary from './components/ErrorBoundary';
-import { initSentry } from './utils/sentry';
+import { initSentry, trackError } from './utils/sentry';
 
 const NewLandingPage = React.lazy(() => import('./pages/NewLandingPage'));
 const NewDashboardLayout = React.lazy(() => import('./pages/NewDashboardLayout'));
@@ -171,16 +171,14 @@ function App() {
     <ErrorBoundary
       onError={(error, errorInfo) => {
         // Send error to Sentry with React context
-        import('./utils/sentry').then(({ trackError }) => {
-          trackError(error, {
-            extra: {
-              componentStack: errorInfo.componentStack,
-              errorBoundary: true,
-            },
-            tags: {
-              error_source: 'error_boundary',
-            },
-          });
+        trackError(error, {
+          extra: {
+            componentStack: errorInfo.componentStack,
+            errorBoundary: true,
+          },
+          tags: {
+            error_source: 'error_boundary',
+          },
         });
       }}
     >
