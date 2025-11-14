@@ -152,34 +152,61 @@ export const parseDOT = (value, decimals = DECIMALS_NUMBER) => {
     return value;
   }
 
-  let normalized;
+  const decimalsNumber = Number(decimals);
+  if (!Number.isFinite(decimalsNumber)) {
+    return 0n;
+  }
+
+  const decimalsInt = Math.max(0, Math.trunc(decimalsNumber));
 
   if (typeof value === 'number') {
-    if (!Number.isFinite(value)) {
+    if (!Number.isFinite(value) || value < 0) {
       return 0n;
     }
-    normalized = value.toString();
-  } else if (typeof value === 'string') {
-    normalized = value.replace(/,/g, '').replace(/[^0-9.]/g, '');
+
+    const scale = 10n ** BigInt(decimalsInt);
+
+    try {
+      const fixed = value.toFixed(decimalsInt);
+      const [wholePart = '0', fractionPart = ''] = fixed.split('.');
+      return BigInt(wholePart) * scale + BigInt(fractionPart || '0');
+    } catch (error) {
+      console.error('parseDOT number conversion failed:', error);
+      return 0n;
+    }
+  }
+
+  let normalized;
+
+  if (typeof value === 'string') {
+    normalized = value;
   } else if (typeof value.toString === 'function') {
     normalized = value.toString();
   } else {
     return 0n;
   }
 
-  if (!normalized) {
+  const sanitized = normalized
+    .replace(/,/g, '')
+    .replace(/[^0-9.]/g, '')
+    .trim();
+
+  if (!sanitized) {
     return 0n;
   }
 
-  if (!/^\d*(\.\d*)?$/.test(normalized)) {
+  if (!/^\d*(\.\d*)?$/.test(sanitized)) {
     return 0n;
   }
 
-  const [whole = '0', fraction = ''] = normalized.split('.');
-  const fractionPadded = (fraction + '0'.repeat(decimals)).slice(0, decimals);
+  const [whole = '0', fraction = ''] = sanitized.split('.');
+  const fractionPadded = (fraction + '0'.repeat(decimalsInt)).slice(0, decimalsInt);
 
   try {
-    return BigInt(whole || '0') * (10n ** BigInt(decimals)) + BigInt(fractionPadded || '0');
+    return (
+      BigInt(whole || '0') * (10n ** BigInt(decimalsInt)) +
+      BigInt(fractionPadded || '0')
+    );
   } catch (error) {
     console.error('parseDOT failed:', error);
     return 0n;
