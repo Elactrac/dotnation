@@ -7,6 +7,8 @@ const NewLandingPage = () => {
   const [activeFilter, setActiveFilter] = useState('all');
 
   useEffect(() => {
+    let lastScroll = 0;
+    
     // Sophisticated mesh grid with mouse interaction
     const canvas = document.getElementById('mesh-canvas');
     if (!canvas) return;
@@ -130,13 +132,15 @@ const NewLandingPage = () => {
       const header = document.querySelector('header');
       
       // Header hide/show
-      const currentScroll = window.pageYOffset;
-      if (currentScroll > lastScroll && currentScroll > header.offsetHeight) {
-        header.classList.add('-translate-y-full');
-      } else {
-        header.classList.remove('-translate-y-full');
+      if (header) {
+        const currentScroll = window.pageYOffset;
+        if (currentScroll > lastScroll && currentScroll > header.offsetHeight) {
+          header.classList.add('-translate-y-full');
+        } else {
+          header.classList.remove('-translate-y-full');
+        }
+        lastScroll = currentScroll <= 0 ? 0 : currentScroll;
       }
-      lastScroll = currentScroll <= 0 ? 0 : currentScroll;
 
       // Parallax effect for decorative elements
       const parallaxElements = document.querySelectorAll('.parallax-slow');
@@ -157,14 +161,14 @@ const NewLandingPage = () => {
       }
     };
 
-    let lastScroll = 0;
     window.addEventListener('scroll', handleScroll);
 
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('scroll', handleScroll);
-      observer.disconnect();
+      if (observer) observer.disconnect();
+      if (stepsObserver) stepsObserver.disconnect();
     };
   }, []);
 

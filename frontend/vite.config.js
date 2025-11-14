@@ -59,6 +59,21 @@ export default defineConfig({
       '@polkadot/api-contract',
       'framer-motion',
     ],
-    exclude: ['@polkadot/wasm-crypto'],
+    exclude: [
+      '@polkadot/wasm-crypto',
+      '@polkadot/wasm-crypto-wasm',
+      '@polkadot/wasm-util',
+      '@polkadot/wasm-crypto-asmjs',
+    ],
+    esbuildOptions: {
+      target: 'esnext',
+    },
+  },
+  resolve: {
+    alias: {
+      // Fix Polkadot WASM crypto module resolution issues
+      '@polkadot/wasm-crypto-wasm/cjs/bytes.js': '@polkadot/wasm-crypto-wasm/bytes',
+      '@polkadot/wasm-crypto-wasm/cjs/bridge.js': '@polkadot/wasm-crypto-wasm/bridge',
+    },
   },
 })
