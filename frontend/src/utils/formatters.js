@@ -1,4 +1,4 @@
-import { BN, formatBalance } from '@polkadot/util';
+import { BN, formatBalance as polkadotFormatBalance } from '@polkadot/util';
 import { TOKEN_DECIMALS, AMOUNT_LIMITS } from '../config/constants';
 
 const DECIMALS_NUMBER = Number(TOKEN_DECIMALS);
@@ -59,7 +59,7 @@ export const formatDotBalance = (balance) => {
   try {
     const plancks = toPlanckBigInt(balance);
     const bnBalance = new BN(plancks.toString());
-    return formatBalance(bnBalance, {
+    return polkadotFormatBalance(bnBalance, {
       decimals: DECIMALS_NUMBER,
       withSi: true,
       withUnit: 'DOT',
@@ -257,3 +257,9 @@ export const validateAmountInRange = (plancks) => {
   const amount = toPlanckBigInt(plancks);
   return amount >= AMOUNT_LIMITS.MIN_DONATION && amount <= AMOUNT_LIMITS.MAX_DONATION;
 };
+
+// Re-export polkadotFormatBalance for advanced use cases
+export { polkadotFormatBalance as formatBalancePolkadot };
+
+// Alias for formatDOT to maintain backward compatibility
+export const formatBalance = formatDOT;

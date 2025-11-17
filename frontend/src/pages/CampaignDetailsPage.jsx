@@ -20,6 +20,8 @@ import { u8aEq } from '@polkadot/util';
 import { useCampaign } from '../contexts/CampaignContext.jsx';
 import { useWallet } from '../contexts/WalletContext';
 import { DonationInterface } from '../components/DonationInterface.jsx';
+import CrossChainDonate from '../components/CrossChainDonate.jsx';
+import MilestoneVoting from '../components/MilestoneVoting.jsx';
 import ErrorBoundary from '../components/ErrorBoundary';
 import {
   formatDOT,
@@ -237,17 +239,22 @@ const CampaignDetailsPage = () => {
     );
   }
 
-  if (!campaign) {
+  if (!campaign && !isLoading) {
     return (
-      <div className="min-h-screen bg-background-dark">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <div className="bg-yellow-500/10 border-2 border-yellow-500/20 rounded-2xl p-6">
-            <div className="flex items-center">
-              <svg className="w-6 h-6 text-yellow-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
-              <p className="text-yellow-400 font-body">Campaign not found</p>
-            </div>
+      <div className="min-h-screen bg-background-dark flex items-center justify-center">
+        <div className="max-w-md mx-auto px-4">
+          <div className="bg-yellow-500/10 border-2 border-yellow-500/30 rounded-2xl p-8 text-center">
+            <svg className="w-16 h-16 text-yellow-400 mx-auto mb-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            <h2 className="text-2xl font-bold text-yellow-400 mb-2">Campaign Not Found</h2>
+            <p className="text-white/70 font-body mb-6">The campaign you're looking for doesn't exist or has been removed.</p>
+            <a 
+              href="/campaigns" 
+              className="inline-block px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-bold rounded-xl hover:scale-105 transition-all duration-300"
+            >
+              Browse All Campaigns
+            </a>
           </div>
         </div>
       </div>
@@ -293,9 +300,9 @@ const CampaignDetailsPage = () => {
       )}
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Campaign Details */}
-          <div className="lg:col-span-2 space-y-6">
+        <div className="space-y-8">
+          {/* Campaign Details */}
+          <div className="space-y-6">
             {/* Campaign Image */}
             <div className="relative rounded-2xl overflow-hidden group fade-in-up">
               <img
@@ -419,6 +426,19 @@ const CampaignDetailsPage = () => {
                   <FiHeart className="w-4 h-4" />
                   About
                 </button>
+                {campaign.uses_milestones && (
+                  <button
+                    onClick={() => setActiveTab('milestones')}
+                    className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-body font-semibold transition-all duration-300 ${
+                      activeTab === 'milestones'
+                        ? 'bg-gradient-to-r from-primary to-secondary text-white shadow-lg shadow-primary/30 scale-105'
+                        : 'text-white/60 hover:text-white hover:bg-white/10 hover:scale-105'
+                    }`}
+                  >
+                    <FiTarget className="w-4 h-4" />
+                    Milestones
+                  </button>
+                )}
                 <button
                   onClick={() => setActiveTab('updates')}
                   className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-body font-semibold transition-all duration-300 ${
@@ -452,6 +472,17 @@ const CampaignDetailsPage = () => {
                   <FiUsers className="w-4 h-4" />
                   Donors ({donations.length})
                 </button>
+                <button
+                  onClick={() => setActiveTab('crosschain')}
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-body font-semibold transition-all duration-300 ${
+                    activeTab === 'crosschain'
+                      ? 'bg-gradient-to-r from-primary to-secondary text-white shadow-lg shadow-primary/30 scale-105'
+                      : 'text-white/60 hover:text-white hover:bg-white/10 hover:scale-105'
+                  }`}
+                >
+                  <span className="text-lg">🌉</span>
+                  Cross-Chain
+                </button>
               </div>
 
               {/* Tab Content */}
@@ -459,6 +490,46 @@ const CampaignDetailsPage = () => {
                 <div className="animate-fade-in">
                   <h2 className="text-2xl font-bold font-display text-white mb-4">About this campaign</h2>
                   <p className="text-white/80 font-body leading-relaxed whitespace-pre-wrap">{campaign.description}</p>
+                  
+                  {/* Show milestone creation for owners if campaign doesn't have milestones yet */}
+                  {campaignStats?.isOwner && !campaign.uses_milestones && campaign.state === 'Active' && (
+                    <div className="mt-6 p-4 bg-blue-500/10 border-2 border-blue-500/30 rounded-xl">
+                      <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
+                        <FiTarget className="w-5 h-5 text-blue-400" />
+                        Enable Milestone-Based Funding?
+                      </h3>
+                      <p className="text-white/70 text-sm mb-4">
+                        Add milestones to your campaign for transparent, accountable fund releases. 
+                        Donors will vote on each milestone before funds are released.
+                      </p>
+                      <button
+                        onClick={() => setActiveTab('milestones')}
+                        className="btn btn-primary btn-sm"
+                      >
+                        Add Milestones
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {activeTab === 'milestones' && (
+                <div className="animate-fade-in">
+                  {campaign.uses_milestones ? (
+                    <MilestoneVoting campaign={campaign} />
+                  ) : (
+                    <div className="text-center py-8">
+                      <FiTarget className="w-12 h-12 text-white/40 mx-auto mb-4" />
+                      <p className="text-white/60 font-body">
+                        This campaign does not use milestones. Funds will be released once when the goal is reached.
+                      </p>
+                      {campaignStats?.isOwner && campaign.state === 'Active' && (
+                        <p className="text-white/50 font-body text-sm mt-4">
+                          Milestone creation feature coming soon!
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -512,6 +583,95 @@ const CampaignDetailsPage = () => {
                       </p>
                     </div>
                   )}
+                </div>
+              )}
+
+              {activeTab === 'crosschain' && (
+                <div className="animate-fade-in space-y-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="text-5xl">🌉</span>
+                    <div>
+                      <h2 className="text-2xl font-bold font-display text-white">Cross-Chain Donations</h2>
+                      <p className="text-white/70 font-body">Powered by Polkadot XCM</p>
+                    </div>
+                  </div>
+
+                   <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border-2 border-blue-500/30 rounded-xl p-6">
+                    <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
+                      <span>⚡</span>
+                      What is Cross-Chain Donation?
+                    </h3>
+                    <p className="text-white/80 font-body leading-relaxed mb-4">
+                      With Polkadot's XCM (Cross-Consensus Messaging), you can donate to this campaign 
+                      from <span className="font-bold text-cyan-400">ANY</span> connected parachain! 
+                      No need to bridge assets manually - XCM handles everything automatically.
+                    </p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                      <div className="bg-gray-900/50 rounded-lg p-4 border border-blue-500/20">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-2xl">💰</span>
+                          <h4 className="font-bold text-white">Supported Chains</h4>
+                        </div>
+                        <ul className="text-sm text-white/70 space-y-1">
+                          <li>• Polkadot Relay Chain</li>
+                          <li>• Moonbeam (GLMR, USDC)</li>
+                          <li>• Acala (ACA, aUSD)</li>
+                          <li>• Asset Hub (USDT, USDC)</li>
+                          <li>• Astar (ASTR)</li>
+                        </ul>
+                      </div>
+
+                      <div className="bg-gray-900/50 rounded-lg p-4 border border-blue-500/20">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-2xl">⚙️</span>
+                          <h4 className="font-bold text-white">How It Works</h4>
+                        </div>
+                        <ol className="text-sm text-white/70 space-y-1">
+                          <li>1. Select your source chain</li>
+                          <li>2. Choose asset (DOT, USDC, etc.)</li>
+                          <li>3. Enter amount</li>
+                          <li>4. Sign XCM transfer</li>
+                          <li>5. Assets delivered in 12-24s</li>
+                        </ol>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-green-500/10 border-2 border-green-500/30 rounded-xl p-4">
+                    <div className="flex items-start gap-3">
+                      <span className="text-2xl">✅</span>
+                      <div>
+                        <h4 className="font-bold text-green-400 mb-1">Why Cross-Chain?</h4>
+                        <ul className="text-sm text-white/70 space-y-1">
+                          <li>• <strong>Convenience:</strong> Use assets from any chain</li>
+                          <li>• <strong>Security:</strong> Native Polkadot protocol (no bridges!)</li>
+                          <li>• <strong>Speed:</strong> Transfers complete in seconds</li>
+                          <li>• <strong>Cost-Effective:</strong> Low XCM fees (~$0.01-0.10)</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-yellow-500/10 border-2 border-yellow-500/30 rounded-xl p-4">
+                    <div className="flex items-start gap-3">
+                      <span className="text-2xl">💡</span>
+                      <div>
+                        <h4 className="font-bold text-yellow-400 mb-1">Pro Tip</h4>
+                        <p className="text-sm text-white/70">
+                          Cross-chain donations work seamlessly with our <strong>Quadratic Funding</strong> system! 
+                          Your donation will receive matching multipliers just like regular donations.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="text-center pt-4">
+                    <p className="text-white/60 text-sm font-body">
+                      👉 Use the <strong className="text-cyan-400">Cross-Chain Donation</strong> section 
+                      below to get started!
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
@@ -580,13 +740,49 @@ const CampaignDetailsPage = () => {
             )}
           </div>
 
-          {/* Right Column - Donation Interface */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-4">
+          {/* Donation Interfaces Section */}
+          <div className={`grid gap-8 ${campaign.state === 'Active' ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1 max-w-2xl mx-auto'}`}>
+            {/* Regular Donation Interface */}
+            <ErrorBoundary>
+              <DonationInterface 
+                campaignId={id} 
+                campaign={campaign}
+                onDonationSuccess={async () => {
+                  // Refresh campaign details after successful donation
+                  const details = await getCampaignDetails(id);
+                  if (details) {
+                    setCampaign(details.campaign);
+                    setDonations(details.donations || []);
+                  }
+                }}
+              />
+            </ErrorBoundary>
+
+            {/* Cross-Chain Donation Interface */}
+            {campaign.state === 'Active' && (
               <ErrorBoundary>
-                <DonationInterface campaignId={id} campaign={campaign} />
+                <CrossChainDonate 
+                  campaignId={id}
+                  contractAddress={import.meta.env.VITE_CONTRACT_ADDRESS}
+                  onSuccess={async (xcmData) => {
+                    // Show success toast
+                    setShowToast({
+                      type: 'success',
+                      message: `Cross-chain donation of ${xcmData.amount} ${xcmData.asset} from ${xcmData.chain} successful!`
+                    });
+                    
+                    // Refresh campaign details after XCM delivery
+                    setTimeout(async () => {
+                      const details = await getCampaignDetails(id);
+                      if (details) {
+                        setCampaign(details.campaign);
+                        setDonations(details.donations || []);
+                      }
+                    }, 15000); // Wait 15s for XCM delivery + contract update
+                  }}
+                />
               </ErrorBoundary>
-            </div>
+            )}
           </div>
         </div>
       </div>

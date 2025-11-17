@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>DotNation - Revolutionary Crowdfunding Platform</title>
+    <meta name="description" content="DotNation: Quadratic Funding + DAO Voting + AI Fraud Detection on Polkadot"/>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌐</text></svg>"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#3a84f2",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101722",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Slide container */
+        .slide-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        /* Individual slides */
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
+            pointer-events: none;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        
+        /* Hide scrollbar but keep functionality */
+        .slide::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .slide::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        .slide::-webkit-scrollbar-thumb {
+            background: rgba(58, 132, 242, 0.5);
+            border-radius: 4px;
+        }
+        
+        .slide::-webkit-scrollbar-thumb:hover {
+            background: rgba(58, 132, 242, 0.8);
+        }
+        
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: auto;
+        }
+        
+        .slide.prev {
+            transform: translateX(-100%);
+        }
+        
+        /* Glow effects */
+        .glow-hover {
+            transition: box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+        
+        .glow-hover:hover {
+            box-shadow: 0 0 20px rgba(58, 132, 242, 0.5), 0 0 40px rgba(58, 132, 242, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        /* Progress indicator */
+        .progress-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3a84f2, #60a5fa);
+            transition: width 0.3s ease-in-out;
+            z-index: 1000;
+        }
+        
+        /* Slide counter */
+        .slide-counter {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+        
+        /* Navigation dots */
+        .nav-dots {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+        
+        .nav-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-dot.active {
+            background: #3a84f2;
+            width: 30px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(58, 132, 242, 0.8);
+        }
+        
+        .nav-dot:hover {
+            background: rgba(58, 132, 242, 0.7);
+        }
+        
+        /* Fullscreen button */
+        .fullscreen-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .fullscreen-btn:hover {
+            background: rgba(58, 132, 242, 0.9);
+            box-shadow: 0 0 15px rgba(58, 132, 242, 0.8);
+        }
+        
+        /* JUDGE-IMPRESSING ENHANCEMENTS */
+        
+        /* Slide entrance animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.05);
+                opacity: 0.9;
+            }
+        }
+        
+        @keyframes shimmer {
+            0% {
+                background-position: -1000px 0;
+            }
+            100% {
+                background-position: 1000px 0;
+            }
+        }
+        
+        @keyframes countUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Animated elements on active slide - only trigger when visited */
+        .slide.active.slide-visited .animate-fade-in-up {
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+        
+        .slide.active.slide-visited .animate-fade-in-scale {
+            animation: fadeInScale 0.6s ease-out forwards;
+        }
+        
+        .slide.active.slide-visited .animate-pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        /* Staggered animations */
+        .animate-delay-100 {
+            animation-delay: 0.1s;
+            opacity: 0;
+        }
+        
+        .animate-delay-200 {
+            animation-delay: 0.2s;
+            opacity: 0;
+        }
+        
+        .animate-delay-300 {
+            animation-delay: 0.3s;
+            opacity: 0;
+        }
+        
+        .animate-delay-400 {
+            animation-delay: 0.4s;
+            opacity: 0;
+        }
+        
+        .animate-delay-500 {
+            animation-delay: 0.5s;
+            opacity: 0;
+        }
+        
+        .animate-delay-600 {
+            animation-delay: 0.6s;
+            opacity: 0;
+        }
+        
+        /* Enhanced glow effects */
+        .super-glow {
+            box-shadow: 0 0 30px rgba(58, 132, 242, 0.4), 0 0 60px rgba(58, 132, 242, 0.2);
+            animation: pulse 3s ease-in-out infinite;
+        }
+        
+        /* Gradient text */
+        .gradient-text {
+            background: linear-gradient(135deg, #60a5fa 0%, #3a84f2 50%, #2563eb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            max-width: 100%;
+        }
+        
+        .gradient-text-gold {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Shimmer effect */
+        .shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            background-size: 1000px 100%;
+            animation: shimmer 3s infinite;
+        }
+        
+        /* Enhanced card hover */
+        .card-impressive {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .card-impressive:hover {
+            transform: translateY(-10px) scale(1.03);
+            box-shadow: 0 20px 50px rgba(58, 132, 242, 0.4), 0 0 80px rgba(58, 132, 242, 0.2);
+            border-color: rgba(58, 132, 242, 0.8);
+        }
+        
+        /* Particle background */
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        
+        .particle {
+            position: absolute;
+            background: rgba(58, 132, 242, 0.3);
+            border-radius: 50%;
+            animation: float 20s infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.5;
+            }
+            90% {
+                opacity: 0.5;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(100px);
+                opacity: 0;
+            }
+        }
+        
+        /* Impact stats */
+        .stat-highlight {
+            font-size: 3rem;
+            font-weight: 900;
+            line-height: 1;
+            text-shadow: 0 0 30px rgba(58, 132, 242, 0.6);
+        }
+        
+        /* Chart styles */
+        .chart-bar {
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 200px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            gap: 1.5rem;
+            padding: 0.5rem;
+        }
+        
+        .chart-bar-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .chart-bar-container {
+            width: 100%;
+            height: 150px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+        
+        .chart-bar {
+            width: 80%;
+            border-radius: 8px 8px 0 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .slide.active.slide-visited .chart-bar {
+            animation: growUp 1.5s ease-out forwards;
+        }
+        
+        @keyframes growUp {
+            from {
+                height: 0;
+                opacity: 0;
+            }
+            to {
+                height: var(--bar-height);
+                opacity: 1;
+            }
+        }
+        
+        /* Donut chart */
+        .donut-chart {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: conic-gradient(
+                #ef4444 0deg 324deg,
+                #10b981 324deg 360deg
+            );
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.3);
+        }
+        
+        .donut-chart::before {
+            content: '';
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            background: #121212;
+            border-radius: 50%;
+        }
+        
+        .donut-chart-label {
+            position: relative;
+            z-index: 1;
+            font-size: 2rem;
+            font-weight: 900;
+            color: #ef4444;
+        }
+
+        /* ACCESSIBILITY: Reduce motion */
+        @media (prefers-reduced-motion: reduce) {
+            .slide,
+            .glow-hover,
+            .card-impressive,
+            .chart-bar {
+                transition: none;
+            }
+        
+            .slide.active.slide-visited .animate-fade-in-up,
+            .slide.active.slide-visited .animate-fade-in-scale,
+            .slide.active.slide-visited .animate-pulse,
+            .slide.active.slide-visited .chart-bar,
+            .super-glow,
+            .shimmer,
+            .particle {
+                animation: none;
+            }
+
+            /* Ensure animated-in content is visible */
+            .animate-delay-100,
+            .animate-delay-200,
+            .animate-delay-300,
+            .animate-delay-400,
+            .animate-delay-500,
+            .animate-delay-600 {
+                opacity: 1;
+            }
+        }
+
+    </style>
+</head>
+<body class="font-display">
+    <div class="progress-bar" id="progressBar"></div>
+    
+    <div class="slide-counter" id="slideCounter">1 / 9</div>
+    
+    <div class="nav-dots" id="navDots"></div>
+    
+    <button class="fullscreen-btn" id="fullscreenBtn" title="Toggle Fullscreen" aria-label="Toggle Fullscreen">
+        <span class="material-symbols-outlined">fullscreen</span>
+    </button>
+    
+    <div class="slide-container" id="slideContainer">
+        
+        <div class="slide active slide-visited" data-slide="1">
+            <div class="relative flex h-screen w-full flex-col bg-background-light dark:bg-background-dark group/design-root overflow-hidden">
+                <div class="absolute inset-0 z-0">
+                    <div class="absolute -bottom-1/4 -left-1/4 h-1/2 w-1/2 rounded-full bg-primary/40 blur-3xl animate-pulse"></div>
+                    <div class="absolute -top-1/4 -right-1/4 h-1/2 w-1/2 rounded-full bg-primary/40 blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
+                    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 h-1/3 w-1/3 rounded-full bg-primary/30 blur-3xl animate-pulse" style="animation-delay: 0.5s;"></div>
+                </div>
+                <div class="relative layout-container flex h-full grow flex-col z-10">
+                    <div class="px-4 sm:px-6 lg:px-8 flex flex-1 justify-center py-4">
+                        <div class="layout-content-container flex flex-col max-w-[960px] flex-1 items-center justify-center gap-3">
+                            <h1 class="gradient-text tracking-tight text-5xl font-black leading-tight text-center pb-2 pt-3 animate-fade-in-scale super-glow">DotNation</h1>
+                            <h2 class="text-primary text-xl font-bold leading-tight tracking-[-0.015em] text-center pb-3 pt-1 animate-fade-in-up animate-delay-200">The Future of Democratic Crowdfunding</h2>
+                            
+                            <div class="grid grid-cols-3 gap-4 mt-3 mb-3 animate-fade-in-up animate-delay-300">
+                                <div class="text-center">
+                                    <div class="text-4xl font-black gradient-text">Audited</div>
+                                    <p class="text-gray-600 dark:text-gray-400 text-xs font-semibold mt-1">Smart Contracts</p>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-4xl font-black gradient-text">3</div>
+                                    <p class="text-gray-600 dark:text-gray-400 text-xs font-semibold mt-1">Key Innovations</p>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-4xl font-black gradient-text">0%</div>
+                                    <p class="text-gray-600 dark:text-gray-400 text-xs font-semibold mt-1">Platform Fees</p>
+                                </div>
+                            </div>
+                            
+                            <p class="text-gray-600 dark:text-gray-400 text-sm font-semibold leading-normal pb-2 pt-3 px-4 text-center animate-fade-in-up animate-delay-400">Built on</p>
+                            <div class="flex items-center justify-center gap-6 mt-2 animate-fade-in-up animate-delay-500">
+                                <div class="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 hover:border-primary/50 transition-all">
+                                    <svg class="h-8 w-8 text-gray-900 dark:text-white" fill="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"></path>
+                                        <path d="M12 10.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5z"></path>
+                                    </svg>
+                                    <span class="text-base font-bold text-gray-900 dark:text-white">Polkadot</span>
+                                </div>
+                                <div class="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 hover:border-primary/50 transition-all">
+                                    <svg class="h-8 w-8 text-gray-900 dark:text-white" fill="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 4c-4.41 0-8 3.59-8 8s3.59 8 8 8 8-3.59 8-8-3.59-8-8-8zm0 14c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"></path>
+                                        <path d="M12 10a2 2 0 100 4 2 2 0 000-4z"></path>
+                                    </svg>
+                                    <span class="text-base font-bold text-gray-900 dark:text-white">Mandala Chain</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="slide" data-slide="2">
+            <div class="relative flex h-screen w-full flex-col bg-background-light dark:bg-background-dark overflow-hidden">
+                <div class="layout-container flex h-full grow flex-col justify-center">
+                    <div class="flex flex-1 justify-center p-4">
+                        <div class="layout-content-container flex flex-col max-w-[1100px] flex-1 justify-center">
+                            <h1 class="text-gray-900 dark:text-white tracking-tight text-2xl font-black leading-tight text-center pb-2 pt-2 animate-fade-in-up">The Problem with Traditional Crowdfunding</h1>
+                            <p class="text-red-500 text-sm font-bold text-center pb-3 animate-fade-in-up animate-delay-100">A Flawed & Unfair System</p>
+                            
+                            <div class="chart-container mb-3 animate-fade-in-scale animate-delay-150">
+                                <div class="chart-bar-wrapper">
+                                    <div class="chart-bar-container">
+                                        <div class="chart-bar bg-gradient-to-t from-red-600 to-red-400" style="--bar-height: 90%;"></div>
+                                    </div>
+                                    <span class="text-red-400 text-lg font-black">Unfair</span>
+                                    <span class="text-gray-400 dark:text-gray-500 text-xs font-bold text-center">Whale<br/>Domination</span>
+                                </div>
+                                <div class="chart-bar-wrapper">
+                                    <div class="chart-bar-container">
+                                        <div class="chart-bar bg-gradient-to-t from-red-600 to-red-400" style="--bar-height: 70%;"></div>
+                                    </div>
+                                    <span class="text-red-400 text-lg font-black">Broken</span>
+                                    <span class="text-gray-400 dark:text-gray-500 text-xs font-bold text-center">Misaligned<br/>Incentives</span>
+                                </div>
+                                <div class="chart-bar-wrapper">
+                                    <div class="chart-bar-container">
+                                        <div class="chart-bar bg-gradient-to-t from-red-600 to-red-400" style="--bar-height: 100%;"></div>
+                                    </div>
+                                    <span class="text-red-400 text-lg font-black">Risky</span>
+                                    <span class="text-gray-400 dark:text-gray-500 text-xs font-bold text-center">High Fraud<br/>Potential</span>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 px-4">
+                                <div class="flex flex-col gap-2 rounded-xl border-2 border-red-500/40 bg-red-500/10 p-4 card-impressive animate-fade-in-up animate-delay-200">
+                                    <div class="text-red-500 flex items-center justify-center w-12 h-12 rounded-full bg-red-500/20 mx-auto">
+                                        <span class="material-symbols-outlined text-3xl">currency_exchange</span>
+                                    </div>
+                                    <h2 class="text-gray-900 dark:text-white text-lg font-black leading-tight text-center">Whale Domination</h2>
+                                    <p class="text-gray-600 dark:text-gray-400 text-sm font-medium leading-relaxed text-center">One wealthy backer can overshadow thousands of community supporters.</p>
+                                </div>
+                                <div class="flex flex-col gap-2 rounded-xl border-2 border-red-500/40 bg-red-500/10 p-4 card-impressive animate-fade-in-up animate-delay-300">
+                                    <div class="text-red-500 flex items-center justify-center w-12 h-12 rounded-full bg-red-500/20 mx-auto">
+                                        <span class="material-symbols-outlined text-3xl">account_balance_wallet</span>
+                                    </div>
+                                    <h2 class="text-gray-900 dark:text-white text-lg font-black leading-tight text-center">No Accountability</h2>
+                                    <p class="text-gray-600 dark:text-gray-400 text-sm font-medium leading-relaxed text-center">Creators take all funds upfront with no milestone verification.</p>
+                                </div>
+                                <div class="flex flex-col gap-2 rounded-xl border-2 border-red-500/40 bg-red-500/10 p-4 card-impressive animate-fade-in-up animate-delay-400">
+                                    <div class="text-red-500 flex items-center justify-center w-12 h-12 rounded-full bg-red-500/20 mx-auto">
+                                        <span class="material-symbols-outlined text-3xl">report</span>
+                                    </div>
+                                    <h2 class="text-gray-900 dark:text-white text-lg font-black leading-tight text-center">Fraud & Scams</h2>
+                                    <p class="text-gray-600 dark:text-gray-400 text-sm font-medium leading-relaxed text-center">Platforms lack robust, proactive fraud detection and risk assessment.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="slide" data-slide="3">
+            <div class="relative flex h-screen w-full flex-col bg-background-light dark:bg-background-dark overflow-hidden">
+                <div class="layout-container flex h-full grow flex-col">
+                    <div class="flex flex-1 justify-center p-4 sm:p-6 md:p-8">
+                        <div class="layout-content-container flex flex-col max-w-[1100px] flex-1 justify-center">
+                            <h1 class="gradient-text tracking-tight text-2xl font-black leading-tight text-center pb-2 pt-4 animate-fade-in-up">DotNation: Our 3-Pillar Solution</h1>
+                            <p class="text-primary text-base font-bold text-center pb-6 animate-fade-in-up animate-delay-100">A Revolutionary Technology Stack</p>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 px-4">
+                                <div class="flex flex-col gap-3 rounded-xl border-2 border-primary/50 bg-primary/10 p-6 card-impressive animate-fade-in-scale animate-delay-200">
+                                    <div class="text-primary flex items-center justify-center w-16 h-16 rounded-full bg-primary/20 mx-auto">
+                                        <span class="material-symbols-outlined text-5xl">groups</span>
+                                    </div>
+                                    <h2 class="text-gray-900 dark:text-white text-2xl font-black leading-tight text-center">Amplify Community Voice</h2>
+                                    <div class="text-center">
+                                        <span class="text-3xl font-black gradient-text">3x+</span>
+                                        <p class="text-primary text-xs font-semibold mt-1">Community Amplification</p>
+                                    </div>
+                                    <p class="text-gray-600 dark:text-gray-400 text-sm font-medium leading-relaxed text-center">**Quadratic Funding** mathematically amplifies community voice over whale power.</p>
+                                </div>
+                                <div class="flex flex-col gap-3 rounded-xl border-2 border-primary/50 bg-primary/10 p-6 card-impressive animate-fade-in-scale animate-delay-300">
+                                    <div class="text-primary flex items-center justify-center w-16 h-16 rounded-full bg-primary/20 mx-auto">
+                                        <span class="material-symbols-outlined text-5xl">how_to_vote</span>
+                                    </div>
+                                    <h2 class="text-gray-900 dark:text-white text-2xl font-black leading-tight text-center">Ensure Accountability</h2>
+                                    <div class="text-center">
+                                        <span class="text-3xl font-black gradient-text">100%</span>
+                                        <p class="text-primary text-xs font-semibold mt-1">On-Chain Governance</p>
+                                    </div>
+                                    <p class="text-gray-600 dark:text-gray-400 text-sm font-medium leading-relaxed text-center">**DAO Voting** means donors vote to approve milestone completion before funds are released.</p>
+                                </div>
+                                <div class="flex flex-col gap-3 rounded-xl border-2 border-primary/50 bg-primary/10 p-6 card-impressive animate-fade-in-scale animate-delay-400">
+                                    <div class="text-primary flex items-center justify-center w-16 h-16 rounded-full bg-primary/20 mx-auto">
+                                        <span class="material-symbols-outlined text-5xl">psychology</span>
+                                    </div>
+                                    <h2 class="text-gray-900 dark:text-white text-2xl font-black leading-tight text-center">Prevent Fraud</h2>
+                                    <div class="text-center">
+                                        <span class="text-3xl font-black gradient-text">Proactive</span>
+                                        <p class="text-primary text-xs font-semibold mt-1">Risk Analysis</p>
+                                    </div>
+                                    <p class="text-gray-600 dark:text-gray-400 text-sm font-medium leading-relaxed text-center">**AI Detection** (via Gemini) analyzes campaigns for fraud indicators and risk patterns *before* launch.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="slide" data-slide="4">
+            <div class="relative flex h-screen w-full flex-col bg-[#121212] overflow-hidden">
+                <div class="layout-container flex h-full grow flex-col">
+                    <main class="flex-1 px-4 py-3 sm:px-6 md:px-8">
+                        <div class="mx-auto flex w-full max-w-7xl flex-col items-stretch">
+                            <div class="text-center pb-3">
+                                <h1 class="text-[#F5F5F5] tracking-light text-2xl font-black leading-tight md:text-4xl animate-fade-in-up">Quadratic Funding vs Traditional Funding</h1>
+                                <p class="text-white/70 text-sm pt-1 animate-fade-in-up animate-delay-100">Visual comparison: Community power amplification</p>
+                            </div>
+                            
+                            <div class="flex justify-center gap-8 mb-3 animate-fade-in-scale animate-delay-150">
+                                <div class="text-center">
+                                    <div class="flex items-end gap-4 h-48">
+                                        <div class="flex flex-col items-center">
+                                            <div class="w-16 bg-gradient-to-t from-red-600 to-red-400 rounded-t-lg chart-bar" style="--bar-height: 91%;"></div>
+                                            <span class="text-xs text-white/60 mt-2">Whale<br/>$10K</span>
+                                        </div>
+                                        <div class="flex flex-col items-center">
+                                            <div class="w-16 bg-gradient-to-t from-red-600 to-red-400 rounded-t-lg chart-bar" style="--bar-height: 9%;"></div>
+                                            <span class="text-xs text-white/60 mt-2">Community<br/>$1K</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-red-400 text-sm font-bold mt-2">❌ Traditional</p>
+                                </div>
+                                <div class="text-center">
+                                    <div class="flex items-end gap-4 h-48">
+                                        <div class="flex flex-col items-center">
+                                            <div class="w-16 bg-gradient-to-t from-primary to-blue-400 rounded-t-lg chart-bar" style="--bar-height: 24%;"></div>
+                                            <span class="text-xs text-white/60 mt-2">Whale<br/>Weight</span>
+                                        </div>
+                                        <div class="flex flex-col items-center">
+                                            <div class="w-16 bg-gradient-to-t from-primary to-blue-400 rounded-t-lg chart-bar" style="--bar-height: 76%;"></div>
+                                            <span class="text-xs text-white/60 mt-2">Community<br/>Weight</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-primary text-sm font-bold mt-2">✅ Quadratic</p>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                                <div class="flex flex-col gap-2 rounded-xl border-2 border-red-500/40 bg-red-500/10 p-4 card-impressive animate-fade-in-scale animate-delay-200">
+                                    <h2 class="text-[#F5F5F5] text-lg font-black text-center pb-1">Traditional Funding ❌</h2>
+                                    <div class="space-y-2">
+                                        <div class="flex justify-between items-center p-2 rounded-lg bg-white/5 border border-white/10">
+                                            <span class="text-white/70 text-xs font-semibold">1 whale donates</span>
+                                            <span class="text-[#F5F5F5] font-black text-base">$10,000</span>
+                                        </div>
+                                        <div class="flex justify-between items-center p-2 rounded-lg bg-white/5 border border-white/10">
+                                            <span class="text-white/70 text-xs font-semibold">100 community members</span>
+                                            <span class="text-[#F5F5F5] font-black text-base">$10 each</span>
+                                        </div>
+                                        <div class="border-t border-white/20 my-1"></div>
+                                        <div class="flex justify-between items-center p-2 rounded-lg bg-red-500/30 border-2 border-red-500">
+                                            <span class="text-[#F5F5F5] font-black text-sm">Total Received</span>
+                                            <span class="text-[#F5F5F5] font-black text-xl">$11,000</span>
+                                        </div>
+                                        <p class="text-red-400 text-xs text-center font-bold pt-1">🐋 Whale dominates (91% of funds)</p>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col gap-2 rounded-xl border-2 border-primary/60 bg-primary/10 p-4 card-impressive animate-fade-in-scale animate-delay-300">
+                                    <h2 class="text-[#F5F5F5] text-lg font-black text-center pb-1">Quadratic Funding ✅</h2>
+                                    <div class="space-y-2">
+                                        <div class="flex justify-between items-center p-2 rounded-lg bg-white/5 border border-primary/30">
+                                            <span class="text-white/70 text-xs font-semibold">1 whale (√$10,000)</span>
+                                            <span class="text-[#F5F5F5] font-black text-base">$100 weight</span>
+                                        </div>
+                                        <div class="flex justify-between items-center p-2 rounded-lg bg-white/5 border border-primary/30">
+                                            <span class="text-white/70 text-xs font-semibold">100 members (100×√$10)</span>
+                                            <span class="text-[#F5F5F5] font-black text-base">$316 weight</span>
+                                        </div>
+                                        <div class="border-t border-white/20 my-1"></div>
+                                        <div class="flex justify-between items-center p-2 rounded-lg bg-primary/30 border-2 border-primary super-glow">
+                                            <span class="text-[#F5F5F5] font-black text-sm">Matching Pool Added*</span>
+                                            <span class="text-[#F5F5F5] font-black text-xl gradient-text">$25,000+</span>
+                                        </div>
+                                        <p class="text-primary text-xs text-center font-bold pt-1">👥 Community gets 3x influence over matching pool</p>
+                                        <p class="text-white/50 text-xs text-center font-medium -mt-1">*Matching Pool funded by partners & treasury.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            </div>
+        </div>
+        
+        <div class="slide" data-slide="5">
+            <div class="relative flex h-screen w-full flex-col bg-[#121212] overflow-hidden">
+                <div class="layout-container flex h-full grow flex-col justify-center">
+                    <main class="flex-1 px-4 py-3 sm:px-6 md:px-8 flex items-center">
+                        <div class="mx-auto flex w-full max-w-5xl flex-col items-stretch">
+                            <div class="text-center pb-4">
+                                <h1 class="text-[#F5F5F5] tracking-light text-2xl font-black leading-tight md:text-4xl animate-fade-in-up">DAO Milestone Voting</h1>
+                                <p class="text-primary text-base font-bold pt-1 animate-fade-in-up animate-delay-100">The Accountability Engine</p>
+                            </div>
+                            <div class="relative mt-4">
+                                <div class="absolute left-1/2 top-0 bottom-0 w-1 bg-primary/30 transform -translate-x-1/2"></div>
+                                <div class="space-y-6">
+                                    <div class="relative flex items-center gap-4 animate-fade-in-up animate-delay-200">
+                                        <div class="flex-1 text-right">
+                                            <h3 class="text-[#F5F5F5] text-lg font-black">Step 1: Creator Sets Milestones</h3>
+                                            <p class="text-white/70 text-sm font-medium mt-1">Funds locked in smart contract, divided by milestones</p>
+                                        </div>
+                                        <div class="relative z-10 flex items-center justify-center w-12 h-12 rounded-full bg-primary border-4 border-[#121212] super-glow">
+                                            <span class="material-symbols-outlined text-white text-2xl">flag</span>
+                                        </div>
+                                        <div class="flex-1"></div>
+                                    </div>
+                                    <div class="relative flex items-center gap-4 animate-fade-in-up animate-delay-300">
+                                        <div class="flex-1"></div>
+                                        <div class="relative z-10 flex items-center justify-center w-12 h-12 rounded-full bg-primary border-4 border-[#121212] super-glow">
+                                            <span class="material-symbols-outlined text-white text-2xl">construction</span>
+                                        </div>
+                                        <div class="flex-1">
+                                            <h3 class="text-[#F5F5F5] text-lg font-black">Step 2: Work Completed</h3>
+                                            <p class="text-white/70 text-sm font-medium mt-1">Creator submits evidence of milestone completion</p>
+                                        </div>
+                                    </div>
+                                    <div class="relative flex items-center gap-4 animate-fade-in-up animate-delay-400">
+                                        <div class="flex-1 text-right">
+                                            <h3 class="text-[#F5F5F5] text-lg font-black">Step 3: Donors Vote</h3>
+                                            <p class="text-white/70 text-sm font-medium mt-1">Backers review & vote on milestone completion</p>
+                                        </div>
+                                        <div class="relative z-10 flex items-center justify-center w-12 h-12 rounded-full bg-primary border-4 border-[#121212] super-glow">
+                                            <span class="material-symbols-outlined text-white text-2xl">how_to_vote</span>
+                                        </div>
+                                        <div class="flex-1"></div>
+                                    </div>
+                                    <div class="relative flex items-center gap-4 animate-fade-in-up animate-delay-500">
+                                        <div class="flex-1"></div>
+                                        <div class="relative z-10 flex items-center justify-center w-12 h-12 rounded-full bg-primary border-4 border-[#121212] super-glow">
+                                            <span class="material-symbols-outlined text-white text-2xl">payments</span>
+                                        </div>
+                                        <div class="flex-1">
+                                            <h3 class="text-[#F5F5F5] text-lg font-black">Step 4: Funds Released</h3>
+                                            <p class="text-white/70 text-sm font-medium mt-1">If approved, smart contract releases milestone payment</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            </div>
+        </div>
+        
+        <div class="slide" data-slide="6">
+            <div class="relative flex h-screen w-full flex-col bg-[#121212] overflow-hidden">
+                <div class="layout-container flex h-full grow flex-col justify-center">
+                    <main class="flex-1 px-4 py-3 sm:px-6 md:px-8">
+                        <div class="mx-auto flex w-full max-w-6xl flex-col items-stretch">
+                            <div class="text-center pb-3">
+                                <h1 class="text-[#F5F5F5] tracking-light text-2xl font-black leading-tight md:text-4xl animate-fade-in-up">AI-Powered Fraud & Risk Detection</h1>
+                                <p class="text-white/70 text-sm pt-1 animate-fade-in-up animate-delay-100">Real-time campaign analysis using Gemini AI</p>
+                            </div>
+                            <div class="mt-3 grid grid-cols-1 gap-4 lg:grid-cols-2">
+                                <div class="flex flex-col gap-3 rounded-xl border-2 border-[#FFBF00]/40 bg-[#FFBF00]/5 p-4 card-impressive animate-fade-in-scale animate-delay-200">
+                                    <div class="flex flex-col items-center gap-2">
+                                        <p class="text-sm font-black uppercase tracking-wider text-[#FFBF00]">Risk Score</p>
+                                        <div class="relative flex items-center justify-center" style="width: 120px; height: 120px;">
+                                            <svg class="absolute inset-0 size-full" viewbox="0 0 100 100">
+                                                <circle class="stroke-white/10" cx="50" cy="50" fill="none" r="45" stroke-width="10"></circle>
+                                                <circle class="stroke-current text-[#FFBF00] transition-all duration-500" cx="50" cy="50" fill="none" r="45" stroke-dasharray="282.7" stroke-dashoffset="42.4" stroke-linecap="round" stroke-width="10"></circle>
+                                            </svg>
+                                            <span class="text-4xl font-black text-[#FFBF00]">High</span>
+                                        </div>
+                                        <p class="text-xs font-bold leading-normal text-[#FFBF00] text-center">⚠️ High risk detected</p>
+                                    </div>
+                                    <div class="w-full border-t border-white/20"></div>
+                                    <div class="flex flex-col items-stretch justify-start">
+                                        <div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-lg border border-white/10" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAfDi3mUy31-8nplNCmLo-PmjJ7MyT7zij3WETE6WG07pCh_yU8RMOfZCYMJKcfKVEDzDM8vC5J1cjRhl8j-pwLySfj8JkCbDAY8l0n0jtGHTio-htOJaGiZiyzxdT4dy-h7zI4BuS0aufX3J61Q5J71n7XEz_5Nx0DqpdL1l7-vw_MGMuSvRJta5CTAHmTte5Li81ffbEMXRYNLB-DJZYfX2BM1091nHVnB9H_5vlocrh86iShfro6l5rE5qtWYBFrxSY3zjSDDh4e");'></div>
+                                        <div class="flex w-full grow flex-col items-stretch justify-center gap-1 pt-2">
+                                            <p class="text-white/60 text-xs font-semibold leading-normal uppercase">Example Campaign</p>
+                                            <p class="text-[#F5F5F5] text-base font-black leading-tight">Project GreenStart: Urban Farming</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col gap-3 rounded-xl border-2 border-white/20 bg-white/5 p-4 animate-fade-in-scale animate-delay-300">
+                                    <div>
+                                        <h2 class="text-[#F5F5F5] text-lg font-black leading-tight pb-2">🚨 Detected Issues</h2>
+                                        <div class="flex flex-col gap-2">
+                                            <div class="flex items-center gap-2 rounded-lg bg-[#D32F2F]/20 border border-[#D32F2F]/40 px-3 py-2">
+                                                <div class="text-[#D32F2F] flex items-center justify-center shrink-0 size-6">
+                                                    <span class="material-symbols-outlined text-lg">error</span>
+                                                </div>
+                                                <p class="text-[#F5F5F5] text-sm font-bold leading-normal flex-1">Anonymous Creator Profile</p>
+                                            </div>
+                                            <div class="flex items-center gap-2 rounded-lg bg-[#D32F2F]/20 border border-[#D32F2F]/40 px-3 py-2">
+                                                <div class="text-[#D32F2F] flex items-center justify-center shrink-0 size-6">
+                                                    <span class="material-symbols-outlined text-lg">error</span>
+                                                </div>
+                                                <p class="text-[#F5F5F5] text-sm font-bold leading-normal flex-1">Vague Budget Breakdown</D>
+                                            </div>
+                                            <div class="flex items-center gap-2 rounded-lg bg-[#D32F2F]/20 border border-[#D32F2F]/40 px-3 py-2">
+                                                <div class="text-[#D32F2F] flex items-center justify-center shrink-0 size-6">
+                                                    <span class="material-symbols-outlined text-lg">error</span>
+                                                </div>
+                                                <p class="text-[#F5F5F5] text-sm font-bold leading-normal flex-1">Copied Project Description (from 3 other sites)</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h2 class="text-[#F5F5F5] text-lg font-black leading-tight pb-2">💡 Recommendations</h2>
+                                        <div class="flex flex-col gap-2">
+                                            <div class="flex items-center gap-2 rounded-lg bg-primary/20 border border-primary/40 px-3 py-2">
+                                                <div class="text-primary flex items-center justify-center shrink-0 size-6">
+                                                    <span class="material-symbols-outlined text-lg">arrow_forward</span>
+                                                </div>
+                                                <p class="text-[#F5F5F5] text-sm font-bold leading-normal flex-1">Complete profile verification</p>
+                                            </div>
+                                            <div class="flex items-center gap-2 rounded-lg bg-primary/20 border border-primary/40 px-3 py-2">
+                                                <div class="text-primary flex items-center justify-center shrink-0 size-6">
+                                                    <span class="material-symbols-outlined text-lg">arrow_forward</span>
+                                                </div>
+                                                <p class="text-[#F5F5F5] text-sm font-bold leading-normal flex-1">Upload detailed line-item budget</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            </div>
+        </div>
+        
+        <div class="slide" data-slide="7">
+            <div class="relative flex h-screen w-full flex-col bg-background-light dark:bg-background-dark group/design-root overflow-hidden">
+                <div class="layout-container flex h-full grow flex-col justify-center">
+                    <div class="flex flex-1 justify-center p-4 sm:p-6 md:p-8">
+                        <div class="layout-content-container flex flex-col w-full max-w-6xl flex-1 justify-center">
+                            <header class="w-full mb-4 text-center">
+                                <h1 class="gradient-text tracking-tight text-2xl sm:text-4xl font-black leading-tight animate-fade-in-up">Production-Ready Platform</h1>
+                                <p class="text-primary text-base font-bold pt-2 animate-fade-in-up animate-delay-100">Enterprise-grade technology built for scale</p>
+                            </header>
+                            <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <div class="flex flex-col gap-2 rounded-xl border-2 border-primary/50 bg-primary/10 p-4 card-impressive animate-fade-in-scale animate-delay-200">
+                                    <div class="flex items-center justify-center mb-1">
+                                        <div class="flex items-center justify-center w-12 h-12 rounded-full bg-primary/20">
+                                            <span class="material-symbols-outlined text-primary text-3xl">verified_user</span>
+                                        </div>
+                                    </div>
+                                    <h2 class="text-zinc-800 dark:text-white text-xl font-black leading-tight text-center">Smart Contracts</h2>
+                                    <div class="text-center mb-1">
+                                        <span class="text-3xl font-black gradient-text">Security-Audited</span>
+                                        <p class="text-primary text-xs font-semibold mt-0.5">Security First</p>
+                                    </div>
+                                    <ul class="flex flex-col gap-2">
+                                        <li class="flex items-start gap-2">
+                                            <span class="material-symbols-outlined text-primary text-lg mt-0.5">check_circle</span>
+                                            <p class="text-zinc-600 dark:text-zinc-300 text-sm font-semibold leading-normal">ink! Smart Contracts</p>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <span class="material-symbols-outlined text-primary text-lg mt-0.5">check_circle</span>
+                                            <p class="text-zinc-600 dark:text-zinc-300 text-sm font-semibold leading-normal">Upgradable Proxy Pattern</p>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <span class="material-symbols-outlined text-primary text-lg mt-0.5">check_circle</span>
+                                            <p class="text-zinc-600 dark:text-zinc-300 text-sm font-semibold leading-normal">Batch Operations for Gas Efficiency</p>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="flex flex-col gap-2 rounded-xl border-2 border-primary/50 bg-primary/10 p-4 card-impressive animate-fade-in-scale animate-delay-300">
+                                    <div class="flex items-center justify-center mb-1">
+                                        <div class="flex items-center justify-center w-12 h-12 rounded-full bg-primary/20">
+                                            <span class="material-symbols-outlined text-primary text-3xl">code_blocks</span>
+                                        </div>
+                                    </div>
+                                    <h2 class="text-zinc-800 dark:text-white text-xl font-black leading-tight text-center">Full Stack</h2>
+                                    <div class="text-center mb-1">
+                                        <span class="text-3xl font-black gradient-text">Modern</span>
+                                        <p class="text-primary text-xs font-semibold mt-0.5">Tech Stack</p>
+                                    </div>
+                                    <ul class="flex flex-col gap-2">
+                                        <li class="flex items-start gap-2">
+                                            <span class="material-symbols-outlined text-primary text-lg mt-0.5">check_circle</span>
+                                            <p class="text-zinc-600 dark:text-zinc-300 text-sm font-semibold leading-normal">React 18 + Vite 5</p>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <span class="material-symbols-outlined text-primary text-lg mt-0.5">check_circle</span>
+                                            <p class="text-zinc-600 dark:text-zinc-300 text-sm font-semibold leading-normal">Node.js + Redis + Gemini AI</p>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <span class="material-symbols-outlined text-primary text-lg mt-0.5">check_circle</span>
+                                            <p class="text-zinc-600 dark:text-zinc-300 text-sm font-semibold leading-normal">Polkadot.js Integration</p>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="flex flex-col gap-2 rounded-xl border-2 border-primary/50 bg-primary/10 p-4 card-impressive animate-fade-in-scale animate-delay-400">
+                                    <div class="flex items-center justify-center mb-1">
+                                        <div class="flex items-center justify-center w-12 h-12 rounded-full bg-primary/20">
+                                            <span class="material-symbols-outlined text-primary text-3xl">workspace_premium</span>
+                                        </div>
+                                    </div>
+                                    <h2 class="text-zinc-800 dark:text-white text-xl font-black leading-tight text-center">Enterprise Quality</h2>
+                                    <div class="text-center mb-1">
+                                        <span class="text-3xl font-black gradient-text">95%+</span>
+                                        <p class="text-primary text-xs font-semibold mt-0.5">Test Coverage</p>
+                                    </div>
+                                    <ul class="flex flex-col gap-2">
+                                        <li class="flex items-start gap-2">
+                                            <span class="material-symbols-outlined text-primary text-lg mt-0.5">check_circle</span>
+                                            <p class="text-zinc-600 dark:text-zinc-300 text-sm font-semibold leading-normal">95%+ Contract Test Coverage</p>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <span class="material-symbols-outlined text-primary text-lg mt-0.5">check_circle</span>
+                                            <p class="text-zinc-600 dark:text-zinc-300 text-sm font-semibold leading-normal">Security Audited Contracts</p>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <span class="material-symbols-outlined text-primary text-lg mt-0.5">check_circle</span>
+                                            <p class="text-zinc-600 dark:text-zinc-300 text-sm font-semibold leading-normal">CI/CD Pipeline</p>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </main>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="slide" data-slide="8">
+            <div class="relative flex h-screen w-full flex-col bg-background-light dark:bg-background-dark group/design-root overflow-hidden">
+                <div class="layout-container flex h-full grow flex-col justify-center">
+                    <div class="flex flex-1 items-center justify-center p-4 sm:p-6 md:p-8">
+                        <div class="layout-content-container flex flex-col w-full max-w-5xl flex-1">
+                            <h1 class="gradient-text tracking-tight text-2xl sm:text-4xl font-black leading-tight text-center pb-2 pt-2 animate-fade-in-up">vs Competition</h1>
+                            <p class="text-primary text-base font-bold text-center pb-4 animate-fade-in-up animate-delay-100">The Only Platform with All 3 Innovations</p>
+                            <div class="w-full @container animate-fade-in-scale animate-delay-200">
+                                <div class="flex overflow-hidden rounded-xl border-2 border-white/20 dark:border-white/30 bg-background-light dark:bg-black/20 shadow-2xl">
+                                    <table class="w-full text-sm">
+                                        <thead>
+                                            <tr class="bg-white/5 dark:bg-white/5">
+                                                <th class="px-4 py-3 text-left text-gray-700 dark:text-white font-black text-sm">Feature</th>
+                                                <th class="px-4 py-3 text-center text-gray-700 dark:text-white font-black text-sm border-l-2 border-white/10 dark:border-white/20 relative bg-primary/20">
+                                                    <div class="gradient-text text-base">DotNation</div>
+                                                    <div class="absolute inset-0 border-4 border-primary rounded-lg pointer-events-none super-glow"></div>
+                                                </th>
+                                                <th class="px-4 py-3 text-center text-gray-700 dark:text-white font-black text-sm border-l-2 border-white/10 dark:border-white/20">Kickstarter</th>
+                                                <th class="px-4 py-3 text-center text-gray-700 dark:text-white font-black text-sm border-l-2 border-white/10 dark:border-white/20">Gitcoin</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="border-t-2 border-t-white/10 dark:border-t-white/20">
+                                                <td class="h-14 px-4 py-2 text-gray-800 dark:text-gray-200 font-bold text-sm">Platform Fees</td>
+                                                <td class="h-14 px-4 py-2 text-center text-primary font-black text-lg border-l-2 border-white/10 dark:border-white/20 bg-primary/5">0%</td>
+                                                <td class="h-14 px-4 py-2 text-center text-gray-600 dark:text-gray-300 font-semibold text-sm border-l-2 border-white/10 dark:border-white/20">5-10%</td>
+                                                <td class="h-14 px-4 py-2 text-center text-gray-600 dark:text-gray-300 font-semibold text-sm border-l-2 border-white/10 dark:border-white/20">0-2%</td>
+                                            </tr>
+                                            <tr class="border-t-2 border-t-white/10 dark:border-t-white/20">
+                                                <td class="h-14 px-4 py-2 text-gray-800 dark:text-gray-200 font-bold text-sm">Quadratic Funding</td>
+                                                <td class="h-14 px-4 py-2 border-l-2 border-white/10 dark:border-white/20 bg-primary/5"><span class="material-symbols-outlined mx-auto flex items-center justify-center text-primary text-3xl">check_circle</span></td>
+                                                <td class="h-14 px-4 py-2 border-l-2 border-white/10 dark:border-white/20"><span class="material-symbols-outlined mx-auto flex items-center justify-center text-red-500 text-3xl">cancel</span></td>
+                                                <td class="h-14 px-4 py-2 border-l-2 border-white/10 dark:border-white/20"><span class="material-symbols-outlined mx-auto flex items-center justify-center text-primary text-3xl">check_circle</span></td>
+                                            </tr>
+                                            <tr class="border-t-2 border-t-white/10 dark:border-t-white/20">
+                                                <td class="h-14 px-4 py-2 text-gray-800 dark:text-gray-200 font-bold text-sm">DAO Milestone Voting</td>
+                                                <td class="h-14 px-4 py-2 border-l-2 border-white/10 dark:border-white/20 bg-primary/5"><span class="material-symbols-outlined mx-auto flex items-center justify-center text-primary text-3xl">check_circle</span></td>
+                                                <td class="h-14 px-4 py-2 border-l-2 border-white/10 dark:border-white/20"><span class="material-symbols-outlined mx-auto flex items-center justify-center text-red-500 text-3xl">cancel</span></td>
+                                                <td class="h-14 px-4 py-2 border-l-2 border-white/10 dark:border-white/20"><span class="material-symbols-outlined mx-auto flex items-center justify-center text-red-500 text-3xl">cancel</span></td>
+                                            </tr>
+                                            <tr class="border-t-2 border-t-white/10 dark:border-t-white/20">
+                                                <td class="h-14 px-4 py-2 text-gray-800 dark:text-gray-200 font-bold text-sm">AI Fraud Detection</td>
+                                                <td class="h-14 px-4 py-2 border-l-2 border-white/10 dark:border-white/20 bg-primary/5"><span class="material-symbols-outlined mx-auto flex items-center justify-center text-primary text-3xl">check_circle</span></td>
+                                                <td class="h-14 px-4 py-2 border-l-2 border-white/10 dark:border-white/20"><span class="material-symbols-outlined mx-auto flex items-center justify-center text-red-500 text-3xl">cancel</span></td>
+                                                <td class="h-14 px-4 py-2 border-l-2 border-white/10 dark:border-white/20"><span class="material-symbols-outlined mx-auto flex items-center justify-center text-red-500 text-3xl">cancel</span></td>
+                                            </tr>
+                                            <tr class="border-t-2 border-t-white/10 dark:border-t-white/20">
+                                                <td class="h-14 px-4 py-2 text-gray-800 dark:text-gray-200 font-bold text-sm">Cross-Chain (Polkadot)</td>
+                                                <td class="h-14 px-4 py-2 border-l-2 border-white/10 dark:border-white/20 bg-primary/5"><span class="material-symbols-outlined mx-auto flex items-center justify-center text-primary text-3xl">check_circle</span></td>
+                                                <td class="h-14 px-4 py-2 border-l-2 border-white/10 dark:border-white/20"><span class="material-symbols-outlined mx-auto flex items-center justify-center text-red-500 text-3xl">cancel</span></td>
+                                                <td class="h-14 px-4 py-2 border-l-2 border-white/10 dark:border-white/20"><span class="material-symbols-outlined mx-auto flex items-center justify-center text-red-500 text-3xl">cancel</span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="slide" data-slide="9">
+            <div class="relative flex h-screen w-full flex-col bg-background-light dark:bg-background-dark group/design-root overflow-hidden">
+                <div class="absolute inset-0 z-0">
+                    <div class="absolute -bottom-1/4 -left-1/4 h-1/2 w-1/2 rounded-full bg-primary/40 blur-3xl animate-pulse"></div>
+                    <div class="absolute -top-1/4 -right-1/4 h-1/2 w-1/2 rounded-full bg-primary/40 blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
+                </div>
+                <div class="layout-container flex h-full grow flex-col relative z-10">
+                    <main class="flex-1 flex items-center justify-center">
+                        <div class="flex flex-col items-center justify-center px-4 py-4">
+                            <div class="flex flex-col max-w-[960px] items-center justify-center">
+                                <div class="flex flex-col items-center gap-4 text-center">
+                                    <h1 class="gradient-text tracking-tight text-5xl font-black super-glow animate-fade-in-scale">DotNation</h1>
+                                    <p class="text-gray-100 dark:text-gray-100 text-xl font-black leading-tight max-w-2xl animate-fade-in-up animate-delay-100">Where Democracy, Accountability, and AI Make Crowdfunding Work.</p>
+                                    
+                                    <div class="grid grid-cols-3 gap-6 mt-3 mb-3 animate-fade-in-up animate-delay-200">
+                                        <div class="text-center">
+                                            <div class="text-4xl font-black gradient-text">Audited</div>
+                                            <p class="text-gray-400 dark:text-gray-400 text-xs font-bold mt-1">Contracts</p>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="text-4xl font-black gradient-text">0%</div>
+                                            <p class="text-gray-400 dark:text-gray-400 text-xs font-bold mt-1">Platform Fees</p>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="text-4xl font-black gradient-text">Open</div>
+                                            <p class="text-gray-400 dark:text-gray-400 text-xs font-bold mt-1">Source</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex w-full max-w-lg flex-col items-stretch gap-3 pt-3 animate-fade-in-up animate-delay-300">
+                                        <a class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-12 px-4 bg-primary/20 border-2 border-primary text-primary text-base font-black transition-all hover:bg-primary/30 card-impressive super-glow" href="#">
+                                            <span class="truncate">🌐 Visit: dotnation.vercel.app</span>
+                                        </a>
+                                        <a class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-12 px-4 bg-primary/20 border-2 border-primary text-primary text-base font-black transition-all hover:bg-primary/30 card-impressive super-glow" href="https://github.com/Elactrac/dotnation" target="_blank">
+                                            <span class="truncate">💻 GitHub: github.com/Elactrac/dotnation</span>
+                                        </a>
+                                        <a class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-12 px-4 bg-primary/20 border-2 border-primary text-primary text-base font-black transition-all hover:bg-primary/30 card-impressive super-glow" href="#">
+                                            <span class="truncate">🚀 Join our Community</span>
+                                        </a>
+                                    </div>
+                                    <p class="text-gray-300 dark:text-gray-400 text-sm font-bold leading-normal pt-3 animate-fade-in-up animate-delay-400">Built on Polkadot & Mandala Chain</p>
+                                    <div class="flex items-center justify-center gap-6 text-gray-400 dark:text-gray-500 pt-2 animate-fade-in-up animate-delay-500">
+                                        <a class="transition-all hover:text-primary hover:scale-125" href="#">
+                                            <svg aria-hidden="true" class="h-6 w-6" fill="currentColor" viewbox="0 0 24 24">
+                                                <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.71v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"></path>
+                                            </svg>
+                                        </a>
+                                        <a class="transition-all hover:text-primary hover:scale-125" href="#">
+                                            <svg aria-hidden="true" class="h-6 w-6" fill="currentColor" viewbox="0 0 24 24">
+                                                <path clip-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.165 6.839 9.49.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" fill-rule="evenodd"></path>
+                                            </svg>
+                                        </a>
+                                    </div>
+                                    <h3 class="gradient-text tracking-light text-3xl font-black leading-tight pt-4 animate-fade-in-scale animate-delay-600">Thank You! 🙏</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    
+    <script>
+        // Presentation state
+        let currentSlide = 1;
+        const totalSlides = 9;
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initNavDots();
+            updatePresentation();
+            
+            // Keyboard navigation
+            document.addEventListener('keydown', handleKeyPress);
+            
+            // Touch swipe support
+            let touchStartX = 0;
+            let touchEndX = 0;
+            
+            document.addEventListener('touchstart', e => {
+                touchStartX = e.changedTouches[0].screenX;
+            });
+            
+            document.addEventListener('touchend', e => {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+            });
+            
+            function handleSwipe() {
+                if (touchEndX < touchStartX - 50) nextSlide();
+                if (touchEndX > touchStartX + 50) prevSlide();
+            }
+            
+            // Fullscreen toggle
+            document.getElementById('fullscreenBtn').addEventListener('click', toggleFullscreen);
+        });
+        
+        // Initialize navigation dots
+        function initNavDots() {
+            const navDots = document.getElementById('navDots');
+            for (let i = 1; i <= totalSlides; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'nav-dot' + (i === 1 ? ' active' : '');
+                
+                // ACCESSIBILITY FIX: Add ARIA roles and keyboard support
+                dot.setAttribute('role', 'button');
+                dot.setAttribute('tabindex', '0');
+                dot.setAttribute('aria-label', `Go to slide ${i}`);
+                
+                dot.addEventListener('click', () => goToSlide(i));
+                dot.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        goToSlide(i);
+                    }
+                });
+                
+                navDots.appendChild(dot);
+            }
+        }
+        
+        // Handle keyboard navigation
+        function handleKeyPress(e) {
+            switch(e.key) {
+                case 'ArrowRight':
+                case 'ArrowDown':
+                case ' ':
+                case 'PageDown':
+                    e.preventDefault();
+                    nextSlide();
+                    break;
+                case 'ArrowLeft':
+                case 'ArrowUp':
+                case 'PageUp':
+                    e.preventDefault();
+                    prevSlide();
+                    break;
+                case 'Home':
+                    e.preventDefault();
+                    goToSlide(1);
+                    break;
+                case 'End':
+                    e.preventDefault();
+                    goToSlide(totalSlides);
+                    break;
+            }
+        }
+        
+        // Navigation functions
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                updatePresentation();
+            }
+        }
+        
+        function prevSlide() {
+            if (currentSlide > 1) {
+                currentSlide--;
+                updatePresentation();
+            }
+        }
+        
+        function goToSlide(slideNumber) {
+            if (slideNumber >= 1 && slideNumber <= totalSlides) {
+                currentSlide = slideNumber;
+                updatePresentation();
+            }
+        }
+        
+        // Update presentation UI
+        function updatePresentation() {
+            // Update slides
+            const slides = document.querySelectorAll('.slide');
+            slides.forEach((slide, index) => {
+                const slideNum = index + 1;
+                slide.classList.remove('active', 'prev');
+                if (slideNum === currentSlide) {
+                    slide.classList.add('active');
+                    // Add slide-visited class to trigger animations
+                    setTimeout(() => {
+                        slide.classList.add('slide-visited');
+                    }, 50);
+                } else if (slideNum < currentSlide) {
+                    slide.classList.add('prev');
+                }
+            });
+            
+            // Update progress bar
+            const progress = (currentSlide / totalSlides) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+            
+            // Update counter
+            document.getElementById('slideCounter').textContent = `${currentSlide} / ${totalSlides}`;
+            
+            // Update navigation dots
+            const dots = document.querySelectorAll('.nav-dot');
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index + 1 === currentSlide);
+            });
+            
+            // Update URL hash
+            window.location.hash = `slide-${currentSlide}`;
+        }
+        
+        // Fullscreen toggle
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+        
+        // Handle URL hash on load
+        window.addEventListener('load', () => {
+            const hash = window.location.hash;
+            if (hash) {
+                const slideNum = parseInt(hash.replace('#slide-', ''));
+                if (!isNaN(slideNum)) {
+                    goToSlide(slideNum);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

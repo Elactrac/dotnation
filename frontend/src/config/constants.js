@@ -1,7 +1,10 @@
 export const TOKEN_DECIMALS = 12n;
 
 export const CONTRACT_LIMITS = {
-  MAX_STORAGE_DEPOSIT: 10n * (10n ** TOKEN_DECIMALS), // 10 DOT in plancks
+  // Storage deposit limit for contract interactions
+  // Set to a very high value (1000 DOT) to prevent StorageDepositLimitExhausted errors
+  // Contract creation requires significant storage deposit for state storage
+  MAX_STORAGE_DEPOSIT: 1000n * (10n ** TOKEN_DECIMALS), // 1000 DOT in plancks
 };
 
 export const AMOUNT_LIMITS = {

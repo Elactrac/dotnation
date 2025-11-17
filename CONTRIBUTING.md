@@ -1,12 +1,15 @@
 # Contributing to DotNation
 
-First off, thank you for considering contributing to DotNation! It's people like you that make DotNation such a great platform for decentralized crowdfunding.
+**Last Updated:** November 15, 2025
+
+First off, thank you for considering contributing to DotNation! It's people like you that make DotNation such a great platform for decentralized crowdfunding with innovative features like Quadratic Funding and DAO governance.
 
 ## Table of Contents
 
 - [Code of Conduct](#code-of-conduct)
 - [How Can I Contribute?](#how-can-i-contribute)
 - [Development Setup](#development-setup)
+- [Testing on Testnet](#testing-on-testnet)
 - [Pull Request Process](#pull-request-process)
 - [Style Guides](#style-guides)
 - [Community](#community)
@@ -200,6 +203,25 @@ npm run build
 cd donation_platform
 cargo contract build --release
 ```
+
+### Testing on Testnet
+
+Before deploying to mainnet, always test thoroughly on a testnet:
+
+- **Paseo Ecosystem** (Recommended): Primary testnet for Polkadot parachains
+  - Mandala Chain: Main testing parachain with full contracts support
+  - Get KPGT tokens: [Paseo Faucet](https://faucet.polkadot.io/paseo)
+  
+- **Rococo Contracts**: Alternative Polkadot testnet
+  - Get ROC tokens: [Rococo Faucet](https://faucet.polkadot.io/rococo)
+
+For detailed testnet deployment and testing instructions, see our comprehensive [TESTNET_TESTING_GUIDE.md](./TESTNET_TESTING_GUIDE.md). This guide includes:
+- Step-by-step deployment instructions
+- Environment configuration for different testnets
+- Common troubleshooting solutions
+- Testing report templates
+
+**Important**: All testnets use 12 decimal places for token amounts. Use BigInt for all amount conversions.
 
 ---
 

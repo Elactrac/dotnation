@@ -38,8 +38,8 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000,
     // Enable source maps for production debugging
     sourcemap: false,
-    // Optimize for modern browsers
-    target: 'es2015',
+    // Optimize for modern browsers (es2020 supports BigInt)
+    target: 'es2020',
     // Minify with terser for better compression
     minify: 'terser',
     terserOptions: {
@@ -49,31 +49,9 @@ export default defineConfig({
       },
     },
   },
-  // Optimize dependencies
-  optimizeDeps: {
-    include: [
-      'react',
-      'react-dom',
-      'react-router-dom',
-      '@polkadot/api',
-      '@polkadot/api-contract',
-      'framer-motion',
-    ],
-    exclude: [
-      '@polkadot/wasm-crypto',
-      '@polkadot/wasm-crypto-wasm',
-      '@polkadot/wasm-util',
-      '@polkadot/wasm-crypto-asmjs',
-    ],
-    esbuildOptions: {
-      target: 'esnext',
-    },
-  },
-  resolve: {
-    alias: {
-      // Fix Polkadot WASM crypto module resolution issues
-      '@polkadot/wasm-crypto-wasm/cjs/bytes.js': '@polkadot/wasm-crypto-wasm/bytes',
-      '@polkadot/wasm-crypto-wasm/cjs/bridge.js': '@polkadot/wasm-crypto-wasm/bridge',
+  server: {
+    fs: {
+      strict: false,
     },
   },
 })

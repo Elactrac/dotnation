@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 import { useWallet } from '../contexts/WalletContext';
 import { useCampaign } from '../contexts/CampaignContext.jsx';
 import { formatDOT, shortenAddress } from '../utils/formatters';
+import { saveProfile, loadProfile } from '../utils/aiApi';
 
 const UserProfilePage = () => {
   const { selectedAccount, balance } = useWallet();
@@ -62,29 +63,81 @@ const UserProfilePage = () => {
 
   // Load profile data
   useEffect(() => {
-    if (selectedAccount) {
-      const mockProfile = {
-        displayName: `User ${shortenAddress(selectedAccount.address)}`,
-        bio: 'Passionate about supporting innovative projects and making a positive impact in the Polkadot ecosystem.',
-        website: '',
-        twitter: '',
-        avatar: null,
-        emailNotifications: true,
-        campaignUpdates: true,
-        donationAlerts: false
-      };
-      setProfile(mockProfile);
-    }
+    const fetchProfile = async () => {
+      if (selectedAccount) {
+        try {
+          const { profile: loadedProfile } = await loadProfile(selectedAccount.address);
+          
+          if (loadedProfile) {
+            // Use loaded profile from backend
+            setProfile({
+              displayName: loadedProfile.displayName || `User ${shortenAddress(selectedAccount.address)}`,
+              bio: loadedProfile.bio || '',
+              website: loadedProfile.website || '',
+              twitter: loadedProfile.twitter || '',
+              avatar: null,
+              emailNotifications: loadedProfile.emailNotifications ?? true,
+              campaignUpdates: loadedProfile.campaignUpdates ?? true,
+              donationAlerts: loadedProfile.donationAlerts ?? false
+            });
+          } else {
+            // No profile found, use default
+            setProfile({
+              displayName: `User ${shortenAddress(selectedAccount.address)}`,
+              bio: '',
+              website: '',
+              twitter: '',
+              avatar: null,
+              emailNotifications: true,
+              campaignUpdates: true,
+              donationAlerts: false
+            });
+          }
+        } catch (error) {
+          console.error('Error loading profile:', error);
+          // Use default profile on error
+          setProfile({
+            displayName: `User ${shortenAddress(selectedAccount.address)}`,
+            bio: '',
+            website: '',
+            twitter: '',
+            avatar: null,
+            emailNotifications: true,
+            campaignUpdates: true,
+            donationAlerts: false
+          });
+        }
+      }
+    };
+    
+    fetchProfile();
   }, [selectedAccount]);
 
   const handleSaveProfile = async () => {
+    if (!selectedAccount) {
+      toast.error('No wallet connected');
+      return;
+    }
+
     setIsSaving(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Prepare profile data (exclude avatar for now)
+      const profileData = {
+        displayName: profile.displayName,
+        bio: profile.bio,
+        website: profile.website,
+        twitter: profile.twitter,
+        emailNotifications: profile.emailNotifications,
+        campaignUpdates: profile.campaignUpdates,
+        donationAlerts: profile.donationAlerts
+      };
+
+      await saveProfile(selectedAccount.address, profileData);
       toast.success('Profile updated successfully!');
       setIsEditing(false);
     } catch (error) {
-      toast.error('Failed to save profile. Please try again.');
+      console.error('Error saving profile:', error);
+      toast.error(error.message || 'Failed to save profile. Please try again.');
     } finally {
       setIsSaving(false);
     }

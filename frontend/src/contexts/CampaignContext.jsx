@@ -377,10 +377,10 @@ export const CampaignProvider = ({ children }) => {
         {
           ...defaultRetryOptions,
           queryOptions: { 
-            storageDepositLimit: CONTRACT_LIMITS.MAX_STORAGE_DEPOSIT.toString()
+            storageDepositLimit: CONTRACT_LIMITS.MAX_STORAGE_DEPOSIT ? CONTRACT_LIMITS.MAX_STORAGE_DEPOSIT.toString() : null
           },
           txOptions: { 
-            storageDepositLimit: CONTRACT_LIMITS.MAX_STORAGE_DEPOSIT.toString()
+            storageDepositLimit: CONTRACT_LIMITS.MAX_STORAGE_DEPOSIT ? CONTRACT_LIMITS.MAX_STORAGE_DEPOSIT.toString() : null
           },
           api,
           onRetry: (attempt, maxRetries, delay, error) => {
@@ -600,6 +600,342 @@ export const CampaignProvider = ({ children }) => {
     }
   }, [contract, selectedAccount]);
 
+  // ==================== Quadratic Funding Functions ====================
+
+  const fundMatchingPool = useCallback(async (amount) => {
+    if (!contract || !selectedAccount) {
+      throw new Error('Contract or wallet not connected');
+    }
+
+    try {
+      const tx = await prepareContractTransaction(
+        contract,
+        'fundMatchingPool',
+        selectedAccount.address,
+        [],
+        {
+          ...defaultRetryOptions,
+          api,
+          value: amount, // Send DOT with the transaction
+        }
+      );
+
+      return tx;
+    } catch (err) {
+      throw new Error(`Failed to fund matching pool: ${err.message}`);
+    }
+  }, [contract, selectedAccount, api]);
+
+  const createMatchingRound = useCallback(async (poolAmount, durationMs) => {
+    if (!contract || !selectedAccount) {
+      throw new Error('Contract or wallet not connected');
+    }
+
+    try {
+      const tx = await prepareContractTransaction(
+        contract,
+        'createMatchingRound',
+        selectedAccount.address,
+        [poolAmount, durationMs],
+        {
+          ...defaultRetryOptions,
+          api,
+        }
+      );
+
+      return tx;
+    } catch (err) {
+      throw new Error(`Failed to create matching round: ${err.message}`);
+    }
+  }, [contract, selectedAccount, api]);
+
+  const distributeMatching = useCallback(async (roundId) => {
+    if (!contract || !selectedAccount) {
+      throw new Error('Contract or wallet not connected');
+    }
+
+    try {
+      const tx = await prepareContractTransaction(
+        contract,
+        'calculateAndDistributeMatching',
+        selectedAccount.address,
+        [roundId],
+        {
+          ...defaultRetryOptions,
+          api,
+        }
+      );
+
+      return tx;
+    } catch (err) {
+      throw new Error(`Failed to distribute matching: ${err.message}`);
+    }
+  }, [contract, selectedAccount, api]);
+
+  const getEstimatedMatching = useCallback(async (campaignId) => {
+    if (!contract) {
+      return '0';
+    }
+
+    try {
+      const { result, output } = await contract.query.getEstimatedMatching(
+        selectedAccount?.address || '',
+        { gasLimit: createGasLimit(api) },
+        campaignId
+      );
+
+      if (result.isErr) {
+        console.error('Error getting estimated matching:', result.asErr.toString());
+        return '0';
+      }
+
+      const value = output?.toHuman() || '0';
+      return typeof value === 'string' ? value.replace(/,/g, '') : value.toString();
+    } catch (err) {
+      console.error('Failed to get estimated matching:', err);
+      return '0';
+    }
+  }, [contract, selectedAccount, api]);
+
+  const getMatchingPoolBalance = useCallback(async () => {
+    if (!contract) {
+      return '0';
+    }
+
+    try {
+      const { result, output } = await contract.query.getMatchingPoolBalance(
+        selectedAccount?.address || '',
+        { gasLimit: createGasLimit(api) }
+      );
+
+      if (result.isErr) {
+        console.error('Error getting matching pool balance:', result.asErr.toString());
+        return '0';
+      }
+
+      const value = output?.toHuman() || '0';
+      return typeof value === 'string' ? value.replace(/,/g, '') : value.toString();
+    } catch (err) {
+      console.error('Failed to get matching pool balance:', err);
+      return '0';
+    }
+  }, [contract, selectedAccount, api]);
+
+  const getCurrentRound = useCallback(async () => {
+    if (!contract) {
+      return null;
+    }
+
+    try {
+      const { result, output } = await contract.query.getCurrentRound(
+        selectedAccount?.address || '',
+        { gasLimit: createGasLimit(api) }
+      );
+
+      if (result.isErr) {
+        console.error('Error getting current round:', result.asErr.toString());
+        return null;
+      }
+
+      const value = output?.toHuman();
+      return value && value !== 'None' ? parseInt(value) : null;
+    } catch (err) {
+      console.error('Failed to get current round:', err);
+      return null;
+    }
+  }, [contract, selectedAccount, api]);
+
+  const getRoundDetails = useCallback(async (roundId) => {
+    if (!contract) {
+      return null;
+    }
+
+    try {
+      const { result, output } = await contract.query.getRound(
+        selectedAccount?.address || '',
+        { gasLimit: createGasLimit(api) },
+        roundId
+      );
+
+      if (result.isErr) {
+        console.error('Error getting round details:', result.asErr.toString());
+        return null;
+      }
+
+      const value = output?.toHuman();
+      if (!value || value === 'None') {
+        return null;
+      }
+
+      return {
+        id: parseInt(value.id),
+        poolAmount: value.poolAmount.replace(/,/g, ''),
+        endTime: parseInt(value.endTime.replace(/,/g, '')),
+        distributed: value.distributed === 'true' || value.distributed === true,
+      };
+    } catch (err) {
+      console.error('Failed to get round details:', err);
+      return null;
+    }
+  }, [contract, selectedAccount, api]);
+
+  // ==================== DAO Milestone Voting Functions ====================
+
+  const addMilestones = useCallback(async (campaignId, milestonesData) => {
+    if (!contract || !selectedAccount) {
+      throw new Error('Contract or wallet not connected');
+    }
+
+    try {
+      const tx = await prepareContractTransaction(
+        contract,
+        'addMilestones',
+        selectedAccount.address,
+        [campaignId, milestonesData],
+        {
+          ...defaultRetryOptions,
+          api,
+        }
+      );
+
+      return tx;
+    } catch (err) {
+      throw new Error(`Failed to add milestones: ${err.message}`);
+    }
+  }, [contract, selectedAccount, api]);
+
+  const activateMilestoneVoting = useCallback(async (campaignId, milestoneIndex) => {
+    if (!contract || !selectedAccount) {
+      throw new Error('Contract or wallet not connected');
+    }
+
+    try {
+      const tx = await prepareContractTransaction(
+        contract,
+        'activateMilestoneVoting',
+        selectedAccount.address,
+        [campaignId, milestoneIndex],
+        {
+          ...defaultRetryOptions,
+          api,
+        }
+      );
+
+      return tx;
+    } catch (err) {
+      throw new Error(`Failed to activate milestone voting: ${err.message}`);
+    }
+  }, [contract, selectedAccount, api]);
+
+  const voteOnMilestone = useCallback(async (campaignId, milestoneIndex, approve) => {
+    if (!contract || !selectedAccount) {
+      throw new Error('Contract or wallet not connected');
+    }
+
+    try {
+      const tx = await prepareContractTransaction(
+        contract,
+        'voteOnMilestone',
+        selectedAccount.address,
+        [campaignId, milestoneIndex, approve],
+        {
+          ...defaultRetryOptions,
+          api,
+        }
+      );
+
+      return tx;
+    } catch (err) {
+      throw new Error(`Failed to vote on milestone: ${err.message}`);
+    }
+  }, [contract, selectedAccount, api]);
+
+  const releaseMilestoneFunds = useCallback(async (campaignId, milestoneIndex) => {
+    if (!contract || !selectedAccount) {
+      throw new Error('Contract or wallet not connected');
+    }
+
+    try {
+      const tx = await prepareContractTransaction(
+        contract,
+        'releaseMilestoneFunds',
+        selectedAccount.address,
+        [campaignId, milestoneIndex],
+        {
+          ...defaultRetryOptions,
+          api,
+        }
+      );
+
+      return tx;
+    } catch (err) {
+      throw new Error(`Failed to release milestone funds: ${err.message}`);
+    }
+  }, [contract, selectedAccount, api]);
+
+  const getMilestones = useCallback(async (campaignId) => {
+    if (!contract) {
+      return [];
+    }
+
+    try {
+      const { result, output } = await contract.query.getMilestones(
+        selectedAccount?.address || '',
+        { gasLimit: createGasLimit(api) },
+        campaignId
+      );
+
+      if (result.isErr) {
+        console.error('Error getting milestones:', result.asErr.toString());
+        return [];
+      }
+
+      const value = output?.toHuman();
+      if (!value || value === 'None') {
+        return [];
+      }
+
+      // Parse milestones
+      return value.map(m => ({
+        description: m.description,
+        percentage: parseInt(m.percentage.replace(/,/g, '')),
+        deadline: parseInt(m.deadline.replace(/,/g, '')),
+        votesFor: m.votesFor.replace(/,/g, ''),
+        votesAgainst: m.votesAgainst.replace(/,/g, ''),
+        released: m.released === 'true' || m.released === true,
+        votingActive: m.votingActive === 'true' || m.votingActive === true,
+      }));
+    } catch (err) {
+      console.error('Failed to get milestones:', err);
+      return [];
+    }
+  }, [contract, selectedAccount, api]);
+
+  const hasVotedOnMilestone = useCallback(async (campaignId, milestoneIndex, voter) => {
+    if (!contract) {
+      return false;
+    }
+
+    try {
+      const { result, output } = await contract.query.hasVotedOnMilestone(
+        selectedAccount?.address || '',
+        { gasLimit: createGasLimit(api) },
+        campaignId,
+        milestoneIndex,
+        voter
+      );
+
+      if (result.isErr) {
+        return false;
+      }
+
+      return output?.toHuman() === 'true' || output?.toHuman() === true;
+    } catch (err) {
+      console.error('Failed to check vote status:', err);
+      return false;
+    }
+  }, [contract, selectedAccount, api]);
+
   useEffect(() => {
     if (contract) {
       fetchCampaigns();
@@ -622,6 +958,21 @@ export const CampaignProvider = ({ children }) => {
         cancelCampaign,
         claimRefund,
         refreshCampaigns: fetchCampaigns,
+        // Quadratic funding functions
+        fundMatchingPool,
+        createMatchingRound,
+        distributeMatching,
+        getEstimatedMatching,
+        getMatchingPoolBalance,
+        getCurrentRound,
+        getRoundDetails,
+        // DAO milestone voting functions
+        addMilestones,
+        activateMilestoneVoting,
+        voteOnMilestone,
+        releaseMilestoneFunds,
+        getMilestones,
+        hasVotedOnMilestone,
       }}
     >
       {children}

@@ -5,6 +5,7 @@ import { ApiProvider } from '../contexts/ApiContext';
 import { WalletProvider } from '../contexts/WalletContext';
 import { CampaignProvider } from '../contexts/CampaignContext';
 import { BatchOperationsProvider } from '../contexts/BatchOperationsContext';
+import { NftProvider } from '../contexts/NftContext';
 
 /**
  * Custom render function that wraps components with all necessary providers
@@ -14,6 +15,7 @@ import { BatchOperationsProvider } from '../contexts/BatchOperationsContext';
  * @param {boolean} options.withRouter - Whether to include router (default: true)
  * @param {boolean} options.withWallet - Whether to include wallet context (default: true)
  * @param {boolean} options.withCampaign - Whether to include campaign context (default: true)
+ * @param {boolean} options.withNft - Whether to include NFT context (default: true)
  * @returns {Object} - Render result with utilities
  */
 export function renderWithProviders(
@@ -22,25 +24,28 @@ export function renderWithProviders(
     withRouter = true,
     withWallet = true,
     withCampaign = true,
+    withNft = true,
     ...renderOptions
   } = {}
 ) {
   const Wrapper = ({ children }) => {
     let wrapped = children;
 
-    if (withWallet || withCampaign) {
+    if (withWallet || withCampaign || withNft) {
       wrapped = (
         <ApiProvider>
           <WalletProvider>
-            {withCampaign ? (
-              <CampaignProvider>
-                <BatchOperationsProvider>
-                  {children}
-                </BatchOperationsProvider>
-              </CampaignProvider>
-            ) : (
-              children
-            )}
+            <NftProvider>
+              {withCampaign ? (
+                <CampaignProvider>
+                  <BatchOperationsProvider>
+                    {children}
+                  </BatchOperationsProvider>
+                </CampaignProvider>
+              ) : (
+                children
+              )}
+            </NftProvider>
           </WalletProvider>
         </ApiProvider>
       );
@@ -132,6 +137,50 @@ export const mockCampaigns = [
     deadline: Date.now() - 86400000,
     raised: '100000000000000',
     state: 'Failed',
+  },
+];
+
+/**
+ * Mock NFT data
+ */
+export const mockNft = {
+  tokenId: 1,
+  metadata: {
+    campaignId: 1,
+    campaignTitle: 'Test Campaign',
+    amount: 10000000000000, // 10 DOT in plancks
+    timestamp: Date.now() - 86400000,
+    donor: '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY',
+  },
+  rarity: 'Common',
+};
+
+/**
+ * Mock multiple NFTs
+ */
+export const mockNfts = [
+  mockNft,
+  {
+    tokenId: 2,
+    metadata: {
+      campaignId: 2,
+      campaignTitle: 'Second Campaign',
+      amount: 25000000000000, // 25 DOT
+      timestamp: Date.now() - 43200000,
+      donor: '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY',
+    },
+    rarity: 'Uncommon',
+  },
+  {
+    tokenId: 3,
+    metadata: {
+      campaignId: 1,
+      campaignTitle: 'Test Campaign',
+      amount: 100000000000000, // 100 DOT
+      timestamp: Date.now() - 172800000,
+      donor: '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY',
+    },
+    rarity: 'Rare',
   },
 ];
 

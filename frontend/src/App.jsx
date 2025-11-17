@@ -4,6 +4,7 @@ import { ApiProvider } from './contexts/ApiContext.jsx';
 import { WalletProvider } from './contexts/WalletContext.jsx';
 import { CampaignProvider } from './contexts/CampaignContext.jsx';
 import { BatchOperationsProvider } from './contexts/BatchOperationsContext.jsx';
+import { NftProvider } from './contexts/NftContext.jsx';
 import ErrorBoundary from './components/ErrorBoundary';
 import { initSentry, trackError } from './utils/sentry';
 
@@ -16,6 +17,8 @@ const CreateCampaignPage = React.lazy(() => import('./pages/CreateCampaignPage.j
 const CampaignDetailsPage = React.lazy(() => import('./pages/CampaignDetailsPage.jsx'));
 const MyCampaignsPage = React.lazy(() => import('./pages/MyCampaignsPage.jsx'));
 const MyDonationsPage = React.lazy(() => import('./pages/MyDonationsPage.jsx'));
+const MyNftsPage = React.lazy(() => import('./pages/MyNftsPage.jsx'));
+const LeaderboardPage = React.lazy(() => import('./pages/LeaderboardPage.jsx'));
 const BrowseCampaignsPage = React.lazy(() => import('./pages/BrowseCampaignsPage.jsx'));
 const UserProfilePage = React.lazy(() => import('./pages/UserProfilePage.jsx'));
 const AboutPage = React.lazy(() => import('./pages/AboutPage.jsx'));
@@ -26,6 +29,7 @@ const SignupPage = React.lazy(() => import('./pages/SignupPage.jsx'));
 const NotFoundPage = React.lazy(() => import('./pages/NotFoundPage.jsx'));
 const BatchCampaignCreator = React.lazy(() => import('./components/BatchCampaignCreator.jsx'));
 const BatchWithdrawal = React.lazy(() => import('./components/BatchWithdrawal.jsx'));
+const MatchingPoolAdmin = React.lazy(() => import('./components/MatchingPoolAdmin.jsx'));
 const DiagnosticPage = React.lazy(() => import('./pages/DiagnosticPage.jsx'));
 
 const router = createBrowserRouter([
@@ -83,6 +87,20 @@ const router = createBrowserRouter([
     ],
   },
   {
+    path: '/my-nfts',
+    element: <NewDashboardLayout />,
+    children: [
+      { index: true, element: <MyNftsPage /> },
+    ],
+  },
+  {
+    path: '/leaderboard',
+    element: <NewDashboardLayout />,
+    children: [
+      { index: true, element: <LeaderboardPage /> },
+    ],
+  },
+  {
     path: '/batch-create',
     element: <NewDashboardLayout />,
     children: [
@@ -94,6 +112,13 @@ const router = createBrowserRouter([
     element: <NewDashboardLayout />,
     children: [
       { index: true, element: <BatchWithdrawal /> },
+    ],
+  },
+  {
+    path: '/admin/matching-pool',
+    element: <NewDashboardLayout />,
+    children: [
+      { index: true, element: <MatchingPoolAdmin /> },
     ],
   },
   {
@@ -186,9 +211,11 @@ function App() {
         <WalletProvider>
           <CampaignProvider>
             <BatchOperationsProvider>
-              <Suspense fallback={<SuspenseFallback />}>
-                <RouterProvider router={router} />
-              </Suspense>
+              <NftProvider>
+                <Suspense fallback={<SuspenseFallback />}>
+                  <RouterProvider router={router} />
+                </Suspense>
+              </NftProvider>
             </BatchOperationsProvider>
           </CampaignProvider>
         </WalletProvider>

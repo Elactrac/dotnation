@@ -6,7 +6,7 @@
 import { parseBlockchainError, ErrorCodes } from './errorHandler';
 import { CONTRACT_LIMITS } from '../config/constants';
 
-const MAX_STORAGE_DEPOSIT_STRING = CONTRACT_LIMITS.MAX_STORAGE_DEPOSIT.toString();
+const MAX_STORAGE_DEPOSIT_STRING = CONTRACT_LIMITS.MAX_STORAGE_DEPOSIT ? CONTRACT_LIMITS.MAX_STORAGE_DEPOSIT.toString() : null;
 const DEFAULT_REF_TIME = 3_000_000_000; // 3 billion
 const DEFAULT_PROOF_SIZE = 1_048_576; // 1 MB
 
@@ -210,10 +210,11 @@ export const executeContractQuery = async (
     : { refTime: DEFAULT_REF_TIME, proofSize: DEFAULT_PROOF_SIZE };
   
   const queryFn = async () => {
-    // For Paseo/production chains, use a large storage deposit limit for dry-run queries
-    // Setting to 10 DOT (10_000_000_000_000) should be sufficient for most operations
-    // The actual amount will be calculated and returned in storageDeposit
-  const storageLimit = MAX_STORAGE_DEPOSIT_STRING;
+    // Use the storage limit from options or MAX_STORAGE_DEPOSIT from config
+    // null means unlimited, which lets the contract calculate storage automatically
+    const storageLimit = options.queryOptions?.storageDepositLimit !== undefined 
+      ? options.queryOptions.storageDepositLimit 
+      : MAX_STORAGE_DEPOSIT_STRING;
     
     const queryOptions = {
       ...options.queryOptions,
@@ -327,43 +328,25 @@ export const prepareContractTransaction = async (
   );
   
   // Extract the actual storage deposit value if it's wrapped in a Charge object
-  let storageLimit = MAX_STORAGE_DEPOSIT_STRING;
+  let cappedStorageLimit = null;
   if (storageDeposit) {
     // storageDeposit can be { Charge: value } or { Refund: value }
     if (storageDeposit.asCharge) {
-      storageLimit = storageDeposit.asCharge;
+      cappedStorageLimit = storageDeposit.asCharge.toString();
     } else if (storageDeposit.isCharge) {
-      storageLimit = storageDeposit.asCharge;
-    } else {
-      // Fallback: use a reasonable default (10 DOT)
-      storageLimit = MAX_STORAGE_DEPOSIT_STRING;
-    }
-  } else {
-    // No storage deposit info, use a reasonable default for Paseo
-    storageLimit = MAX_STORAGE_DEPOSIT_STRING;
-  }
-
-  let cappedStorageLimit = MAX_STORAGE_DEPOSIT_STRING;
-  if (storageLimit !== null) {
-    try {
-      const numericStorage = toBigInt(storageLimit);
-      if (numericStorage > CONTRACT_LIMITS.MAX_STORAGE_DEPOSIT) {
-        throw new Error(
-          `Storage deposit requirement (${numericStorage.toString()} plancks) exceeds cap of ${MAX_STORAGE_DEPOSIT_STRING}.`
-        );
-      }
-      cappedStorageLimit = numericStorage.toString();
-    } catch (error) {
-      console.warn('[contractRetry] Failed to parse storage limit, using max cap:', error?.message);
-      throw error;
+      cappedStorageLimit = storageDeposit.asCharge.toString();
     }
   }
+  
+  // If no storage deposit returned from query, use null to let chain calculate it
+  console.log('[contractRetry] Using storage deposit limit:', cappedStorageLimit || 'null (auto-calculate)');
 
   const userSpecifiedTxLimit = options.txOptions?.storageDepositLimit;
-  if (userSpecifiedTxLimit !== undefined) {
+  if (userSpecifiedTxLimit !== undefined && userSpecifiedTxLimit !== null) {
     try {
       const userLimitBigInt = toBigInt(userSpecifiedTxLimit);
-      if (userLimitBigInt > CONTRACT_LIMITS.MAX_STORAGE_DEPOSIT) {
+      // Only check the cap if MAX_STORAGE_DEPOSIT is set (not null)
+      if (CONTRACT_LIMITS.MAX_STORAGE_DEPOSIT && userLimitBigInt > CONTRACT_LIMITS.MAX_STORAGE_DEPOSIT) {
         throw new Error(
           `User-supplied storage deposit limit (${userLimitBigInt.toString()} plancks) exceeds cap of ${MAX_STORAGE_DEPOSIT_STRING}.`
         );
@@ -380,7 +363,7 @@ export const prepareContractTransaction = async (
     args,
     gasRequired: gasRequired?.toString(),
     storageDeposit: storageDeposit?.toString(),
-    storageLimit: storageLimit?.toString(),
+    cappedStorageLimit: cappedStorageLimit?.toString(),
     txOptions: options.txOptions
   });
   

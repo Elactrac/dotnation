@@ -462,78 +462,6 @@ app.post('/api/fraud-detection', aiLimiter, validateMiddleware('fraudDetection')
 });
 
 /**
- * @route POST /api/generate-title
- * @group AI - AI-powered content generation
- * @param {string} keywords.body - Keywords for the campaign.
- * @param {string} category.body - Campaign category.
- * @returns {object} 200 - An object containing generated title suggestions.
- * @returns {Error}  500 - Failed to generate titles.
- */
-app.post('/api/generate-title', aiLimiter, validateMiddleware('generateTitle'), async (req, res) => {
-  const startTime = Date.now();
-  
-  try {
-    const { keywords, category } = req.body;
-
-    logger.info('Generating titles', { keywords, category });
-
-    if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your_gemini_api_key_here') {
-      const mockTitles = [
-        `Revolutionary ${category || 'Project'} Initiative`,
-        `Community-Driven ${keywords || 'Innovation'} Platform`,
-        `Decentralized ${keywords || 'Solution'} for Everyone`
-      ];
-      return res.json({ titles: mockTitles, mock: true });
-    }
-
-    const prompt = `Generate 5 compelling and unique crowdfunding campaign titles for a ${category || 'general'} project about ${keywords || 'innovation'}. 
-    
-    STRICT REQUIREMENTS:
-    - Each title must be 5-10 words and under 100 characters
-    - Make them catchy, professional, and action-oriented
-    - Focus on the impact and benefits, not just features
-    - Avoid generic buzzwords like "revolutionary" or "innovative"
-    - Be specific and memorable
-    - NO markdown formatting, symbols, or special characters
-    - Return ONLY a valid JSON array, nothing else
-    
-    Return format (plain text JSON only):
-    ["First Campaign Title Here", "Second Campaign Title Here", "Third Campaign Title Here", "Fourth Campaign Title Here", "Fifth Campaign Title Here"]`;
-
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    let text = response.text();
-    
-    logger.debug('Raw AI response:', { text: text.substring(0, 200) });
-    
-    // Remove markdown code fences if present
-    text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-    
-    // Extract JSON array from response
-    const jsonMatch = text.match(/\[[\s\S]*\]/);
-    if (jsonMatch) {
-      const titles = JSON.parse(jsonMatch[0]);
-      
-      const responseTime = Date.now() - startTime;
-      logger.logAIUsage('/api/generate-title', prompt, responseTime);
-      
-      return res.json({ titles });
-    }
-
-    // Fallback
-    logger.warn('Failed to extract JSON from AI response', { text });
-    res.json({ titles: ['Create a Compelling Campaign Title'] });
-
-  } catch (error) {
-    logger.logError(error, req);
-    res.status(500).json({ 
-      error: 'Failed to generate titles.', 
-      details: sanitizeError(error) 
-    });
-  }
-});
-
-/**
  * Helper function to get client IP address
  */
 function getClientIP(req) {
@@ -717,6 +645,102 @@ app.get('/api/captcha/stats', (req, res) => {
   } catch (error) {
     logger.logError(error, req);
     res.status(500).json({ error: 'Failed to retrieve stats' });
+  }
+});
+
+/**
+ * @route POST /api/profile/save
+ * @group Profile - User profile storage
+ * @param {string} walletAddress.body.required - The user's wallet address.
+ * @param {object} profile.body.required - The profile data to save.
+ * @returns {object} 200 - Success response.
+ * @returns {Error} 400 - Missing required fields.
+ * @returns {Error} 500 - Failed to save profile.
+ */
+app.post('/api/profile/save', validateMiddleware('saveProfile'), async (req, res) => {
+  try {
+    const { walletAddress, profile } = req.body;
+
+    logger.info('Saving profile', { walletAddress: walletAddress.substring(0, 10) + '...' });
+
+    if (!redisReady) {
+      logger.warn('Redis not available, profile not saved');
+      return res.status(503).json({ 
+        error: 'Profile storage service unavailable. Please try again later.' 
+      });
+    }
+
+    // Validate profile data
+    const validatedProfile = {
+      displayName: profile.displayName?.substring(0, 50) || '',
+      bio: profile.bio?.substring(0, 500) || '',
+      website: profile.website?.substring(0, 200) || '',
+      twitter: profile.twitter?.substring(0, 100) || '',
+      emailNotifications: !!profile.emailNotifications,
+      campaignUpdates: !!profile.campaignUpdates,
+      donationAlerts: !!profile.donationAlerts,
+      lastUpdated: new Date().toISOString()
+    };
+
+    // Save to Redis with 1 year TTL (profiles are semi-permanent)
+    const profileKey = `profile:${walletAddress}`;
+    const client = require('./redisClient').getRedisClient();
+    await client.setEx(profileKey, 31536000, JSON.stringify(validatedProfile)); // 1 year
+
+    logger.info('Profile saved successfully', { walletAddress: walletAddress.substring(0, 10) + '...' });
+
+    res.json({ 
+      success: true, 
+      message: 'Profile saved successfully',
+      profile: validatedProfile
+    });
+
+  } catch (error) {
+    logger.logError(error, req);
+    res.status(500).json({ 
+      error: 'Failed to save profile.', 
+      details: sanitizeError(error) 
+    });
+  }
+});
+
+/**
+ * @route GET /api/profile/:walletAddress
+ * @group Profile - User profile storage
+ * @param {string} walletAddress.path.required - The user's wallet address.
+ * @returns {object} 200 - Profile data or null if not found.
+ * @returns {Error} 500 - Failed to load profile.
+ */
+app.get('/api/profile/:walletAddress', async (req, res) => {
+  try {
+    const { walletAddress } = req.params;
+
+    logger.info('Loading profile', { walletAddress: walletAddress.substring(0, 10) + '...' });
+
+    if (!redisReady) {
+      logger.warn('Redis not available, returning null profile');
+      return res.json({ profile: null });
+    }
+
+    const profileKey = `profile:${walletAddress}`;
+    const client = require('./redisClient').getRedisClient();
+    const profileData = await client.get(profileKey);
+
+    if (profileData) {
+      const profile = JSON.parse(profileData);
+      logger.info('Profile loaded successfully', { walletAddress: walletAddress.substring(0, 10) + '...' });
+      res.json({ profile });
+    } else {
+      logger.info('No profile found', { walletAddress: walletAddress.substring(0, 10) + '...' });
+      res.json({ profile: null });
+    }
+
+  } catch (error) {
+    logger.logError(error, req);
+    res.status(500).json({ 
+      error: 'Failed to load profile.', 
+      details: sanitizeError(error) 
+    });
   }
 });
 

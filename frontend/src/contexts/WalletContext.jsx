@@ -6,7 +6,7 @@ import { setUserContext, trackEvent, trackError } from '../utils/sentry';
 import { useApi } from './ApiContext';
 import CaptchaModal from '../components/CaptchaModal';
 
-const WalletContext = createContext({});
+export const WalletContext = createContext({});
 
 /**
  * Provides wallet-related state and functions to the application.
@@ -65,9 +65,50 @@ export const WalletProvider = ({ children }) => {
     const startTime = Date.now();
 
     try {
-      const extensions = await web3Enable('DotNation');
+      // Add retry logic for extension connection
+      let extensions = [];
+      let lastError = null;
+      const maxRetries = 3;
+      
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          console.log(`Attempting to connect to Polkadot.js extension (attempt ${attempt}/${maxRetries})...`);
+          
+          // Wait a bit between retries to allow extension to initialize
+          if (attempt > 1) {
+            await new Promise(resolve => setTimeout(resolve, 500 * attempt));
+          }
+          
+          extensions = await web3Enable('DotNation');
+          
+          if (extensions.length > 0) {
+            console.log(`Successfully connected to Polkadot.js extension on attempt ${attempt}`);
+            break;
+          }
+          
+          // If no extensions but no error, it might be not installed
+          if (attempt === maxRetries) {
+            throw new Error('Please install the Polkadot.js browser extension and refresh the page');
+          }
+        } catch (err) {
+          console.warn(`Attempt ${attempt} failed:`, err.message);
+          lastError = err;
+          
+          // Check for specific error types
+          if (err.message.includes('does not exist')) {
+            if (attempt < maxRetries) {
+              continue; // Retry for "receiving end does not exist" errors
+            }
+            throw new Error('Polkadot.js extension is not responding. Please:\n1. Ensure the extension is installed\n2. Reload the extension in your browser\n3. Refresh this page');
+          }
+          
+          // For other errors, throw immediately
+          throw err;
+        }
+      }
+      
       if (extensions.length === 0) {
-        const error = new Error('No extension installed, or the user did not accept the authorization');
+        const error = new Error(lastError?.message || 'No extension installed, or the user did not accept the authorization');
         metrics.recordError(error, 'error', { operation: 'connectWallet' });
         throw error;
       }
@@ -128,9 +169,50 @@ export const WalletProvider = ({ children }) => {
     const startTime = Date.now();
 
     try {
-      const extensions = await web3Enable('DotNation');
+      // Add retry logic for extension connection
+      let extensions = [];
+      let lastError = null;
+      const maxRetries = 3;
+      
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          console.log(`Attempting to connect to Polkadot.js extension (attempt ${attempt}/${maxRetries})...`);
+          
+          // Wait a bit between retries to allow extension to initialize
+          if (attempt > 1) {
+            await new Promise(resolve => setTimeout(resolve, 500 * attempt));
+          }
+          
+          extensions = await web3Enable('DotNation');
+          
+          if (extensions.length > 0) {
+            console.log(`Successfully connected to Polkadot.js extension on attempt ${attempt}`);
+            break;
+          }
+          
+          // If no extensions but no error, it might be not installed
+          if (attempt === maxRetries) {
+            throw new Error('Please install the Polkadot.js browser extension and refresh the page');
+          }
+        } catch (err) {
+          console.warn(`Attempt ${attempt} failed:`, err.message);
+          lastError = err;
+          
+          // Check for specific error types
+          if (err.message.includes('does not exist')) {
+            if (attempt < maxRetries) {
+              continue; // Retry for "receiving end does not exist" errors
+            }
+            throw new Error('Polkadot.js extension is not responding. Please:\n1. Ensure the extension is installed\n2. Reload the extension in your browser\n3. Refresh this page');
+          }
+          
+          // For other errors, throw immediately
+          throw err;
+        }
+      }
+      
       if (extensions.length === 0) {
-        const error = new Error('No extension installed, or the user did not accept the authorization');
+        const error = new Error(lastError?.message || 'No extension installed, or the user did not accept the authorization');
         metrics.recordError(error, 'error', { operation: 'connectWallet' });
         throw error;
       }

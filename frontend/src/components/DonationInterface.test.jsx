@@ -3,11 +3,32 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { DonationInterface } from './DonationInterface';
 import * as formatters from '../utils/formatters';
 
+// Mock framer-motion
+vi.mock('framer-motion', () => ({
+  motion: {
+    div: ({ children, ...props }) => <div {...props}>{children}</div>,
+    button: ({ children, ...props }) => <button {...props}>{children}</button>,
+  },
+  AnimatePresence: ({ children }) => <>{children}</>,
+}));
+
 // Mock lucide-react icons
 vi.mock('lucide-react', () => ({
   Heart: () => <div data-testid="heart-icon">Heart</div>,
   AlertCircle: () => <div data-testid="alert-icon">AlertCircle</div>,
   Info: () => <div data-testid="info-icon">Info</div>,
+  CheckCircle: () => <div data-testid="check-icon">CheckCircle</div>,
+  Wallet: () => <div data-testid="wallet-icon">Wallet</div>,
+  TrendingUp: () => <div data-testid="trending-icon">TrendingUp</div>,
+  ArrowRight: () => <div data-testid="arrow-icon">ArrowRight</div>,
+  Loader: () => <div data-testid="loader-icon">Loader</div>,
+  Gift: () => <div data-testid="gift-icon">Gift</div>,
+}));
+
+// Mock @polkadot/extension-dapp
+vi.mock('@polkadot/extension-dapp', () => ({
+  web3FromAddress: vi.fn(),
+  web3Enable: vi.fn(),
 }));
 
 // Mock formatters
@@ -18,11 +39,32 @@ vi.mock('../utils/formatters', () => ({
     const num = parseFloat(value);
     return !isNaN(num) && num > 0;
   }),
+  calculateProgress: vi.fn((raised, goal) => {
+    const progress = (Number(raised) / Number(goal)) * 100;
+    return Math.min(progress, 100);
+  }),
 }));
 
 // Mock errorHandler
 vi.mock('../utils/errorHandler', () => ({
   asyncHandler: (fn) => fn,
+}));
+
+// Mock validation
+vi.mock('../utils/validation', () => ({
+  validateDonationAmount: vi.fn((value) => {
+    const num = parseFloat(value);
+    if (isNaN(num) || num <= 0) {
+      throw new Error('Please enter a valid positive number');
+    }
+    if (num < 0.001) {
+      throw new Error('Minimum donation is 0.001 DOT');
+    }
+    if (num > 100000) {
+      throw new Error('Maximum donation is 100,000 DOT');
+    }
+    return true;
+  }),
 }));
 
 // Create mock functions that we can control in tests
@@ -39,6 +81,13 @@ vi.mock('../contexts/CampaignContext.jsx', () => ({
 vi.mock('../contexts/WalletContext.jsx', () => ({
   useWallet: () => ({
     selectedAccount: mockSelectedAccount,
+  }),
+}));
+
+vi.mock('../contexts/NftContext.jsx', () => ({
+  useNft: () => ({
+    nftEnabled: false,
+    mintNftReceipt: vi.fn(),
   }),
 }));
 

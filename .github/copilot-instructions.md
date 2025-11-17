@@ -1,10 +1,11 @@
 # DotNation - AI Agent Instructions
 
 ## Project Overview
-DotNation is a decentralized crowdfunding platform built on Polkadot. It consists of:
-- **Backend**: ink! smart contract (`donation_platform/lib.rs`) for Polkadot parachains
+DotNation is a decentralized crowdfunding platform built on Polkadot with advanced features:
+- **Backend**: ink! smart contract (`donation_platform/lib.rs`) with Quadratic Funding & DAO Voting
 - **Frontend**: React 18 + Vite 5 SPA with Chakra UI v3 and Polkadot.js
 - **Network**: Targets local `substrate-contracts-node` (dev) and Polkadot parachains (prod)
+- **Key Features**: Quadratic Funding matching pools, DAO milestone-based voting, weighted governance
 
 ## Tech Stack
 - **Smart Contract**: Rust + ink! 5.0.2, cargo-contract 5.0.3
@@ -16,13 +17,19 @@ DotNation is a decentralized crowdfunding platform built on Polkadot. It consist
 ## Architecture & Data Flow
 
 ### Smart Contract Layer (Rust + ink!)
-- **Location**: `donation_platform/lib.rs`
+- **Location**: `donation_platform/lib.rs` (V2 with QF + DAO voting)
 - **Pattern**: Campaign state machine with 4 states: `Active`, `Successful`, `Failed`, `Withdrawn`
+- **Advanced Features**:
+  - **Quadratic Funding**: Matching pools, rounds, QF calculation with sqrt algorithm
+  - **DAO Voting**: Milestone-based releases, weighted voting (66% threshold), sequential unlocking
+  - **Governance**: Donors vote on milestones proportional to donation amount
 - **Critical invariants**:
   - Funds transfer directly: Donor → Contract → Beneficiary (never through intermediaries)
-  - Withdrawals only allowed when: goal reached OR deadline passed
+  - Withdrawals only allowed when: goal reached OR deadline passed (or milestone approved)
   - All amounts stored in `Balance` type (Polkadot's smallest unit)
   - Campaign IDs are auto-incremented u32 starting from 0
+  - QF matching distributed only when round ends
+  - Milestones must be activated and released sequentially
 
 ### Frontend Architecture (React + Polkadot.js)
 - **Entry**: `frontend/src/main.jsx` → `App.jsx` → React Router → Pages
@@ -33,7 +40,11 @@ DotNation is a decentralized crowdfunding platform built on Polkadot. It consist
 - **State management**: React Context API (3 contexts)
   - `WalletContext`: Polkadot.js extension auth, account selection, wallet UI
   - `ApiContext`: WebSocket connection to Substrate node (ws://127.0.0.1:9944)
-  - `CampaignContext`: Contract method wrappers, campaign CRUD, donation flows
+  - `CampaignContext`: Contract method wrappers, campaign CRUD, donation flows, QF functions, DAO voting
+- **New Components**:
+  - `MilestoneCreation.jsx`: Form for campaign owners to define milestones (475 lines)
+  - `MilestoneVoting.jsx`: Voting interface for donors, fund release for owners (390 lines)
+  - `MatchingPoolAdmin.jsx`: Admin dashboard for QF matching pool management
 - **Resilience**: App loads without Polkadot node (5s timeout), shows warnings if disconnected
 
 ### Contract Interaction Pattern

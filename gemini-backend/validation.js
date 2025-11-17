@@ -90,19 +90,6 @@ const schemas = {
     },
   },
 
-  generateTitle: {
-    keywords: {
-      type: 'string',
-      maxLength: 200,
-      sanitize: true,
-    },
-    category: {
-      type: 'string',
-      maxLength: 50,
-      sanitize: true,
-    },
-  },
-
   captchaChallenge: {
     sessionToken: {
       required: true,
@@ -149,6 +136,47 @@ const schemas = {
       type: 'string',
       minLength: 10,
       maxLength: 500,
+    },
+  },
+
+  saveProfile: {
+    walletAddress: {
+      required: true,
+      type: 'string',
+      pattern: /^[1-9A-HJ-NP-Za-km-z]{47,48}$/, // Substrate SS58 address
+    },
+    profile: {
+      required: true,
+      type: 'object',
+      properties: {
+        displayName: {
+          type: 'string',
+          maxLength: 50,
+          sanitize: true,
+        },
+        bio: {
+          type: 'string',
+          maxLength: 500,
+          sanitize: true,
+        },
+        website: {
+          type: 'string',
+          maxLength: 200,
+        },
+        twitter: {
+          type: 'string',
+          maxLength: 100,
+        },
+        emailNotifications: {
+          type: 'boolean',
+        },
+        campaignUpdates: {
+          type: 'boolean',
+        },
+        donationAlerts: {
+          type: 'boolean',
+        },
+      },
     },
   },
 };

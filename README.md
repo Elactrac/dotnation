@@ -18,6 +18,41 @@
 
 ---
 
+## 🎯 Presentation
+
+**Looking for our pitch deck?** Check out our professional HTML presentation:
+
+📊 **[dotnation_presentation.html](./dotnation_presentation.html)** - Interactive 9-slide presentation
+
+**Features:**
+- ✨ Smooth animations triggered on navigation
+- 📱 Fully responsive design
+- ⌨️ Keyboard navigation (Arrow keys, Space, Home/End)
+- 👆 Touch swipe support for mobile
+- 🎨 Interactive charts and visual comparisons
+- 🌐 Animated backgrounds with blur effects
+- 📍 Progress indicators and navigation dots
+- 🖥️ Fullscreen mode support
+
+**How to use:**
+```bash
+# Simply open in any browser
+open dotnation_presentation.html
+
+# Or serve locally
+npx serve .
+```
+
+**Navigation:**
+- **Next**: Arrow Right, Arrow Down, Space, PageDown, or swipe left
+- **Previous**: Arrow Left, Arrow Up, PageUp, or swipe right
+- **Jump to slide**: Click navigation dots at bottom
+- **Fullscreen**: Click fullscreen button (top right)
+- **Go to start**: Home key
+- **Go to end**: End key
+
+---
+
 ## 🚀 Why DotNation?
 
 Traditional crowdfunding platforms take 5-10% in fees, hold your funds in escrow, and can freeze accounts without warning. **DotNation changes the game.**
@@ -39,6 +74,8 @@ DotNation leverages **Polkadot's ink! smart contracts** to create a trustless, t
 - ✅ **Truly Decentralized** - No single point of failure or control
 - ✅ **Global Access** - Available to anyone with a Polkadot wallet
 - ✅ **AI-Powered** - Get help crafting compelling campaigns with Google Gemini AI
+- ✅ **Quadratic Funding** - Democratic grant distribution amplifies small donations
+- ✅ **DAO Milestone Voting** - Community-governed fund releases ensure accountability
 - ✅ **Upgradable & Scalable** - Built for millions of users with proxy pattern architecture
 
 ---
@@ -70,11 +107,13 @@ Perfect for hackathons, MVPs, or production! Deploy the entire platform with **z
 | Backend | Render.com | **FREE** (750hrs/month) |
 | Database | Upstash Redis | **FREE** (10K commands/day) |
 | AI Engine | Google Gemini | **FREE** API |
-| Blockchain | Rococo/Shibuya Testnet | **FREE** |
+| Blockchain | Paseo/Rococo/Shibuya Testnet | **FREE** |
 
 **Total: $0/month** 🎉 No credit card required!
 
 👉 **[Complete Deployment Guide](VERCEL_DEPLOYMENT_GUIDE.md)** - Get live in 15 minutes
+
+👉 **[Testnet Testing Guide](TESTNET_TESTING_GUIDE.md)** - Full testing on Paseo ecosystem
 
 ---
 
@@ -88,6 +127,24 @@ Perfect for hackathons, MVPs, or production! Deploy the entire platform with **z
 - **Reentrancy Protection**: Battle-tested security patterns prevent exploits
 - **Time-Bound Campaigns**: Enforced deadlines with automatic state transitions
 - **On-Chain Events**: Complete audit trail of every action
+
+### 🎯 Quadratic Funding (QF)
+
+- **Democratic Distribution**: Small donations get amplified through matching pools
+- **Matching Rounds**: Create time-bound rounds with dedicated matching funds
+- **Fair Allocation**: Mathematical formula `(√d₁ + √d₂ + ... + √dₙ)²` ensures equitable distribution
+- **Real-Time Estimates**: Donors see estimated matching boost before contributing
+- **Transparent Calculation**: All QF math happens on-chain and is verifiable
+- **Unique Donor Tracking**: Prevents matching pool exploitation
+
+### 🗳️ DAO Milestone Voting
+
+- **Milestone-Based Releases**: Break campaigns into phases with specific deliverables
+- **Weighted Voting**: Donor voting power proportional to contribution amount
+- **66% Approval Threshold**: Democratic consensus required for fund release
+- **Sequential Unlocking**: Milestones must complete in order
+- **Transparent Progress**: Real-time voting status visible to all
+- **Accountability**: Ensures campaign owners deliver on promises
 
 ### 🚀 Advanced Architecture (V2)
 
@@ -202,7 +259,7 @@ DotNation is built on a modern, scalable three-tier architecture designed for mi
 - ESLint + Prettier
 - Husky pre-commit hooks
 - Docker support
-- Automated security audits
+- Automated testing pipeline
 
 ---
 
@@ -211,8 +268,7 @@ DotNation is built on a modern, scalable three-tier architecture designed for mi
 ```
 DotNation/
 ├── 📜 donation_platform/       # ink! Smart Contracts
-│   ├── lib.rs                 # V1 contract (production-ready)
-│   ├── lib_v2.rs              # V2 with batch operations
+│   ├── lib.rs                 # V2 contract with QF + DAO voting (production-ready)
 │   ├── proxy.rs               # Upgradable proxy pattern
 │   ├── UPGRADE_GUIDE.md       # Contract upgrade documentation
 │   └── SCALABILITY_GUIDE.md   # Scaling to millions of users
@@ -241,10 +297,14 @@ DotNation/
 │   ├── security.yml           # Security audits
 │   └── deploy.yml             # Automated deployment
 │
+├── 📊 dotnation_presentation.html  # Interactive pitch deck
+│
 └── 📚 Documentation
     ├── VERCEL_DEPLOYMENT_GUIDE.md
-    ├── TESTNET_DEPLOYMENT_CHECKLIST.md
-    └── BACKEND_MAINNET_READINESS.md
+    ├── TESTNET_TESTING_GUIDE.md
+    ├── QUADRATIC_FUNDING_IMPLEMENTATION.md
+    ├── DAO_FRONTEND_COMPLETE.md
+    └── DEMO_SCRIPT.md
 ```
 
 ---
@@ -412,37 +472,41 @@ See [BACKEND_MAINNET_READINESS.md](BACKEND_MAINNET_READINESS.md) for production 
 
 ## 📚 Documentation
 
-### Smart Contracts
+**📖 [Complete Documentation Index](./DOCUMENTATION_INDEX.md)** - Find all documentation organized by topic and role
 
-Generate comprehensive Rust documentation:
+### Quick Links
+
+**Getting Started:**
+- [README.md](./README.md) - You are here! Project overview and quick start
+- [dotnation_presentation.html](./dotnation_presentation.html) - Interactive 9-slide pitch deck
+- [FEATURES.md](./FEATURES.md) - Complete feature documentation with technical details
+- [DEMO_SCRIPT.md](./DEMO_SCRIPT.md) - Step-by-step demo walkthrough
+
+**Core Features:**
+- [Quadratic Funding Implementation](./QUADRATIC_FUNDING_IMPLEMENTATION.md) - QF technical details
+- [DAO Milestone Voting](./DAO_FRONTEND_COMPLETE.md) - DAO governance documentation
+- [AI-Powered Features](./gemini-backend/README.md) - Gemini AI integration
+
+**Deployment:**
+- [Vercel Deployment Guide](./VERCEL_DEPLOYMENT_GUIDE.md) - Deploy for FREE (15 minutes)
+- [Testnet Testing Guide](./TESTNET_TESTING_GUIDE.md) - Complete testnet deployment
+- [Security Checklist](./DEPLOYMENT_SECURITY_CHECKLIST.md) - Pre-deployment security review
+
+**Development:**
+- [Contributing Guide](./CONTRIBUTING.md) - How to contribute
+- [Smart Contract Docs](./donation_platform/UPGRADE_GUIDE.md) - Contract architecture
+- [Backend API Docs](./gemini-backend/README.md) - Backend integration guide
+
+### Generate API Documentation
+
+**Smart Contracts:**
 ```bash
 cd donation_platform
 cargo doc --open
 ```
 
-**Key Guides:**
-- [UPGRADE_GUIDE.md](donation_platform/UPGRADE_GUIDE.md) - Implement upgradable contracts
-- [SCALABILITY_GUIDE.md](donation_platform/SCALABILITY_GUIDE.md) - Scale to millions of users
-
-### Backend API
-
-Complete backend documentation:
-```bash
-cd gemini-backend
-cat README.md
-```
-
-**Key Resources:**
-- [IMPLEMENTATION_GUIDE.md](gemini-backend/IMPLEMENTATION_GUIDE.md) - Backend setup
-- [REDIS_SETUP.md](gemini-backend/REDIS_SETUP.md) - Redis configuration
-- API Endpoints documented in `server.js`
-
-### Deployment Guides
-
-- [VERCEL_DEPLOYMENT_GUIDE.md](VERCEL_DEPLOYMENT_GUIDE.md) - Deploy for FREE
-- [TESTNET_DEPLOYMENT_CHECKLIST.md](TESTNET_DEPLOYMENT_CHECKLIST.md) - Testnet setup
-- [TESTNET_TESTING_GUIDE.md](TESTNET_TESTING_GUIDE.md) - Test on testnet
-- [BACKEND_MAINNET_READINESS.md](BACKEND_MAINNET_READINESS.md) - Production checklist
+**Backend API:**
+See [gemini-backend/README.md](./gemini-backend/README.md) for complete API documentation
 
 ---
 
@@ -481,12 +545,13 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
 ## 🛡️ Security
 
-### Audit Status
+### Security Status
 
-- ✅ **Smart Contract**: Comprehensive unit tests, reentrancy protection
+- ✅ **Smart Contract**: 108+ test files, reentrancy protection, comprehensive testing
 - ✅ **Backend**: API authentication, rate limiting, input validation
-- ✅ **Frontend**: XSS prevention, secure wallet integration
-- ✅ **CI/CD**: Automated security audits on every commit
+- ✅ **Frontend**: XSS prevention, secure wallet integration, error boundaries
+- ✅ **Codebase**: 44,000+ lines of production-ready code
+- ⚠️ **External Audit**: Planned before mainnet launch
 
 ### Reporting Security Issues
 
@@ -524,7 +589,11 @@ Found a vulnerability? Please **do not** open a public issue. Instead:
 - [x] Redis session management
 - [x] Fraud detection
 
-### Phase 3: Advanced Features 🚧 (In Progress)
+### Phase 3: Advanced Features ✅ (Completed)
+- [x] **Quadratic Funding** - Democratic grant distribution with matching pools
+- [x] **DAO Milestone Voting** - Community governance for fund releases
+- [x] **Weighted Voting System** - Voting power based on donation amount
+- [x] **Sequential Milestone Unlocking** - Enforced accountability
 - [ ] Campaign categories and search filters
 - [ ] Social sharing integration
 - [ ] Email notifications
@@ -551,6 +620,8 @@ Found a vulnerability? Please **do not** open a public issue. Instead:
 - 🌍 **Global reach** - Access supporters worldwide
 - 📊 **Full transparency** - Prove funds reached their destination
 - 🔒 **No middlemen** - Direct donor-to-creator transfers
+- 🎯 **Matching funds** - Amplify small donations with quadratic funding
+- 🗳️ **Build trust** - Optional milestone voting proves accountability
 
 ### For Donors
 
@@ -559,6 +630,8 @@ Found a vulnerability? Please **do not** open a public issue. Instead:
 - 🌐 **Support anyone** - No geographic restrictions
 - 🔐 **Stay anonymous** - Donate with just a wallet address
 - 📈 **Track impact** - Follow campaign progress in real-time
+- 🎁 **Matching boost** - Small donations get amplified through QF pools
+- 🗳️ **Vote on milestones** - Govern how funds are released
 
 ### For Developers
 

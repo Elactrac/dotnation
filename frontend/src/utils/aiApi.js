@@ -288,3 +288,63 @@ export async function getCampaignQualityScore(campaign) {
     };
   }
 }
+
+/**
+ * Save user profile to backend
+ * @param {string} walletAddress - User's wallet address
+ * @param {Object} profile - Profile data to save
+ * @returns {Promise<{success: boolean, profile: Object}>}
+ */
+export async function saveProfile(walletAddress, profile) {
+  try {
+    console.log('[Profile API] Saving profile for:', walletAddress.substring(0, 10) + '...');
+    const response = await fetchWithTimeout(`${BACKEND_URL}/api/profile/save`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ walletAddress, profile }),
+    }, REQUEST_TIMEOUT);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = Array.isArray(errorData.details) 
+        ? errorData.details.join(', ') 
+        : errorData.details || errorData.error || response.statusText;
+      throw new Error(`Failed to save profile: ${errorMessage}`);
+    }
+
+    const data = await response.json();
+    console.log('[Profile API] ✅ Profile saved successfully');
+    return data;
+  } catch (error) {
+    console.error('[Profile API] Error saving profile:', error);
+    throw error;
+  }
+}
+
+/**
+ * Load user profile from backend
+ * @param {string} walletAddress - User's wallet address
+ * @returns {Promise<{profile: Object|null}>}
+ */
+export async function loadProfile(walletAddress) {
+  try {
+    console.log('[Profile API] Loading profile for:', walletAddress.substring(0, 10) + '...');
+    const response = await fetchWithTimeout(`${BACKEND_URL}/api/profile/${walletAddress}`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    }, REQUEST_TIMEOUT);
+
+    if (!response.ok) {
+      console.error('[Profile API] Backend error:', response.status, response.statusText);
+      throw new Error(`Failed to load profile: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log('[Profile API] ✅ Profile loaded successfully');
+    return data;
+  } catch (error) {
+    console.error('[Profile API] Error loading profile:', error);
+    // Return null profile on error
+    return { profile: null };
+  }
+}

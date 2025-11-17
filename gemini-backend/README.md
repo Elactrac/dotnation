@@ -1,5 +1,7 @@
 # Gemini Backend - AI Campaign Assistant
 
+**Last Updated:** November 15, 2025
+
 Node.js + Express server that integrates Google's Gemini AI (FREE tier) to provide intelligent campaign assistance for DotNation.
 
 ## Features

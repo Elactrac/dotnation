@@ -5,6 +5,7 @@ import { useWallet } from '../contexts/WalletContext';
 const NewLandingPage = () => {
   const { accounts, selectedAccount, connectWallet, switchAccount, disconnectWallet } = useWallet();
   const [activeFilter, setActiveFilter] = useState('all');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
     let lastScroll = 0;
@@ -172,6 +173,20 @@ const NewLandingPage = () => {
     };
   }, []);
 
+  // Handle click outside dropdown to close it
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isDropdownOpen && !event.target.closest('.relative')) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isDropdownOpen]);
+
   const formatAddress = (address) => {
     if (!address) return '';
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
@@ -259,12 +274,15 @@ const NewLandingPage = () => {
                 </Link>
 
               {selectedAccount ? (
-                <div className="relative group">
-                  <button className="flex items-center gap-2 rounded-full h-10 px-4 bg-gray-800/70 text-gray-200 text-sm font-medium hover:bg-gray-700/80 transition-colors duration-300">
+                <div className="relative">
+                  <button 
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    className="flex items-center gap-2 rounded-full h-10 px-4 bg-gray-800/70 text-gray-200 text-sm font-medium hover:bg-gray-700/80 transition-colors duration-300"
+                  >
                     <span className="w-6 h-6 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-500" />
                     <span>{formatAddress(selectedAccount.address)}</span>
                       <svg
-                        className="w-4 h-4 text-gray-400"
+                        className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`}
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -275,7 +293,8 @@ const NewLandingPage = () => {
                   </button>
 
                   {/* Dropdown */}
-                  <div className="absolute right-0 mt-2 w-64 rounded-xl border border-white/10 bg-background-dark/95 backdrop-blur-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                  {isDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-64 rounded-xl border border-white/10 bg-background-dark/95 backdrop-blur-lg shadow-xl transition-all duration-200">
                     <div className="p-4">
                       <p className="text-xs text-gray-400 mb-2">Connected Account</p>
                       <p className="text-sm text-gray-200 font-medium mb-4">{selectedAccount.address}</p>
@@ -306,6 +325,7 @@ const NewLandingPage = () => {
                       </button>
                     </div>
                   </div>
+                  )}
                 </div>
               ) : (
                 <button
@@ -514,13 +534,6 @@ const NewLandingPage = () => {
                     <h3 className="text-2xl font-bold font-display mb-3">On-Chain Escrow</h3>
                     <p className="text-white/60 font-body leading-relaxed">Funds are locked in the smart contract, not our bank account. Withdrawals are only possible when campaign rules are met.</p>
                   </div>
-                  {/* Decorative element */}
-                  <div className="mt-auto pt-6 border-t border-white/10 flex items-center gap-2 text-primary text-sm font-medium group-hover:gap-3 transition-all">
-                    <span>Learn more</span>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                    </svg>
-                  </div>
                 </div>
               </div>
 
@@ -539,12 +552,6 @@ const NewLandingPage = () => {
                   <div>
                     <h3 className="text-2xl font-bold font-display mb-3">Radical Transparency</h3>
                     <p className="text-white/60 font-body leading-relaxed">Every donation, withdrawal, and campaign creation is a public transaction on the blockchain, verifiable by anyone.</p>
-                  </div>
-                  <div className="mt-auto pt-6 border-t border-white/10 flex items-center gap-2 text-secondary text-sm font-medium group-hover:gap-3 transition-all">
-                    <span>Learn more</span>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                    </svg>
                   </div>
                 </div>
               </div>
@@ -565,13 +572,242 @@ const NewLandingPage = () => {
                     <h3 className="text-2xl font-bold font-display mb-3">Community Governed</h3>
                     <p className="text-white/60 font-body leading-relaxed">Designed to be a public good, the protocol&apos;s future will be guided by its community of users, not a central corporation.</p>
                   </div>
-                  <div className="mt-auto pt-6 border-t border-white/10 flex items-center gap-2 text-purple-400 text-sm font-medium group-hover:gap-3 transition-all">
-                    <span>Learn more</span>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                    </svg>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Advanced Features Section - NEW */}
+          <section className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto relative">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(56,116,255,0.05)_0%,transparent_50%)] parallax-slow"></div>
+            <div className="text-center mb-16 relative fade-in-up">
+              <div className="inline-block px-4 py-2 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-full border border-blue-500/30 mb-4">
+                <span className="text-blue-400 font-bold text-sm">🚀 ADVANCED FEATURES</span>
+              </div>
+              <h2 className="text-4xl lg:text-5xl font-bold tracking-tight font-display mb-4">The Future of Crowdfunding</h2>
+              <p className="mt-4 max-w-2xl mx-auto text-lg text-white/70 font-body">
+                Leveraging cutting-edge blockchain technology to create the most advanced crowdfunding platform in Web3
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 stagger-children">
+              {/* XCM Cross-Chain Donations */}
+              <div className="group relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 via-cyan-500/20 to-transparent rounded-2xl blur-xl group-hover:blur-2xl transition-all"></div>
+                <div className="relative flex flex-col gap-6 rounded-2xl border border-blue-500/30 bg-gradient-to-br from-blue-500/10 via-cyan-500/5 to-transparent p-8 backdrop-blur-lg hover:border-blue-500/50 transition-all duration-300 h-full">
+                  <div className="flex items-start gap-4">
+                    <div className="relative flex-shrink-0">
+                      <div className="absolute inset-0 bg-blue-500/20 rounded-2xl blur-md"></div>
+                      <div className="relative size-16 flex items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/30">
+                        <span className="text-3xl">🌉</span>
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-2xl font-bold font-display mb-2 text-white">Cross-Chain Donations (XCM)</h3>
+                      <p className="text-blue-400 text-sm font-semibold mb-3">Powered by Polkadot XCM</p>
+                    </div>
+                  </div>
+                  <p className="text-white/70 font-body leading-relaxed">
+                    Donate from <strong>ANY Polkadot parachain</strong> - Moonbeam, Acala, Asset Hub, and more! Our XCM integration enables seamless cross-chain transfers without bridges. Assets arrive in seconds with minimal fees.
+                  </p>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-white/60 text-sm">
+                      <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span>Support for 10+ parachains (Moonbeam, Acala, Astar, etc.)</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-white/60 text-sm">
+                      <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span>12-24 second cross-chain transfer time</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-white/60 text-sm">
+                      <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span>No bridges required - native Polkadot security</span>
+                    </div>
+                  </div>
+                  <div className="mt-auto pt-6 border-t border-white/10">
+                    <div className="flex items-center justify-between">
+                      <span className="text-blue-400 text-sm font-medium">Available Now</span>
+                      <svg className="w-5 h-5 text-blue-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
                   </div>
                 </div>
+              </div>
+
+              {/* Quadratic Funding */}
+              <div className="group relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-green-400/20 via-emerald-500/20 to-transparent rounded-2xl blur-xl group-hover:blur-2xl transition-all"></div>
+                <div className="relative flex flex-col gap-6 rounded-2xl border border-green-400/30 bg-gradient-to-br from-green-400/10 via-emerald-500/5 to-transparent p-8 backdrop-blur-lg hover:border-green-400/50 transition-all duration-300 h-full">
+                  <div className="flex items-start gap-4">
+                    <div className="relative flex-shrink-0">
+                      <div className="absolute inset-0 bg-green-400/20 rounded-2xl blur-md"></div>
+                      <div className="relative size-16 flex items-center justify-center rounded-2xl bg-gradient-to-br from-green-400 to-emerald-500 text-white shadow-lg shadow-green-400/30">
+                        <svg fill="currentColor" height="32" viewBox="0 0 256 256" width="32">
+                          <path d="M176,112H152V88a8,8,0,0,0-16,0v24H112a8,8,0,0,0,0,16h24v24a8,8,0,0,0,16,0V128h24a8,8,0,0,0,0-16Zm64,40A104,104,0,1,1,136,48V16a8,8,0,0,1,16,0V48a104,104,0,0,1,88,104Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,224,152Z"/>
+                        </svg>
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-2xl font-bold font-display mb-2 text-white">Quadratic Funding</h3>
+                      <p className="text-green-400 text-sm font-semibold mb-3">Democratic Matching Pools</p>
+                    </div>
+                  </div>
+                  <p className="text-white/70 font-body leading-relaxed">
+                    <strong>Amplify community support.</strong> Our quadratic funding mechanism gives more weight to the number of contributors than the amount donated, ensuring grassroots projects get fair matching from donor pools.
+                  </p>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-white/60 text-sm">
+                      <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span>Favors projects with broad community support</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-white/60 text-sm">
+                      <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span>Automatic matching calculation & distribution</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-white/60 text-sm">
+                      <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span>Used by Gitcoin & other Web3 public goods platforms</span>
+                    </div>
+                  </div>
+                  <div className="mt-auto pt-6 border-t border-white/10">
+                    <div className="flex items-center justify-between">
+                      <span className="text-green-400 text-sm font-medium">Available Now</span>
+                      <svg className="w-5 h-5 text-green-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Milestone-Based Funding */}
+              <div className="group relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-orange-400/20 via-amber-500/20 to-transparent rounded-2xl blur-xl group-hover:blur-2xl transition-all"></div>
+                <div className="relative flex flex-col gap-6 rounded-2xl border border-orange-400/30 bg-gradient-to-br from-orange-400/10 via-amber-500/5 to-transparent p-8 backdrop-blur-lg hover:border-orange-400/50 transition-all duration-300 h-full">
+                  <div className="flex items-start gap-4">
+                    <div className="relative flex-shrink-0">
+                      <div className="absolute inset-0 bg-orange-400/20 rounded-2xl blur-md"></div>
+                      <div className="relative size-16 flex items-center justify-center rounded-2xl bg-gradient-to-br from-orange-400 to-amber-500 text-white shadow-lg shadow-orange-400/30">
+                        <svg fill="currentColor" height="32" viewBox="0 0 256 256" width="32">
+                          <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm40-68a28,28,0,0,1-28,28h-8v12a8,8,0,0,1-16,0V176H104a8,8,0,0,1,0-16h36a12,12,0,0,0,0-24H116a28,28,0,0,1,0-56h4V68a8,8,0,0,1,16,0V80h12a8,8,0,0,1,0,16H116a12,12,0,0,0,0,24h24A28,28,0,0,1,168,148Z"/>
+                        </svg>
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-2xl font-bold font-display mb-2 text-white">Milestone-Based Releases</h3>
+                      <p className="text-orange-400 text-sm font-semibold mb-3">Accountable Fund Management</p>
+                    </div>
+                  </div>
+                  <p className="text-white/70 font-body leading-relaxed">
+                    <strong>Build trust with transparency.</strong> Campaign creators set milestones with deliverables. Donors vote to approve fund releases at each stage, ensuring accountability and progress tracking.
+                  </p>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-white/60 text-sm">
+                      <svg className="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span>Donors vote on milestone completion before funds release</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-white/60 text-sm">
+                      <svg className="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span>Transparent progress tracking for all stakeholders</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-white/60 text-sm">
+                      <svg className="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span>Optional: Choose traditional or milestone-based funding</span>
+                    </div>
+                  </div>
+                  <div className="mt-auto pt-6 border-t border-white/10">
+                    <div className="flex items-center justify-between">
+                      <span className="text-orange-400 text-sm font-medium">Available Now</span>
+                      <svg className="w-5 h-5 text-orange-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* DAO Governance + NFT Rewards */}
+              <div className="group relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-pink-400/20 via-rose-500/20 to-transparent rounded-2xl blur-xl group-hover:blur-2xl transition-all"></div>
+                <div className="relative flex flex-col gap-6 rounded-2xl border border-pink-400/30 bg-gradient-to-br from-pink-400/10 via-rose-500/5 to-transparent p-8 backdrop-blur-lg hover:border-pink-400/50 transition-all duration-300 h-full">
+                  <div className="flex items-start gap-4">
+                    <div className="relative flex-shrink-0">
+                      <div className="absolute inset-0 bg-pink-400/20 rounded-2xl blur-md"></div>
+                      <div className="relative size-16 flex items-center justify-center rounded-2xl bg-gradient-to-br from-pink-400 to-rose-500 text-white shadow-lg shadow-pink-400/30">
+                        <svg fill="currentColor" height="32" viewBox="0 0 256 256" width="32">
+                          <path d="M216,64H176V56a24,24,0,0,0-24-24H104A24,24,0,0,0,80,56v8H40A16,16,0,0,0,24,80V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V80A16,16,0,0,0,216,64ZM96,56a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96ZM216,200H40V80H216V200Zm-32-68a12,12,0,1,1-12-12A12,12,0,0,1,184,132Z"/>
+                        </svg>
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-2xl font-bold font-display mb-2 text-white">DAO Governance + NFT Rewards</h3>
+                      <p className="text-pink-400 text-sm font-semibold mb-3">Community Ownership</p>
+                    </div>
+                  </div>
+                  <p className="text-white/70 font-body leading-relaxed">
+                    <strong>Own the platform you use.</strong> DotNation is governed by its community through a DAO. Donors receive commemorative NFTs as proof of support, which can unlock governance rights and special perks.
+                  </p>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-white/60 text-sm">
+                      <svg className="w-4 h-4 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span>Donors receive unique NFT badges for each contribution</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-white/60 text-sm">
+                      <svg className="w-4 h-4 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span>DAO treasury funds public goods & platform upgrades</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-white/60 text-sm">
+                      <svg className="w-4 h-4 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span>Community votes on platform direction & features</span>
+                    </div>
+                  </div>
+                  <div className="mt-auto pt-6 border-t border-white/10">
+                    <div className="flex items-center justify-between">
+                      <span className="text-pink-400 text-sm font-medium">Available Now</span>
+                      <svg className="w-5 h-5 text-pink-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Feature Highlight Banner */}
+            <div className="mt-16 relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-green-500/10 to-pink-500/10 rounded-2xl blur-xl"></div>
+              <div className="relative bg-gradient-to-r from-blue-500/5 via-green-500/5 to-pink-500/5 backdrop-blur-sm border border-blue-500/20 rounded-2xl p-8 text-center">
+                <h3 className="text-2xl font-bold font-display text-white mb-3">
+                  The Only Crowdfunding Platform with All These Features
+                </h3>
+                <p className="text-white/70 font-body max-w-3xl mx-auto">
+                  DotNation combines XCM cross-chain donations, quadratic funding, milestone-based releases, DAO governance, and NFT rewards in one unified platform. Built on Polkadot for maximum security, scalability, and interoperability.
+                </p>
               </div>
             </div>
           </section>
@@ -815,7 +1051,7 @@ const NewLandingPage = () => {
               </div>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 relative stagger-children">
-              <div className={`project-card group relative transition-all duration-300 ${activeFilter !== 'all' && activeFilter !== 'defi' ? 'opacity-30 scale-95' : 'opacity-100 scale-100'}`} data-category="defi">
+              <div className={`project-card group relative transition-all duration-300 ${activeFilter === 'all' || activeFilter === 'defi' ? 'opacity-100 scale-100' : 'opacity-30 scale-95'}`} data-category="defi">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent rounded-2xl blur-xl group-hover:blur-2xl transition-all opacity-0 group-hover:opacity-100"></div>
                 <div className="relative bg-gradient-to-br from-primary/20 via-primary/5 to-transparent backdrop-blur-sm border border-primary/30 rounded-2xl overflow-hidden group-hover:border-primary/40 transition-all p-8 flex flex-col items-center justify-center h-full">
                   <div className="relative mb-4">
@@ -837,7 +1073,7 @@ const NewLandingPage = () => {
                   </div>
                 </div>
               </div>
-              <div className={`project-card group relative transition-all duration-300 ${activeFilter !== 'all' && activeFilter !== 'infra' ? 'opacity-30 scale-95' : 'opacity-100 scale-100'}`} data-category="infra">
+              <div className={`project-card group relative transition-all duration-300 ${activeFilter === 'all' || activeFilter === 'infra' ? 'opacity-100 scale-100' : 'opacity-30 scale-95'}`} data-category="infra">
                 <div className="absolute inset-0 bg-gradient-to-br from-secondary/20 to-transparent rounded-2xl blur-xl group-hover:blur-2xl transition-all opacity-0 group-hover:opacity-100"></div>
                 <div className="relative bg-gradient-to-br from-secondary/20 via-secondary/5 to-transparent backdrop-blur-sm border border-secondary/30 rounded-2xl overflow-hidden group-hover:border-secondary/40 transition-all p-8 flex flex-col items-center justify-center h-full">
                   <div className="relative mb-4">
@@ -859,7 +1095,7 @@ const NewLandingPage = () => {
                   </div>
                 </div>
               </div>
-              <div className={`project-card group relative transition-all duration-300 ${activeFilter !== 'all' && activeFilter !== 'community' ? 'opacity-30 scale-95' : 'opacity-100 scale-100'}`} data-category="community">
+              <div className={`project-card group relative transition-all duration-300 ${activeFilter === 'all' || activeFilter === 'community' ? 'opacity-100 scale-100' : 'opacity-30 scale-95'}`} data-category="community">
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-400/20 to-transparent rounded-2xl blur-xl group-hover:blur-2xl transition-all opacity-0 group-hover:opacity-100"></div>
                 <div className="relative bg-gradient-to-br from-purple-400/20 via-purple-400/5 to-transparent backdrop-blur-sm border border-purple-400/30 rounded-2xl overflow-hidden group-hover:border-purple-400/40 transition-all p-8 flex flex-col items-center justify-center h-full">
                   <div className="relative mb-4">
@@ -884,7 +1120,7 @@ const NewLandingPage = () => {
                   </div>
                 </div>
               </div>
-              <div className={`project-card group relative transition-all duration-300 ${activeFilter !== 'all' && activeFilter !== 'infra' ? 'opacity-30 scale-95' : 'opacity-100 scale-100'}`} data-category="infra">
+              <div className={`project-card group relative transition-all duration-300 ${activeFilter === 'all' || activeFilter === 'infra' ? 'opacity-100 scale-100' : 'opacity-30 scale-95'}`} data-category="infra">
                 <div className="absolute inset-0 bg-gradient-to-br from-green-400/20 to-transparent rounded-2xl blur-xl group-hover:blur-2xl transition-all opacity-0 group-hover:opacity-100"></div>
                 <div className="relative bg-gradient-to-br from-green-400/20 via-green-400/5 to-transparent backdrop-blur-sm border border-green-400/30 rounded-2xl overflow-hidden group-hover:border-green-400/40 transition-all p-8 flex flex-col items-center justify-center h-full">
                   <div className="relative mb-4">
@@ -907,7 +1143,7 @@ const NewLandingPage = () => {
                   </div>
                 </div>
               </div>
-              <div className={`project-card group relative transition-all duration-300 ${activeFilter !== 'all' && activeFilter !== 'defi' ? 'opacity-30 scale-95' : 'opacity-100 scale-100'}`} data-category="defi">
+              <div className={`project-card group relative transition-all duration-300 ${activeFilter === 'all' || activeFilter === 'defi' ? 'opacity-100 scale-100' : 'opacity-30 scale-95'}`} data-category="defi">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-400/20 to-transparent rounded-2xl blur-xl group-hover:blur-2xl transition-all opacity-0 group-hover:opacity-100"></div>
                 <div className="relative bg-gradient-to-br from-blue-400/20 via-blue-400/5 to-transparent backdrop-blur-sm border border-blue-400/30 rounded-2xl overflow-hidden group-hover:border-blue-400/40 transition-all p-8 flex flex-col items-center justify-center h-full">
                   <div className="relative mb-4">
@@ -928,7 +1164,7 @@ const NewLandingPage = () => {
                   </div>
                 </div>
               </div>
-              <div className={`project-card group relative transition-all duration-300 ${activeFilter !== 'all' && activeFilter !== 'community' ? 'opacity-30 scale-95' : 'opacity-100 scale-100'}`} data-category="community">
+              <div className={`project-card group relative transition-all duration-300 ${activeFilter === 'all' || activeFilter === 'community' ? 'opacity-100 scale-100' : 'opacity-30 scale-95'}`} data-category="community">
                 <div className="absolute inset-0 bg-gradient-to-br from-pink-400/20 to-transparent rounded-2xl blur-xl group-hover:blur-2xl transition-all opacity-0 group-hover:opacity-100"></div>
                 <div className="relative bg-gradient-to-br from-pink-400/20 via-pink-400/5 to-transparent backdrop-blur-sm border border-pink-400/30 rounded-2xl overflow-hidden group-hover:border-pink-400/40 transition-all p-8 flex flex-col items-center justify-center h-full">
                   <div className="relative mb-4">
@@ -1250,15 +1486,15 @@ const NewLandingPage = () => {
               </div>
               
               <div className="flex items-center gap-6">
-                <a href="/about" className="text-white/60 hover:text-white transition-colors text-sm">
+                <Link to="/about" className="text-white/60 hover:text-white transition-colors text-sm">
                   About
-                </a>
-                <a href="/privacy" className="text-white/60 hover:text-white transition-colors text-sm">
+                </Link>
+                <Link to="/privacy" className="text-white/60 hover:text-white transition-colors text-sm">
                   Privacy Policy
-                </a>
-                <a href="/contact" className="text-white/60 hover:text-white transition-colors text-sm">
+                </Link>
+                <Link to="/contact" className="text-white/60 hover:text-white transition-colors text-sm">
                   Contact
-                </a>
+                </Link>
               </div>
 
               <div className="flex gap-4">
