@@ -11,20 +11,40 @@ coverage
 .cache
 
 # Backend
-gemini-backend
+gemini-backend/
 
-# Contract
-donation_platform
+# Smart Contracts
+donation_platform/
+donation_nft_contract/
+target/
 
-# Documentation
+# Substrate binaries
+substrate-contracts-node
+substrate-contracts-node-mac/
+substrate-contracts-node.tar.gz
+
+# Scripts and documentation
+scripts/
 *.md
 !README.md
+HACKATHON_VIDEO_SCRIPT.md
 
 # Test files - ignore test directories and files
-__tests__
+__tests__/
 *.test.js
 *.test.jsx
 *.spec.js
 *.spec.jsx
 setupTests.js
 vitest.config.js
+
+# Build artifacts
+frontend/node_modules/
+frontend/coverage/
+frontend/dist/
+
+# Misc
+.husky/
+.Rhistory
+.RData
+.Rproj.user/
