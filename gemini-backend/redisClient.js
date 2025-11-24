@@ -272,6 +272,230 @@ const cacheOps = {
       await client.del(keys);
     }
     return keys.length;
+  },
+
+  /**
+   * Generic get operation
+   */
+  async get(key) {
+    const client = getRedisClient();
+    return await client.get(key);
+  },
+
+  /**
+   * Generic set operation
+   */
+  async set(key, value, ttlSeconds) {
+    const client = getRedisClient();
+    if (ttlSeconds) {
+      await client.setEx(key, ttlSeconds, value);
+    } else {
+      await client.set(key, value);
+    }
+  },
+
+  /**
+   * Generic delete operation
+   */
+  async del(key) {
+    const client = getRedisClient();
+    await client.del(key);
+  }
+};
+
+/**
+ * IPFS Posts operations with Redis
+ */
+const postsOps = {
+  /**
+   * Create a new post
+   */
+  async createPost(postData) {
+    const client = getRedisClient();
+    const postKey = `post:${postData.id}`;
+    
+    // Store post data
+    await client.set(postKey, JSON.stringify(postData));
+    
+    // Add to creator's posts sorted set (sorted by timestamp)
+    await client.zAdd(`creator-posts:${postData.creatorAddress}`, {
+      score: postData.timestamp,
+      value: postData.id
+    });
+    
+    // Add to global posts sorted set
+    await client.zAdd('posts:all', {
+      score: postData.timestamp,
+      value: postData.id
+    });
+    
+    return postData;
+  },
+
+  /**
+   * Get a specific post by ID
+   */
+  async getPost(postId) {
+    const client = getRedisClient();
+    const postKey = `post:${postId}`;
+    const data = await client.get(postKey);
+    return data ? JSON.parse(data) : null;
+  },
+
+  /**
+   * Get all posts for a creator
+   */
+  async getCreatorPosts(creatorAddress, options = {}) {
+    const client = getRedisClient();
+    const { status, limit = 50, offset = 0 } = options;
+    
+    // Get post IDs from sorted set (newest first)
+    const postIds = await client.zRange(
+      `creator-posts:${creatorAddress}`,
+      0,
+      -1,
+      { REV: true }
+    );
+    
+    if (postIds.length === 0) {
+      return { posts: [], total: 0, limit, offset };
+    }
+    
+    // Fetch all posts
+    const posts = [];
+    for (const postId of postIds) {
+      const post = await this.getPost(postId);
+      if (post) {
+        // Filter by status if provided
+        if (!status || post.status === status) {
+          posts.push(post);
+        }
+      }
+    }
+    
+    // Apply pagination
+    const paginatedPosts = posts.slice(offset, offset + limit);
+    
+    return {
+      posts: paginatedPosts,
+      total: posts.length,
+      limit,
+      offset
+    };
+  },
+
+  /**
+   * Update a post
+   */
+  async updatePost(postId, creatorAddress, updates) {
+    const client = getRedisClient();
+    const post = await this.getPost(postId);
+    
+    if (!post || post.creatorAddress !== creatorAddress) {
+      throw new Error('Post not found or unauthorized');
+    }
+    
+    // Merge updates
+    const updatedPost = { ...post, ...updates };
+    
+    // Save updated post
+    const postKey = `post:${postId}`;
+    await client.set(postKey, JSON.stringify(updatedPost));
+    
+    return updatedPost;
+  },
+
+  /**
+   * Delete a post
+   */
+  async deletePost(postId, creatorAddress) {
+    const client = getRedisClient();
+    const post = await this.getPost(postId);
+    
+    if (!post || post.creatorAddress !== creatorAddress) {
+      throw new Error('Post not found or unauthorized');
+    }
+    
+    // Remove from Redis
+    const postKey = `post:${postId}`;
+    await client.del(postKey);
+    
+    // Remove from creator's sorted set
+    await client.zRem(`creator-posts:${creatorAddress}`, postId);
+    
+    // Remove from global sorted set
+    await client.zRem('posts:all', postId);
+    
+    return true;
+  },
+
+  /**
+   * Increment post views
+   */
+  async incrementViews(postId) {
+    const client = getRedisClient();
+    const post = await this.getPost(postId);
+    
+    if (!post) {
+      throw new Error('Post not found');
+    }
+    
+    post.views += 1;
+    
+    const postKey = `post:${postId}`;
+    await client.set(postKey, JSON.stringify(post));
+    
+    return post.views;
+  },
+
+  /**
+   * Increment post likes
+   */
+  async incrementLikes(postId) {
+    const client = getRedisClient();
+    const post = await this.getPost(postId);
+    
+    if (!post) {
+      throw new Error('Post not found');
+    }
+    
+    post.likes += 1;
+    
+    const postKey = `post:${postId}`;
+    await client.set(postKey, JSON.stringify(post));
+    
+    return post.likes;
+  },
+
+  /**
+   * Get total posts count for a creator
+   */
+  async getCreatorPostsCount(creatorAddress) {
+    const client = getRedisClient();
+    return await client.zCard(`creator-posts:${creatorAddress}`);
+  },
+
+  /**
+   * Get all posts (for admin/debugging)
+   */
+  async getAllPosts(limit = 100, offset = 0) {
+    const client = getRedisClient();
+    const postIds = await client.zRange('posts:all', 0, -1, { REV: true });
+    
+    const posts = [];
+    for (const postId of postIds.slice(offset, offset + limit)) {
+      const post = await this.getPost(postId);
+      if (post) {
+        posts.push(post);
+      }
+    }
+    
+    return {
+      posts,
+      total: postIds.length,
+      limit,
+      offset
+    };
   }
 };
 
@@ -282,5 +506,6 @@ module.exports = {
   sessionOps,
   rateLimitOps,
   fraudOps,
-  cacheOps
+  cacheOps,
+  postsOps
 };
