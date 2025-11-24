@@ -284,6 +284,8 @@ mod donation_platform_v2 {
         unique_donors: Mapping<(u32, AccountId), bool>,
         /// DAO voting: Track votes (campaign_id, milestone_index, voter) -> vote_weight
         milestone_votes: Mapping<(u32, u32, AccountId), Balance>,
+        /// Treasury account for platform fees
+        treasury_account: AccountId,
     }
 
     /// Minimum donation amount to prevent dust spam (0.001 DOT = 1,000,000 planck)
@@ -317,6 +319,7 @@ mod donation_platform_v2 {
                 round_count: 0,
                 unique_donors: Mapping::default(),
                 milestone_votes: Mapping::default(),
+                treasury_account: Self::env().caller(),
             }
         }
 
@@ -352,6 +355,7 @@ mod donation_platform_v2 {
                 round_count: 0,
                 unique_donors: Mapping::default(),
                 milestone_votes: Mapping::default(),
+                treasury_account: Self::env().caller(),
             }
         }
 
@@ -559,6 +563,17 @@ mod donation_platform_v2 {
                 return Err(Error::InvalidDonationAmount);
             }
 
+            // Calculate fee (3%)
+            let fee = donation_amount.checked_mul(3).ok_or(Error::InvalidDonationAmount)?
+                .checked_div(100).ok_or(Error::InvalidDonationAmount)?;
+            
+            // Transfer fee to treasury
+            if fee > 0 {
+                if self.env().transfer(self.treasury_account, fee).is_err() {
+                    return Err(Error::TransferFailed);
+                }
+            }
+
             // Get campaign
             let mut campaign = self.campaigns.get(campaign_id).ok_or(Error::CampaignNotFound)?;
 
@@ -723,7 +738,14 @@ mod donation_platform_v2 {
             }
 
             // Calculate total to withdraw (donations + matching)
-            let total_amount = campaign.raised
+            // Note: Donations already had 3% fee taken in real-time, but campaign.raised tracks GROSS.
+            // So we must subtract the fee from campaign.raised to get the NET amount available.
+            let fee_total = campaign.raised.checked_mul(3).ok_or(Error::WithdrawalFailed)?
+                .checked_div(100).ok_or(Error::WithdrawalFailed)?;
+            
+            let net_raised = campaign.raised.checked_sub(fee_total).ok_or(Error::WithdrawalFailed)?;
+
+            let total_amount = net_raised
                 .checked_add(campaign.matching_amount)
                 .ok_or(Error::WithdrawalFailed)?;
 
@@ -2314,6 +2336,70 @@ mod donation_platform_v2 {
             // Get active campaigns
             let active = platform.get_active_campaigns(0, 10);
             assert_eq!(active.len(), 2);
+        }
+        #[ink::test]
+        fn platform_fee_deducted() {
+            let accounts = test::default_accounts::<DefaultEnvironment>();
+            let mut platform = DonationPlatformV2::new();
+
+            let campaign_id = platform.create_campaign(
+                String::from("Test Campaign"),
+                String::from("Description"),
+                1000,
+                10_000_000,
+                accounts.bob,
+            ).unwrap();
+
+            // Donate 10_000_000 (10 DOT)
+            platform.process_donation(campaign_id, 10_000_000).unwrap();
+
+            // Check campaign raised (should be gross 10_000_000)
+            let campaign = platform.get_campaign(campaign_id).unwrap();
+            assert_eq!(campaign.raised, 10_000_000);
+
+            // In a real environment, 3 would be sent to treasury.
+            // In unit tests, we can't easily check the transfer without mocking,
+            // but we can check the withdrawal amount later.
+        }
+
+        #[ink::test]
+        fn withdrawal_respects_fees() {
+            let accounts = test::default_accounts::<DefaultEnvironment>();
+            let mut platform = DonationPlatformV2::new();
+
+            let campaign_id = platform.create_campaign(
+                String::from("Test Campaign"),
+                String::from("Description"),
+                100, // Goal 100
+                10_000_000,
+                accounts.bob,
+            ).unwrap();
+
+            // Donate 10_000_000 (10 DOT)
+            platform.process_donation(campaign_id, 10_000_000).unwrap();
+
+            // Campaign successful
+            let campaign = platform.get_campaign(campaign_id).unwrap();
+            assert_eq!(campaign.state, CampaignState::Successful);
+
+            // Withdraw
+            // We need to mock the contract having funds, otherwise transfer fails in test?
+            // ink! tests usually start with some balance.
+            // But we transferred fee OUT.
+            // Fee = 10_000_000 * 3 / 100 = 300_000.
+            // Net remaining = 9_700_000.
+            
+            // We need to set the contract balance to simulate the donation remaining amount.
+            // In ink! 5, we might need to import Env to call env() on the contract instance in tests
+            use ink::codegen::Env;
+            let contract_addr = platform.env().account_id();
+            test::set_account_balance::<DefaultEnvironment>(contract_addr, 9_700_000);
+
+            // Set caller to owner (Alice created it)
+            test::set_caller::<DefaultEnvironment>(accounts.alice);
+            
+            let result = platform.withdraw_funds(campaign_id);
+            assert_eq!(result, Ok(()));
         }
     }
 }

@@ -17,7 +17,7 @@ const REQUEST_TIMEOUT = 10000; // 10 seconds
 async function fetchWithTimeout(url, options = {}, timeout = REQUEST_TIMEOUT) {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeout);
-  
+
   try {
     const response = await fetch(url, {
       ...options,
@@ -46,94 +46,16 @@ function getAuthHeaders() {
 }
 
 /**
- * Create a new captcha session
- * @returns {Promise<{success: boolean, sessionToken: string, expiresIn: number}>}
+ * Verify reCAPTCHA token with backend
+ * @param {string} token - The reCAPTCHA token from Google
+ * @returns {Promise<{success: boolean, error?: string}>}
  */
-export async function createCaptchaSession() {
+export async function verifyRecaptcha(token) {
   try {
-    const response = await fetchWithTimeout(`${BACKEND_URL}/api/captcha/session`, {
+    const response = await fetchWithTimeout(`${BACKEND_URL}/api/verify-recaptcha`, {
       method: 'POST',
       headers: getAuthHeaders(),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to create captcha session: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('[Captcha API] Error creating session:', error);
-    throw error;
-  }
-}
-
-/**
- * Generate a captcha challenge
- * @param {Object} params - Challenge parameters
- * @param {string} params.sessionToken - The session token
- * @param {string} params.captchaType - Type of captcha (math, image, slider, pattern)
- * @param {number} params.difficulty - Difficulty level (0-2, optional)
- * @returns {Promise<{success: boolean, type: string, challenge: Object}>}
- */
-export async function generateCaptchaChallenge({
-  sessionToken,
-  captchaType,
-  difficulty = 0
-}) {
-  try {
-    const response = await fetchWithTimeout(`${BACKEND_URL}/api/captcha/challenge`, {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify({
-        sessionToken,
-        captchaType,
-        difficulty
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || `Failed to generate challenge: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('[Captcha API] Error generating challenge:', error);
-    throw error;
-  }
-}
-
-/**
- * Verify captcha answer
- * SECURE: Only sends user's answer, NOT the expected answer
- * @param {Object} params - Verification parameters
- * @param {string} params.sessionToken - The session token
- * @param {string} params.captchaType - Type of captcha (math, image, slider, pattern)
- * @param {any} params.userAnswer - User's answer
- * @param {number} params.timeTaken - Time taken in seconds
- * @param {Object} params.options - Additional options (e.g., tolerance for slider)
- * @returns {Promise<{verified: boolean, token?: string, error?: string}>}
- */
-export async function verifyCaptcha({
-  sessionToken,
-  captchaType,
-  userAnswer,
-  timeTaken,
-  options = {}
-}) {
-  try {
-    const response = await fetchWithTimeout(`${BACKEND_URL}/api/captcha/verify`, {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify({
-        sessionToken,
-        captchaType,
-        userAnswer,
-        timeTaken,
-        options
-      }),
+      body: JSON.stringify({ token }),
     });
 
     if (!response.ok) {
@@ -144,55 +66,7 @@ export async function verifyCaptcha({
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('[Captcha API] Error verifying captcha:', error);
-    throw error;
-  }
-}
-
-/**
- * Validate a verification token
- * @param {string} token - The verification token to validate
- * @returns {Promise<{valid: boolean, error?: string}>}
- */
-export async function validateCaptchaToken(token) {
-  try {
-    const response = await fetchWithTimeout(`${BACKEND_URL}/api/captcha/validate-token`, {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify({ token }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Token validation failed: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('[Captcha API] Error validating token:', error);
-    throw error;
-  }
-}
-
-/**
- * Get captcha system statistics (for monitoring/debugging)
- * @returns {Promise<Object>}
- */
-export async function getCaptchaStats() {
-  try {
-    const response = await fetchWithTimeout(`${BACKEND_URL}/api/captcha/stats`, {
-      method: 'GET',
-      headers: getAuthHeaders(),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to get captcha stats: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('[Captcha API] Error getting stats:', error);
+    console.error('[Captcha API] Error verifying reCAPTCHA:', error);
     throw error;
   }
 }

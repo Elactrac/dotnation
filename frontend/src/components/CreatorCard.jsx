@@ -1,0 +1,74 @@
+import PropTypes from 'prop-types';
+import { Link } from 'react-router-dom';
+
+/**
+ * A card component that displays a creator profile summary.
+ * Used in the Members browse page to showcase creators.
+ */
+const CreatorCard = ({ creator }) => {
+    return (
+        <article
+            className="card card-hover card-spacing space-card group"
+            aria-label={`Creator: ${creator.name}`}
+        >
+            {/* Header with Avatar */}
+            <div className="flex items-start gap-4 mb-4">
+                <div className="text-5xl flex-shrink-0" aria-hidden="true">
+                    {creator.avatar}
+                </div>
+                <div className="flex-1 min-w-0">
+                    <h3 className="text-display-sm mb-1 truncate">{creator.name}</h3>
+                    <div className="flex items-center gap-2 text-sm text-text-secondary">
+                        <span>{creator.subscribers} subscribers</span>
+                        <span className="text-text-muted">•</span>
+                        <span className="badge badge-info">{creator.price}/month</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Description */}
+            <p className="text-body-sm text-text-secondary mb-6 line-clamp-2">
+                {creator.description}
+            </p>
+
+            {/* Stats */}
+            <div className="flex items-center justify-between border-t border-border pt-4 mt-auto">
+                <div className="flex items-center gap-4 text-caption text-text-muted">
+                    <div className="flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                        </svg>
+                        <span>{creator.subscribers}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z" />
+                        </svg>
+                        <span>{creator.price}</span>
+                    </div>
+                </div>
+
+                <Link
+                    to={`/members/${creator.id}`}
+                    className="btn btn-primary btn-sm group-hover:scale-105 transition-transform duration-300"
+                    aria-label={`View ${creator.name}'s profile`}
+                >
+                    View Profile →
+                </Link>
+            </div>
+        </article>
+    );
+};
+
+CreatorCard.propTypes = {
+    creator: PropTypes.shape({
+        id: PropTypes.string.isRequired,
+        name: PropTypes.string.isRequired,
+        description: PropTypes.string.isRequired,
+        price: PropTypes.string.isRequired,
+        subscribers: PropTypes.number.isRequired,
+        avatar: PropTypes.string.isRequired,
+    }).isRequired,
+};
+
+export default CreatorCard;

@@ -1,10 +1,12 @@
 import React, { Suspense } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { ThemeProvider } from './context/ThemeContext.jsx';
 import { ApiProvider } from './contexts/ApiContext.jsx';
 import { WalletProvider } from './contexts/WalletContext.jsx';
 import { CampaignProvider } from './contexts/CampaignContext.jsx';
 import { BatchOperationsProvider } from './contexts/BatchOperationsContext.jsx';
 import { NftProvider } from './contexts/NftContext.jsx';
+import { MembershipProvider } from './contexts/MembershipContext.jsx';
 import ErrorBoundary from './components/ErrorBoundary';
 import { initSentry, trackError } from './utils/sentry';
 
@@ -31,6 +33,12 @@ const BatchCampaignCreator = React.lazy(() => import('./components/BatchCampaign
 const BatchWithdrawal = React.lazy(() => import('./components/BatchWithdrawal.jsx'));
 const MatchingPoolAdmin = React.lazy(() => import('./components/MatchingPoolAdmin.jsx'));
 const DiagnosticPage = React.lazy(() => import('./pages/DiagnosticPage.jsx'));
+const MembersLandingPage = React.lazy(() => import('./pages/MembersLandingPage.jsx'));
+const MembersPage = React.lazy(() => import('./pages/MembersPage.jsx'));
+const MembersDashboard = React.lazy(() => import('./pages/MembersDashboard.jsx'));
+const CreatorProfilePage = React.lazy(() => import('./pages/CreatorProfilePage.jsx'));
+const CreatorFeed = React.lazy(() => import('./components/CreatorFeed.jsx'));
+const CreatorDashboard = React.lazy(() => import('./pages/CreatorDashboard.jsx'));
 
 const router = createBrowserRouter([
   {
@@ -62,8 +70,8 @@ const router = createBrowserRouter([
     path: '/campaign/:id',
     element: <NewDashboardLayout />,
     children: [
-      { 
-        index: true, 
+      {
+        index: true,
         element: (
           <ErrorBoundary>
             <CampaignDetailsPage />
@@ -135,48 +143,72 @@ const router = createBrowserRouter([
       { index: true, element: <UserProfilePage /> },
     ],
   },
-   {
-     path: '/settings',
-     element: <NewDashboardLayout />,
-     children: [
-       { index: true, element: <NewSettingsPage /> },
-     ],
-   },
-    {
-      path: '/about',
-      element: <NewDashboardLayout />,
-      children: [
-        { index: true, element: <AboutPage /> },
-      ],
-    },
-   {
-     path: '/contact',
-     element: <ContactPage />,
-   },
-   {
-     path: '/privacy',
-     element: <NewDashboardLayout />,
-     children: [
-       { index: true, element: <PrivacyPolicyPage /> },
-     ],
-   },
-   {
-     path: '/login',
-     element: <LoginPage />,
-   },
-   {
-     path: '/signup',
-     element: <SignupPage />,
-   },
-   {
-     path: '/diagnostic',
-     element: <DiagnosticPage />,
-   },
-   {
-     path: '*',
-     element: <NotFoundPage />,
-   },
- ]);
+  {
+    path: '/settings',
+    element: <NewDashboardLayout />,
+    children: [
+      { index: true, element: <NewSettingsPage /> },
+    ],
+  },
+  {
+    path: '/about',
+    element: <NewDashboardLayout />,
+    children: [
+      { index: true, element: <AboutPage /> },
+    ],
+  },
+  {
+    path: '/contact',
+    element: <ContactPage />,
+  },
+  {
+    path: '/privacy',
+    element: <NewDashboardLayout />,
+    children: [
+      { index: true, element: <PrivacyPolicyPage /> },
+    ],
+  },
+  {
+    path: '/login',
+    element: <LoginPage />,
+  },
+  {
+    path: '/signup',
+    element: <SignupPage />,
+  },
+  {
+    path: '/diagnostic',
+    element: <DiagnosticPage />,
+  },
+  {
+    path: '/members',
+    element: <MembersLandingPage />,
+  },
+  {
+    path: '/members/browse',
+    element: <MembersPage />,
+  },
+  {
+    path: '/members/dashboard',
+    element: <MembersDashboard />,
+  },
+  {
+    path: '/members/:creatorId',
+    element: <CreatorProfilePage />,
+  },
+  {
+    path: '/members/feed/:creatorId',
+    element: <CreatorFeed />,
+  },
+  {
+    path: '/creator/dashboard',
+    element: <CreatorDashboard />,
+  },
+  {
+    path: '*',
+    element: <NotFoundPage />,
+  },
+]);
 
 const SuspenseFallback = () => (
   <div className="flex justify-center items-center h-screen bg-background-dark">
@@ -207,19 +239,23 @@ function App() {
         });
       }}
     >
-      <ApiProvider>
-        <WalletProvider>
-          <CampaignProvider>
-            <BatchOperationsProvider>
-              <NftProvider>
-                <Suspense fallback={<SuspenseFallback />}>
-                  <RouterProvider router={router} />
-                </Suspense>
-              </NftProvider>
-            </BatchOperationsProvider>
-          </CampaignProvider>
-        </WalletProvider>
-      </ApiProvider>
+      <ThemeProvider>
+        <ApiProvider>
+          <WalletProvider>
+            <CampaignProvider>
+              <BatchOperationsProvider>
+                <NftProvider>
+                  <MembershipProvider>
+                    <Suspense fallback={<SuspenseFallback />}>
+                      <RouterProvider router={router} />
+                    </Suspense>
+                  </MembershipProvider>
+                </NftProvider>
+              </BatchOperationsProvider>
+            </CampaignProvider>
+          </WalletProvider>
+        </ApiProvider>
+      </ThemeProvider>
     </ErrorBoundary>
   );
 }
