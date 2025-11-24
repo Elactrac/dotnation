@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { useTheme } from '../context/ThemeContext';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
     FiGrid, FiCreditCard, FiCalendar, FiSettings, FiUsers, 
@@ -8,14 +7,9 @@ import {
 } from 'react-icons/fi';
 
 const MembersDashboard = () => {
-    const { setLightTheme } = useTheme();
     const [activeSection, setActiveSection] = useState('subscriptions');
     const [selectedSubscription, setSelectedSubscription] = useState(null);
     const [showCancelModal, setShowCancelModal] = useState(false);
-
-    useEffect(() => {
-        setLightTheme();
-    }, [setLightTheme]);
 
     // Mock subscriber data
     const subscriberStats = {

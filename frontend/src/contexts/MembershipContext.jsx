@@ -242,6 +242,274 @@ export const MembershipProvider = ({ children }) => {
         }
     }, [subscriptionContract, api]);
 
+    // ===== NEW TIER MANAGEMENT FUNCTIONS =====
+
+    // Create a new subscription tier
+    const createTier = useCallback(async (name, price, benefits) => {
+        if (!subscriptionContract || !selectedAccount) {
+            throw new Error('Contract not loaded or wallet not connected');
+        }
+
+        try {
+            const gasLimit = createGasLimit(api);
+            
+            // Dry run first
+            const { result } = await subscriptionContract.query.createTier(
+                selectedAccount.address,
+                { gasLimit },
+                name,
+                price,
+                benefits
+            );
+
+            if (result.isErr) {
+                throw new Error('Failed to create tier');
+            }
+
+            // Execute transaction
+            return new Promise((resolve, reject) => {
+                subscriptionContract.tx
+                    .createTier({ gasLimit }, name, price, benefits)
+                    .signAndSend(selectedAccount.address, ({ status, events }) => {
+                        if (status.isInBlock || status.isFinalized) {
+                            resolve({ success: true, events });
+                        }
+                    })
+                    .catch(reject);
+            });
+        } catch (err) {
+            console.error('[MembershipContext] Error creating tier:', err);
+            throw new Error(`Failed to create tier: ${err.message}`);
+        }
+    }, [subscriptionContract, selectedAccount, api]);
+
+    // Update an existing tier
+    const updateTier = useCallback(async (tierId, newPrice, newBenefits) => {
+        if (!subscriptionContract || !selectedAccount) {
+            throw new Error('Contract not loaded or wallet not connected');
+        }
+
+        try {
+            const gasLimit = createGasLimit(api);
+            
+            // Dry run first
+            const { result } = await subscriptionContract.query.updateTier(
+                selectedAccount.address,
+                { gasLimit },
+                tierId,
+                newPrice,
+                newBenefits
+            );
+
+            if (result.isErr) {
+                throw new Error('Failed to update tier');
+            }
+
+            // Execute transaction
+            return new Promise((resolve, reject) => {
+                subscriptionContract.tx
+                    .updateTier({ gasLimit }, tierId, newPrice, newBenefits)
+                    .signAndSend(selectedAccount.address, ({ status }) => {
+                        if (status.isInBlock || status.isFinalized) {
+                            resolve({ success: true });
+                        }
+                    })
+                    .catch(reject);
+            });
+        } catch (err) {
+            console.error('[MembershipContext] Error updating tier:', err);
+            throw new Error(`Failed to update tier: ${err.message}`);
+        }
+    }, [subscriptionContract, selectedAccount, api]);
+
+    // Delete a tier
+    const deleteTier = useCallback(async (tierId) => {
+        if (!subscriptionContract || !selectedAccount) {
+            throw new Error('Contract not loaded or wallet not connected');
+        }
+
+        try {
+            const gasLimit = createGasLimit(api);
+            
+            // Dry run first
+            const { result } = await subscriptionContract.query.deleteTier(
+                selectedAccount.address,
+                { gasLimit },
+                tierId
+            );
+
+            if (result.isErr) {
+                throw new Error('Failed to delete tier');
+            }
+
+            // Execute transaction
+            return new Promise((resolve, reject) => {
+                subscriptionContract.tx
+                    .deleteTier({ gasLimit }, tierId)
+                    .signAndSend(selectedAccount.address, ({ status }) => {
+                        if (status.isInBlock || status.isFinalized) {
+                            resolve({ success: true });
+                        }
+                    })
+                    .catch(reject);
+            });
+        } catch (err) {
+            console.error('[MembershipContext] Error deleting tier:', err);
+            throw new Error(`Failed to delete tier: ${err.message}`);
+        }
+    }, [subscriptionContract, selectedAccount, api]);
+
+    // Get all tiers for a creator
+    const getCreatorTiers = useCallback(async (creatorAddress) => {
+        if (!subscriptionContract) {
+            console.log('[MembershipContext] Contract not available, returning mock tiers');
+            return mockCreatorData.tiers;
+        }
+
+        try {
+            const { result, output } = await subscriptionContract.query.getCreatorTiers(
+                creatorAddress,
+                { gasLimit: createGasLimit(api) },
+                creatorAddress
+            );
+
+            if (result.isOk && output) {
+                const tiers = output.toHuman();
+                console.log('[MembershipContext] Fetched tiers:', tiers);
+                
+                // Transform contract data to match frontend format
+                if (Array.isArray(tiers) && tiers.length > 0) {
+                    return tiers.map(tier => ({
+                        id: tier.tierId || tier.tier_id,
+                        name: tier.name,
+                        price: parseInt(tier.price?.replace(/,/g, '') || 0),
+                        benefits: tier.benefits || [],
+                        creator: tier.creator
+                    }));
+                }
+                
+                return mockCreatorData.tiers; // Return mock data if no tiers
+            }
+
+            return mockCreatorData.tiers;
+        } catch (err) {
+            console.error('[MembershipContext] Error getting creator tiers:', err);
+            return mockCreatorData.tiers;
+        }
+    }, [subscriptionContract, api]);
+
+    // Get a specific tier
+    const getTier = useCallback(async (creatorAddress, tierId) => {
+        if (!subscriptionContract) {
+            return null;
+        }
+
+        try {
+            const { result, output } = await subscriptionContract.query.getTier(
+                creatorAddress,
+                { gasLimit: createGasLimit(api) },
+                creatorAddress,
+                tierId
+            );
+
+            if (result.isOk && output) {
+                const tier = output.toHuman();
+                if (tier && tier !== 'None') {
+                    return {
+                        id: tier.tierId || tier.tier_id,
+                        name: tier.name,
+                        price: parseInt(tier.price?.replace(/,/g, '') || 0),
+                        benefits: tier.benefits || [],
+                        creator: tier.creator
+                    };
+                }
+            }
+
+            return null;
+        } catch (err) {
+            console.error('[MembershipContext] Error getting tier:', err);
+            return null;
+        }
+    }, [subscriptionContract, api]);
+
+    // Subscribe to a specific tier
+    const subscribeToTier = useCallback(async (creatorAddress, tierId, amount) => {
+        if (!subscriptionContract || !selectedAccount) {
+            throw new Error('Contract not loaded or wallet not connected');
+        }
+
+        try {
+            const gasLimit = createGasLimit(api);
+            
+            // Execute subscription transaction
+            return new Promise((resolve, reject) => {
+                subscriptionContract.tx
+                    .subscribeToTier({ gasLimit, value: amount }, creatorAddress, tierId)
+                    .signAndSend(selectedAccount.address, ({ status }) => {
+                        if (status.isInBlock || status.isFinalized) {
+                            resolve({ success: true });
+                        }
+                    })
+                    .catch(reject);
+            });
+        } catch (err) {
+            console.error('[MembershipContext] Error subscribing to tier:', err);
+            throw new Error(`Failed to subscribe to tier: ${err.message}`);
+        }
+    }, [subscriptionContract, selectedAccount, api]);
+
+    // Get subscriber's current tier
+    const getSubscriberTier = useCallback(async (userAddress, creatorAddress) => {
+        if (!subscriptionContract) {
+            return null;
+        }
+
+        try {
+            const { result, output } = await subscriptionContract.query.getSubscriberTier(
+                userAddress,
+                { gasLimit: createGasLimit(api) },
+                userAddress,
+                creatorAddress
+            );
+
+            if (result.isOk && output) {
+                const tierId = output.toHuman();
+                return tierId && tierId !== 'None' ? parseInt(tierId) : null;
+            }
+
+            return null;
+        } catch (err) {
+            console.error('[MembershipContext] Error getting subscriber tier:', err);
+            return null;
+        }
+    }, [subscriptionContract, api]);
+
+    // Check tier access
+    const checkTierAccess = useCallback(async (userAddress, creatorAddress, requiredTierId) => {
+        if (!subscriptionContract) {
+            return false;
+        }
+
+        try {
+            const { result, output } = await subscriptionContract.query.checkTierAccess(
+                userAddress,
+                { gasLimit: createGasLimit(api) },
+                userAddress,
+                creatorAddress,
+                requiredTierId
+            );
+
+            if (result.isOk && output) {
+                return output.toHuman() === 'true' || output.toHuman() === true;
+            }
+
+            return false;
+        } catch (err) {
+            console.error('[MembershipContext] Error checking tier access:', err);
+            return false;
+        }
+    }, [subscriptionContract, api]);
+
     return (
         <MembershipContext.Provider
             value={{
@@ -254,6 +522,15 @@ export const MembershipProvider = ({ children }) => {
                 subscribeToCreator,
                 checkSubscription,
                 getCreatorPrice,
+                // New tier management functions
+                createTier,
+                updateTier,
+                deleteTier,
+                getCreatorTiers,
+                getTier,
+                subscribeToTier,
+                getSubscriberTier,
+                checkTierAccess,
             }}
         >
             {children}

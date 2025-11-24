@@ -3,6 +3,8 @@ import { useParams } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useWallet } from '../contexts/WalletContext';
 import { useApi } from '../contexts/ApiContext';
+import { useMembership } from '../contexts/MembershipContext';
+import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import '../styles/light-theme.css';
 
@@ -13,19 +15,36 @@ const CreatorFeed = () => {
     const { setLightTheme } = useTheme();
     const { selectedAccount } = useWallet();
     const { api } = useApi();
+    const { getCreatorTiers, getSubscriberTier } = useMembership();
 
     const [creator, setCreator] = useState(null);
     const [posts, setPosts] = useState([]);
     const [isSubscribed, setIsSubscribed] = useState(false);
-    const [loading, setLoading] = useState(false);
     const [unlockingPostId, setUnlockingPostId] = useState(null);
+    const [tiers, setTiers] = useState([]);
+    const [currentTier, setCurrentTier] = useState(null);
 
     useEffect(() => {
         setLightTheme();
         loadCreatorData();
         loadFeed();
         checkSubscription();
+        loadTiers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [creatorId, selectedAccount]);
+    
+    const loadTiers = async () => {
+        if (!creatorId) return;
+        
+        try {
+            const creatorTiers = await getCreatorTiers(creatorId);
+            if (creatorTiers && creatorTiers.length > 0) {
+                setTiers(creatorTiers);
+            }
+        } catch (error) {
+            console.error('Error loading tiers:', error);
+        }
+    };
 
     const loadCreatorData = () => {
         // Mock creator data
@@ -58,36 +77,36 @@ const CreatorFeed = () => {
     };
 
     const checkSubscription = async () => {
-        if (!selectedAccount || !api) return;
+        if (!selectedAccount || !api || !creatorId) return;
 
         try {
-            // TODO: Check contract for active subscription
-            // For demo, set to false
-            setIsSubscribed(false);
+            const tierId = await getSubscriberTier(selectedAccount.address, creatorId);
+            if (tierId !== null) {
+                setIsSubscribed(true);
+                setCurrentTier(tierId);
+            } else {
+                setIsSubscribed(false);
+                setCurrentTier(null);
+            }
         } catch (error) {
             console.error('Error checking subscription:', error);
+            setIsSubscribed(false);
         }
     };
 
     const handleSubscribe = async () => {
         if (!selectedAccount || !creator) {
-            alert('Please connect your wallet first');
+            toast.error('Please connect your wallet first');
+            return;
+        }
+        
+        if (tiers.length === 0) {
+            toast.error('No subscription tiers available');
             return;
         }
 
-        setLoading(true);
-        try {
-            // TODO: Call subscription_manager contract
-            // For demo, just simulate success
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            setIsSubscribed(true);
-            alert('Subscribed successfully! (Demo mode)');
-        } catch (error) {
-            console.error('Error subscribing:', error);
-            alert('Subscription failed. Please try again.');
-        } finally {
-            setLoading(false);
-        }
+        // Redirect to creator profile page for tier selection
+        window.location.href = `/members/${creatorId}`;
     };
 
     const handleUnlock = async (postId) => {
@@ -147,16 +166,27 @@ const CreatorFeed = () => {
                     </div>
 
                     {!isSubscribed ? (
-                        <button
-                            onClick={handleSubscribe}
-                            disabled={loading}
-                            className="members-button w-full text-lg py-4"
-                        >
-                            {loading ? 'Processing...' : `Subscribe for ${(parseInt(creator.price) / 1e12).toFixed(0)} DOT/month`}
-                        </button>
+                        <div>
+                            {tiers.length > 0 && (
+                                <div className="mb-4 text-sm text-gray-500">
+                                    {tiers.length} tier{tiers.length !== 1 ? 's' : ''} available: {tiers.map(t => `${(t.price / 1e10).toFixed(0)} DOT`).join(', ')}
+                                </div>
+                            )}
+                            <button
+                                onClick={handleSubscribe}
+                                className="members-button w-full text-lg py-4"
+                            >
+                                {tiers.length > 0 
+                                    ? `Choose Subscription Tier` 
+                                    : `Subscribe for ${(parseInt(creator.price) / 1e12).toFixed(0)} DOT/month`
+                                }
+                            </button>
+                        </div>
                     ) : (
                         <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4 text-center">
-                            <span className="text-green-700 font-semibold">✓ Active Subscriber</span>
+                            <span className="text-green-700 font-semibold">
+                                ✓ Active Subscriber {currentTier !== null ? `(Tier ${currentTier})` : ''}
+                            </span>
                         </div>
                     )}
                 </div>

@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react';
-import { useTheme } from '../context/ThemeContext';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FiInstagram, FiTwitter, FiFacebook, FiYoutube, FiMenu, FiX, FiTrendingUp, FiUsers, FiHeart, FiStar } from 'react-icons/fi';
 import '../styles/light-theme.css';
@@ -13,12 +12,7 @@ const mockCreators = [
 ];
 
 const MembersLandingPage = () => {
-    const { setLightTheme } = useTheme();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-    useEffect(() => {
-        setLightTheme();
-    }, [setLightTheme]);
 
     return (
         <div className="min-h-screen bg-white text-gray-900 font-sans selection:bg-yellow-100 selection:text-black">

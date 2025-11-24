@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { useTheme } from '../context/ThemeContext';
 import { useWallet } from '../contexts/WalletContext';
 import { useMembership } from '../contexts/MembershipContext';
 import { Link } from 'react-router-dom';
@@ -19,25 +18,36 @@ import {
     FiMessageCircle,
     FiBarChart2,
     FiCalendar,
-    FiClock,
     FiArrowUp,
     FiArrowDown,
     FiSearch,
     FiDownload,
-    FiSend,
-    FiImage,
-    FiTrash2,
-    FiCheck,
-    FiSave,
     FiBell,
-    FiCreditCard
+    FiCreditCard,
+    FiSend,
+    FiTrash2,
+    FiSave,
+    FiCheck
 } from 'react-icons/fi';
+import ContentUploadForm from '../components/ContentUploadForm';
+import ContentPostList from '../components/ContentPostList';
+import { 
+    savePostToBackend, 
+    fetchCreatorPosts, 
+    deletePost 
+} from '../utils/postsApi';
 import '../styles/light-theme.css';
 
 const CreatorDashboard = () => {
-    const { setLightTheme } = useTheme();
     const { selectedAccount, connectWallet } = useWallet();
-    const { creatorStats, isLoading, fetchCreatorStats } = useMembership();
+    const { 
+        creatorStats, 
+        isLoading, 
+        fetchCreatorStats,
+        createTier,
+        updateTier,
+        deleteTier
+    } = useMembership();
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [activeSection, setActiveSection] = useState('overview');
     
@@ -48,22 +58,21 @@ const CreatorDashboard = () => {
     const [editingPost, setEditingPost] = useState(null);
     const [editingTier, setEditingTier] = useState(null);
     
+    // Posts state
+    const [posts, setPosts] = useState([]);
+    const [postsLoading, setPostsLoading] = useState(false);
+    
     // Search and filter states
     const [memberSearch, setMemberSearch] = useState('');
     const [memberFilter, setMemberFilter] = useState('all');
     
     // Form states
-    const [postForm, setPostForm] = useState({ title: '', content: '', tier: 'all', media: null });
     const [tierForm, setTierForm] = useState({ name: '', price: '', benefits: [''] });
     const [messageForm, setMessageForm] = useState({ recipients: 'all', subject: '', message: '' });
     const [settingsForm, setSettingsForm] = useState({ displayName: '', bio: '', notifications: true });
     
     // Toast notification
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
-
-    useEffect(() => {
-        setLightTheme();
-    }, [setLightTheme]);
 
     // Fetch creator stats when account is connected
     useEffect(() => {
@@ -79,6 +88,27 @@ const CreatorDashboard = () => {
         }
     }, [selectedAccount]);
 
+    // Fetch posts when account is connected
+    useEffect(() => {
+        if (selectedAccount?.address) {
+            loadPosts();
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedAccount?.address]);
+
+    const loadPosts = async () => {
+        try {
+            setPostsLoading(true);
+            const response = await fetchCreatorPosts(selectedAccount.address);
+            setPosts(response.posts || []);
+        } catch (error) {
+            console.error('Error loading posts:', error);
+            showToast('Failed to load posts', 'error');
+        } finally {
+            setPostsLoading(false);
+        }
+    };
+
     // Toast helper
     const showToast = (message, type = 'success') => {
         setToast({ show: true, message, type });
@@ -86,51 +116,161 @@ const CreatorDashboard = () => {
     };
 
     // Post handlers
-    const handleCreatePost = (e) => {
-        e.preventDefault();
-        // TODO: Integrate with smart contract
-        showToast('Post created successfully!');
-        setShowPostModal(false);
-        setPostForm({ title: '', content: '', tier: 'all', media: null });
+    const handlePostSuccess = async (newPost) => {
+        try {
+            // Save to backend API
+            const savedPost = await savePostToBackend(newPost);
+            
+            // Add to local state
+            setPosts(prev => [savedPost.post || newPost, ...prev]);
+            setShowPostModal(false);
+            setEditingPost(null);
+            showToast('Post created successfully!');
+        } catch (error) {
+            console.error('Error saving post:', error);
+            // Still add to local state even if backend save fails
+            setPosts(prev => [newPost, ...prev]);
+            setShowPostModal(false);
+            setEditingPost(null);
+            showToast('Post created (saved locally)', 'warning');
+        }
     };
 
-    const handleEditPost = (post) => {
+    const handlePostEdit = (post) => {
         setEditingPost(post);
-        setPostForm({ title: post.title, content: '', tier: 'all', media: null });
         setShowPostModal(true);
     };
 
-    const handleUpdatePost = (e) => {
-        e.preventDefault();
-        // TODO: Integrate with smart contract
-        showToast('Post updated successfully!');
+    const handlePostDelete = async (post) => {
+        try {
+            // Delete from backend
+            if (selectedAccount?.address) {
+                await deletePost(post.id, selectedAccount.address);
+            }
+            
+            // Remove from local state
+            setPosts(prev => prev.filter(p => p.id !== post.id));
+            showToast('Post deleted successfully!');
+        } catch (error) {
+            console.error('Error deleting post:', error);
+            showToast('Failed to delete post', 'error');
+        }
+    };
+
+    const handlePostView = (post) => {
+        // Open the post in a new window or navigate to post detail page
+        if (post.contentUrl) {
+            window.open(post.contentUrl, '_blank');
+        }
+    };
+
+    const handlePostCancel = () => {
         setShowPostModal(false);
         setEditingPost(null);
-        setPostForm({ title: '', content: '', tier: 'all', media: null });
     };
 
     // Tier handlers
-    const handleCreateTier = (e) => {
+    const handleCreateTier = async (e) => {
         e.preventDefault();
-        // TODO: Integrate with smart contract
-        showToast('Tier created successfully!');
-        setShowTierModal(false);
-        setTierForm({ name: '', price: '', benefits: [''] });
+        
+        if (!selectedAccount) {
+            showToast('Please connect your wallet first', 'error');
+            return;
+        }
+
+        try {
+            showToast('Creating tier...', 'info');
+            
+            // Convert price to contract format (likely in planck/smallest unit)
+            // Assuming 1 DOT = 10^10 planck for Acala
+            const priceInPlanck = Math.floor(parseFloat(tierForm.price) * Math.pow(10, 10));
+            
+            const result = await createTier(
+                tierForm.name,
+                priceInPlanck,
+                tierForm.benefits.filter(b => b.trim() !== '')
+            );
+            
+            if (result.success) {
+                showToast('Tier created successfully!');
+                setShowTierModal(false);
+                setTierForm({ name: '', price: '', benefits: [''] });
+                // Refresh tier data
+                fetchCreatorStats();
+            }
+        } catch (err) {
+            console.error('Error creating tier:', err);
+            showToast(err.message || 'Failed to create tier', 'error');
+        }
     };
 
     const handleEditTier = (tier) => {
         setEditingTier(tier);
-        setTierForm({ name: tier.name, price: tier.price, benefits: tier.benefits });
+        setTierForm({ 
+            name: tier.name, 
+            price: tier.price / Math.pow(10, 10), // Convert back from planck
+            benefits: tier.benefits 
+        });
         setShowTierModal(true);
     };
 
-    const handleUpdateTier = (e) => {
+    const handleUpdateTier = async (e) => {
         e.preventDefault();
-        // TODO: Integrate with smart contract
-        showToast('Tier updated successfully!');
-        setShowTierModal(false);
-        setEditingTier(null);
-        setTierForm({ name: '', price: '', benefits: [''] });
+        
+        if (!selectedAccount || !editingTier) {
+            showToast('Please connect your wallet first', 'error');
+            return;
+        }
+
+        try {
+            showToast('Updating tier...', 'info');
+            
+            const priceInPlanck = Math.floor(parseFloat(tierForm.price) * Math.pow(10, 10));
+            
+            const result = await updateTier(
+                editingTier.id,
+                priceInPlanck,
+                tierForm.benefits.filter(b => b.trim() !== '')
+            );
+            
+            if (result.success) {
+                showToast('Tier updated successfully!');
+                setShowTierModal(false);
+                setEditingTier(null);
+                setTierForm({ name: '', price: '', benefits: [''] });
+                // Refresh tier data
+                fetchCreatorStats();
+            }
+        } catch (err) {
+            console.error('Error updating tier:', err);
+            showToast(err.message || 'Failed to update tier', 'error');
+        }
+    };
+
+    const handleDeleteTier = async (tierId) => {
+        if (!selectedAccount) {
+            showToast('Please connect your wallet first', 'error');
+            return;
+        }
+
+        if (!window.confirm('Are you sure you want to delete this tier? This action cannot be undone.')) {
+            return;
+        }
+
+        try {
+            showToast('Deleting tier...', 'info');
+            
+            const result = await deleteTier(tierId);
+            
+            if (result.success) {
+                showToast('Tier deleted successfully!');
+                // Refresh tier data
+                fetchCreatorStats();
+            }
+        } catch (err) {
+            console.error('Error deleting tier:', err);
+            showToast(err.message || 'Failed to delete tier', 'error');
+        }
     };
 
     const handleAddBenefit = () => {
@@ -467,75 +607,14 @@ const CreatorDashboard = () => {
                 </button>
             </div>
 
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                <table className="w-full">
-                    <thead>
-                        <tr className="border-b border-gray-200 bg-gray-50">
-                            <th className="text-left px-6 py-4 text-sm font-semibold text-gray-900">Title</th>
-                            <th className="text-left px-6 py-4 text-sm font-semibold text-gray-900">Date</th>
-                            <th className="text-left px-6 py-4 text-sm font-semibold text-gray-900">Views</th>
-                            <th className="text-left px-6 py-4 text-sm font-semibold text-gray-900">Engagement</th>
-                            <th className="text-left px-6 py-4 text-sm font-semibold text-gray-900">Status</th>
-                            <th className="text-left px-6 py-4 text-sm font-semibold text-gray-900">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {creatorStats.recentPosts.map((post) => (
-                            <tr key={post.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                                <td className="px-6 py-4">
-                                    <p className="font-medium text-gray-900">{post.title}</p>
-                                </td>
-                                <td className="px-6 py-4">
-                                    <div className="flex items-center gap-2 text-sm text-gray-500">
-                                        <FiClock className="w-4 h-4" />
-                                        {post.date}
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4">
-                                    <div className="flex items-center gap-2 text-sm text-gray-700">
-                                        <FiEye className="w-4 h-4" />
-                                        {post.views.toLocaleString()}
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4">
-                                    <div className="flex items-center gap-4 text-sm text-gray-700">
-                                        <div className="flex items-center gap-1">
-                                            <FiHeart className="w-4 h-4" />
-                                            {post.likes}
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                            <FiMessageCircle className="w-4 h-4" />
-                                            {post.comments}
-                                        </div>
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4">
-                                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                                        post.published 
-                                            ? 'bg-green-50 text-green-700 border border-green-200' 
-                                            : 'bg-gray-100 text-gray-700 border border-gray-200'
-                                    }`}>
-                                        {post.published ? 'Published' : 'Draft'}
-                                    </span>
-                                </td>
-                                <td className="px-6 py-4">
-                                    <div className="flex items-center gap-2">
-                                        <button onClick={() => handleEditPost(post)} className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
-                                            <FiEdit className="w-4 h-4" />
-                                        </button>
-                                        <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
-                                            <FiEye className="w-4 h-4" />
-                                        </button>
-                                        <button className="p-2 text-red-400 hover:text-red-600 transition-colors">
-                                            <FiTrash2 className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+            <ContentPostList
+                posts={posts}
+                tiers={creatorStats.tiers}
+                onEdit={handlePostEdit}
+                onDelete={handlePostDelete}
+                onView={handlePostView}
+                loading={postsLoading}
+            />
         </div>
     );
 
@@ -557,9 +636,14 @@ const CreatorDashboard = () => {
                                 <h3 className="text-xl font-serif font-bold text-gray-900 mb-1">{tier.name}</h3>
                                 <p className="text-2xl font-bold text-gray-900">${tier.price}<span className="text-sm text-gray-500 font-normal">/month</span></p>
                             </div>
-                            <button onClick={() => handleEditTier(tier)} className="text-gray-400 hover:text-gray-600 transition-colors">
-                                <FiEdit className="w-5 h-5" />
-                            </button>
+                            <div className="flex items-center gap-2">
+                                <button onClick={() => handleEditTier(tier)} className="text-gray-400 hover:text-gray-600 transition-colors">
+                                    <FiEdit className="w-5 h-5" />
+                                </button>
+                                <button onClick={() => handleDeleteTier(tier.id)} className="text-red-400 hover:text-red-600 transition-colors">
+                                    <FiTrash2 className="w-5 h-5" />
+                                </button>
+                            </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4 mb-4 pb-4 border-b border-gray-200">
                             <div>
@@ -941,61 +1025,14 @@ const CreatorDashboard = () => {
             )}
 
             {/* Post Creation/Edit Modal */}
-            <Modal isOpen={showPostModal} onClose={() => { setShowPostModal(false); setEditingPost(null); }} title={editingPost ? 'Edit Post' : 'Create New Post'}>
-                <form onSubmit={editingPost ? handleUpdatePost : handleCreatePost} className="space-y-6">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Post Title</label>
-                        <input
-                            type="text"
-                            value={postForm.title}
-                            onChange={(e) => setPostForm(prev => ({ ...prev, title: e.target.value }))}
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
-                            placeholder="Enter post title..."
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Content</label>
-                        <textarea
-                            value={postForm.content}
-                            onChange={(e) => setPostForm(prev => ({ ...prev, content: e.target.value }))}
-                            rows={8}
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
-                            placeholder="Write your post content..."
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Tier Access</label>
-                        <select
-                            value={postForm.tier}
-                            onChange={(e) => setPostForm(prev => ({ ...prev, tier: e.target.value }))}
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
-                        >
-                            <option value="all">All Members</option>
-                            {creatorStats.tiers.map((tier) => (
-                                <option key={tier.id} value={tier.id}>{tier.name} Tier & Above</option>
-                            ))}
-                        </select>
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Media (Optional)</label>
-                        <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-gray-400 transition-colors cursor-pointer">
-                            <FiImage className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                            <p className="text-sm text-gray-600">Click to upload images or videos</p>
-                            <p className="text-xs text-gray-500 mt-1">PNG, JPG, GIF or MP4 up to 10MB</p>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-4 pt-4">
-                        <button type="submit" className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-black text-white rounded-xl hover:bg-gray-800 transition-all font-medium">
-                            <FiCheck className="w-5 h-5" />
-                            {editingPost ? 'Update Post' : 'Publish Post'}
-                        </button>
-                        <button type="button" onClick={() => { setShowPostModal(false); setEditingPost(null); }} className="px-6 py-3 bg-gray-100 text-gray-900 rounded-xl hover:bg-gray-200 transition-all font-medium">
-                            Cancel
-                        </button>
-                    </div>
-                </form>
+            <Modal isOpen={showPostModal} onClose={handlePostCancel} title={editingPost ? 'Edit Post' : 'Create New Post'}>
+                <ContentUploadForm
+                    tiers={creatorStats.tiers}
+                    creatorAddress={selectedAccount?.address}
+                    onSuccess={handlePostSuccess}
+                    onCancel={handlePostCancel}
+                    initialData={editingPost}
+                />
             </Modal>
 
             {/* Tier Creation/Edit Modal */}

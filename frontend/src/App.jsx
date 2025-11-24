@@ -8,6 +8,7 @@ import { BatchOperationsProvider } from './contexts/BatchOperationsContext.jsx';
 import { NftProvider } from './contexts/NftContext.jsx';
 import { MembershipProvider } from './contexts/MembershipContext.jsx';
 import ErrorBoundary from './components/ErrorBoundary';
+import ThemeRouter from './components/ThemeRouter.jsx';
 import { initSentry, trackError } from './utils/sentry';
 
 const NewLandingPage = React.lazy(() => import('./pages/NewLandingPage'));
@@ -39,6 +40,7 @@ const MembersDashboard = React.lazy(() => import('./pages/MembersDashboard.jsx')
 const CreatorProfilePage = React.lazy(() => import('./pages/CreatorProfilePage.jsx'));
 const CreatorFeed = React.lazy(() => import('./components/CreatorFeed.jsx'));
 const CreatorDashboard = React.lazy(() => import('./pages/CreatorDashboard.jsx'));
+const IPFSTest = React.lazy(() => import('./components/IPFSTest.jsx'));
 
 const router = createBrowserRouter([
   {
@@ -205,6 +207,10 @@ const router = createBrowserRouter([
     element: <CreatorDashboard />,
   },
   {
+    path: '/test/ipfs',
+    element: <IPFSTest />,
+  },
+  {
     path: '*',
     element: <NotFoundPage />,
   },
@@ -240,21 +246,23 @@ function App() {
       }}
     >
       <ThemeProvider>
-        <ApiProvider>
-          <WalletProvider>
-            <CampaignProvider>
-              <BatchOperationsProvider>
-                <NftProvider>
-                  <MembershipProvider>
-                    <Suspense fallback={<SuspenseFallback />}>
-                      <RouterProvider router={router} />
-                    </Suspense>
-                  </MembershipProvider>
-                </NftProvider>
-              </BatchOperationsProvider>
-            </CampaignProvider>
-          </WalletProvider>
-        </ApiProvider>
+        <ThemeRouter>
+          <ApiProvider>
+            <WalletProvider>
+              <CampaignProvider>
+                <BatchOperationsProvider>
+                  <NftProvider>
+                    <MembershipProvider>
+                      <Suspense fallback={<SuspenseFallback />}>
+                        <RouterProvider router={router} />
+                      </Suspense>
+                    </MembershipProvider>
+                  </NftProvider>
+                </BatchOperationsProvider>
+              </CampaignProvider>
+            </WalletProvider>
+          </ApiProvider>
+        </ThemeRouter>
       </ThemeProvider>
     </ErrorBoundary>
   );

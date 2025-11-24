@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useTheme } from '../context/ThemeContext';
 import { useWallet } from '../contexts/WalletContext';
+import { useMembership } from '../contexts/MembershipContext';
+import { toast } from 'react-hot-toast';
 import { 
     FiCheck, FiClock, FiUsers, FiStar, FiHeart, 
     FiShare2, FiLock, FiPlay, FiDownload, FiArrowLeft 
@@ -10,17 +11,15 @@ import {
 const CreatorProfilePage = () => {
     const { creatorId } = useParams();
     const navigate = useNavigate();
-    const { setLightTheme } = useTheme();
     const { selectedAccount } = useWallet();
+    const { getCreatorTiers, subscribeToTier, getSubscriberTier } = useMembership();
     
     const [selectedTier, setSelectedTier] = useState(null);
     const [loading, setLoading] = useState(false);
     const [showSubscribeModal, setShowSubscribeModal] = useState(false);
     const [isSubscribed, setIsSubscribed] = useState(false);
-
-    useEffect(() => {
-        setLightTheme();
-    }, [setLightTheme]);
+    const [currentTier, setCurrentTier] = useState(null);
+    const [realTiers, setRealTiers] = useState([]);
 
     // Mock creator data based on ID
     const creators = {
@@ -137,6 +136,43 @@ const CreatorProfilePage = () => {
         }
     };
 
+    // Load tiers and subscription status on mount
+    useEffect(() => {
+        const loadData = async () => {
+            if (!creatorId) return;
+            
+            try {
+                // Fetch real tiers from contract
+                const tiers = await getCreatorTiers(creatorId);
+                if (tiers && tiers.length > 0) {
+                    // Transform contract tiers to match UI format
+                    const transformedTiers = tiers.map(tier => ({
+                        id: tier.id,
+                        name: tier.name,
+                        price: `${(tier.price / 1e10).toFixed(0)} DOT`,
+                        priceValue: tier.price / 1e10,
+                        description: `${tier.name} tier membership`,
+                        perks: tier.benefits || []
+                    }));
+                    setRealTiers(transformedTiers);
+                }
+                
+                // Check if user is subscribed and get their tier
+                if (selectedAccount) {
+                    const tierId = await getSubscriberTier(selectedAccount.address, creatorId);
+                    if (tierId !== null) {
+                        setIsSubscribed(true);
+                        setCurrentTier(tierId);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading creator data:', error);
+            }
+        };
+        
+        loadData();
+    }, [creatorId, selectedAccount, getCreatorTiers, getSubscriberTier]);
+
     const creator = creators[creatorId] || {
         name: 'CodeMaster Pro',
         tagline: 'Advanced Rust and Substrate tutorials',
@@ -195,6 +231,9 @@ const CreatorProfilePage = () => {
             responseTime: '< 12 hours'
         }
     };
+    
+    // Use real tiers if available, otherwise fall back to mock data
+    const displayTiers = realTiers.length > 0 ? realTiers : creator.tiers;
 
     const handleSubscribe = (tier) => {
         if (!selectedAccount) {
@@ -206,18 +245,29 @@ const CreatorProfilePage = () => {
     };
 
     const confirmSubscription = async () => {
+        if (!selectedAccount || !selectedTier) return;
+        
         setLoading(true);
+        const toastId = toast.loading('Processing subscription...');
+        
         try {
-            // TODO: Integrate with subscription_manager contract
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            // Convert DOT to planck (smallest unit: 10^10)
+            const amountInPlanck = BigInt(Math.floor(selectedTier.priceValue * 1e10));
+            
+            // Call subscribeToTier with creator address, tier ID, and payment amount
+            await subscribeToTier(creatorId, selectedTier.id, amountInPlanck);
+            
             setIsSubscribed(true);
+            setCurrentTier(selectedTier.id);
             setShowSubscribeModal(false);
-            alert(`Successfully subscribed to ${selectedTier.name} tier!`);
-            // Redirect to member dashboard
+            
+            toast.success(`Successfully subscribed to ${selectedTier.name} tier!`, { id: toastId });
+            
+            // Redirect to member dashboard after success
             setTimeout(() => navigate('/members/dashboard'), 1500);
         } catch (error) {
             console.error('Subscription error:', error);
-            alert('Subscription failed. Please try again.');
+            toast.error(`Subscription failed: ${error.message}`, { id: toastId });
         } finally {
             setLoading(false);
         }
@@ -316,8 +366,16 @@ const CreatorProfilePage = () => {
                 {/* Membership Tiers */}
                 <div className="mb-12">
                     <h2 className="text-3xl font-serif mb-6">Choose Your Tier</h2>
+                    {isSubscribed && currentTier !== null && (
+                        <div className="mb-6 bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3">
+                            <FiCheck className="w-5 h-5 text-green-600" />
+                            <span className="text-green-800 font-medium">
+                                You&apos;re currently subscribed to tier {currentTier}
+                            </span>
+                        </div>
+                    )}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {creator.tiers.map((tier) => (
+                        {displayTiers.map((tier) => (
                             <div 
                                 key={tier.id}
                                 className={`bg-white border-2 rounded-2xl p-6 transition-all hover:shadow-lg ${

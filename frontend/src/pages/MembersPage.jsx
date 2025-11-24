@@ -1,11 +1,9 @@
 import { useState, useMemo, useEffect } from 'react';
 import { FiSearch, FiX, FiSliders } from 'react-icons/fi';
-import { useTheme } from '../context/ThemeContext';
 import { Link } from 'react-router-dom';
 import CreatorCard from '../components/CreatorCard';
 
 const MembersPage = () => {
-    const { setLightTheme } = useTheme();
     const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
     // Search and filter states
@@ -328,10 +326,6 @@ const MembersPage = () => {
             category: 'Health'
         }
     ]);
-
-    useEffect(() => {
-        setLightTheme();
-    }, [setLightTheme]);
 
     // Mesh grid canvas effect
     useEffect(() => {
