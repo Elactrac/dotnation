@@ -113,9 +113,9 @@ const NewDashboardLayout = () => {
         aria-hidden="true"
       />
 
-      {/* Background Gradient */}
+      {/* Background Gradient - Subtle White Glow */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(56,116,255,0.1)_0%,transparent_50%)] animate-pulse-slow" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03)_0%,transparent_50%)] animate-pulse-slow" />
       </div>
 
       {/* Main Layout Container */}
@@ -260,7 +260,7 @@ const NewDashboardLayout = () => {
                     aria-haspopup="true"
                     aria-label={`Wallet menu for ${formatAddress(selectedAccount.address)}`}
                   >
-                    <span className="w-6 h-6 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-500" aria-hidden="true" />
+                    <span className="w-6 h-6 rounded-full bg-white/20 border border-white/10" aria-hidden="true" />
                     <span>{formatAddress(selectedAccount.address)}</span>
                     <svg
                       className="w-4 h-4 text-white/70"
@@ -302,8 +302,8 @@ const NewDashboardLayout = () => {
                                     setIsWalletMenuOpen(false);
                                   }}
                                   className={`w-full text-left px-3 py-2.5 rounded-lg text-sm ${account.address === selectedAccount.address
-                                      ? 'bg-primary/20 text-primary border border-primary/30'
-                                      : 'text-white/70 hover:bg-white/10 border border-transparent'
+                                    ? 'bg-primary/20 text-primary border border-primary/30'
+                                    : 'text-white/70 hover:bg-white/10 border border-transparent'
                                     } transition-all`}
                                   role="menuitemradio"
                                   aria-checked={account.address === selectedAccount.address}

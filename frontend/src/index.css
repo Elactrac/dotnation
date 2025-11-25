@@ -116,8 +116,8 @@
 
 .card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(56, 116, 255, 0.1), 0 0 20px rgba(56, 116, 255, 0.05);
-    border-color: rgba(56, 116, 255, 0.3);
+    box-shadow: 0 10px 30px rgba(255, 255, 255, 0.05), 0 0 20px rgba(255, 255, 255, 0.02);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 .project-card {
@@ -131,8 +131,8 @@
 }
 
 .filter-btn.active {
-    background-color: #3874ff !important;
-    color: white !important;
+    background-color: #FFFFFF !important;
+    color: #000000 !important;
 }
 
 /* Enhanced Scroll Animations */
@@ -420,10 +420,10 @@ body {
 
 /* HEADER */
 .header {
-    background: rgba(10, 11, 26, 0.8);
+    background: rgba(5, 5, 5, 0.8);
     backdrop-filter: blur(10px);
     padding: 15px 0;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--glass-border);
     position: sticky;
     top: 0;
     z-index: 100;
@@ -485,7 +485,7 @@ body {
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(56, 116, 255, 0.2);
+    box-shadow: 0 10px 20px rgba(255, 255, 255, 0.1);
 }
 
 /* MISSION CONTROL STATS */
