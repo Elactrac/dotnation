@@ -8,32 +8,32 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: "#3874ff",
-        secondary: "#00EAD3",
-        surface: "#ffffff",
-        border: "#e5e7eb",
-        "background-light": "#f8f6f7",
-        "background-dark": "#0A0B1A",
+        primary: "#FFFFFF", // White
+        secondary: "#A3A3A3", // Neutral Gray
+        surface: "#111111", // Dark Surface
+        border: "rgba(255, 255, 255, 0.1)", // Glass Border
+        "background-light": "#F5F5F7",
+        "background-dark": "#050505", // Paperweight Black
         text: {
-          primary: "#1f2937",
-          secondary: "#6b7280",
-          muted: "#9ca3af",
+          primary: "#F5F5F7",
+          secondary: "rgba(245, 245, 247, 0.6)",
+          muted: "rgba(245, 245, 247, 0.4)",
         },
-        success: "#10b981",
-        warning: "#f59e0b",
-        error: "#ef4444",
-        info: "#3b82f6",
+        success: "#A7F3D0",
+        warning: "#FDE68A",
+        error: "#FECACA",
+        info: "#FFFFFF",
       },
       boxShadow: {
-        soft: "0 2px 8px rgba(0, 0, 0, 0.1)",
-        medium: "0 4px 16px rgba(0, 0, 0, 0.15)",
-        hard: "0 8px 32px rgba(0, 0, 0, 0.2)",
-        glow: "0 0 20px rgba(56, 116, 255, 0.3)",
-        "glow-secondary": "0 0 20px rgba(0, 234, 211, 0.3)",
+        soft: "0 2px 8px rgba(0, 0, 0, 0.2)",
+        medium: "0 4px 16px rgba(0, 0, 0, 0.3)",
+        hard: "0 8px 32px rgba(0, 0, 0, 0.4)",
+        glow: "0 0 20px rgba(255, 255, 255, 0.1)",
+        "glow-secondary": "0 0 20px rgba(255, 255, 255, 0.05)",
       },
       fontFamily: {
-        display: ["Space Grotesk", "sans-serif"],
-        body: ["Noto Sans", "sans-serif"],
+        display: ["Baskervville", "serif"],
+        body: ["Inter", "sans-serif"],
       },
       borderRadius: {
         DEFAULT: "0.5rem",

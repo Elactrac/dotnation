@@ -1,9 +1,8 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { FiSearch, FiX, FiSliders } from 'react-icons/fi';
 import { useCampaign } from '../contexts/CampaignContext.jsx';
 import { formatDOT } from '../utils/formatters';
 import PageErrorBoundary from '../components/PageErrorBoundary';
-import { useWallet } from '../contexts/WalletContext.jsx';
 import CampaignCard from '../components/CampaignCard';
 import { CampaignCardSkeleton } from '../components/SkeletonLoader';
 
@@ -15,7 +14,6 @@ const calculateProgress = (raised, goal) => {
 
 const BrowseCampaignsPage = () => {
   const { campaigns, isLoading, error } = useCampaign();
-  const { selectedAccount } = useWallet();
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
   // Search and filter states
@@ -26,113 +24,11 @@ const BrowseCampaignsPage = () => {
   const [progressRange, setProgressRange] = useState([0, 100]); // Progress percentage
   const [selectedCategories, setSelectedCategories] = useState([]);
 
-  // Mesh grid canvas effect
-  useEffect(() => {
-    const canvas = document.getElementById('mesh-canvas-browse');
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = document.documentElement.scrollHeight;
-    
-    let mouseX = window.innerWidth / 2;
-    let mouseY = window.innerHeight / 2;
-    
-    const handleMouseMove = (e) => {
-      mouseX = e.clientX;
-      mouseY = e.clientY + window.pageYOffset;
-    };
-    
-    const drawMesh = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      const gridSize = 40;
-      const maxDistance = 200;
-      
-      // Draw vertical lines
-      for (let x = 0; x < canvas.width; x += gridSize) {
-        const distX = Math.abs(mouseX - x);
-        if (distX < maxDistance) {
-          const opacity = (1 - distX / maxDistance) * 0.3;
-          ctx.strokeStyle = `rgba(56, 195, 255, ${opacity})`;
-        } else {
-          ctx.strokeStyle = 'rgba(56, 116, 255, 0.08)';
-        }
-        
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.height);
-        ctx.stroke();
-      }
-      
-      // Draw horizontal lines
-      for (let y = 0; y < canvas.height; y += gridSize) {
-        const distY = Math.abs(mouseY - y);
-        if (distY < maxDistance) {
-          const opacity = (1 - distY / maxDistance) * 0.3;
-          ctx.strokeStyle = `rgba(56, 195, 255, ${opacity})`;
-        } else {
-          ctx.strokeStyle = 'rgba(56, 116, 255, 0.08)';
-        }
-        
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
-        ctx.stroke();
-      }
-      
-      requestAnimationFrame(drawMesh);
-    };
-    
-    drawMesh();
-    
-    const handleResize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = document.documentElement.scrollHeight;
-    };
-    
-    document.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('resize', handleResize);
-
-    // Intersection Observer for scroll animations
-    const observerOptions = { 
-      threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px'
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible');
-          observer.unobserve(entry.target);
-        }
-      });
-    }, observerOptions);
-
-    // Observe elements with animation classes
-    document.querySelectorAll('.fade-in-up, .fade-in-left, .fade-in-right, .scale-in, .stagger-children').forEach(element => {
-      observer.observe(element);
-    });
-
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('resize', handleResize);
-      observer.disconnect();
-    };
-  }, []);
-
   // Mock categories (in a real app, these would come from the backend)
   const availableCategories = useMemo(() => [
     'Technology', 'Education', 'Health', 'Environment',
     'Arts', 'Community', 'Business', 'Charity'
   ], []);
-
-  // Effect to clear user-specific filters on wallet disconnect
-  useEffect(() => {
-    if (!selectedAccount) {
-      // Here you could clear filters that are user-specific in the future
-    }
-  }, [selectedAccount]);
 
   // Filter and sort campaigns
   const filteredCampaigns = useMemo(() => {
@@ -234,11 +130,11 @@ const BrowseCampaignsPage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background-dark">
+      <div className="min-h-screen bg-[#050505]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-            <p className="mt-4 text-white/70">Loading campaigns...</p>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto"></div>
+            <p className="mt-4 text-white/50 text-sm">Loading campaigns...</p>
           </div>
         </div>
       </div>
@@ -247,14 +143,14 @@ const BrowseCampaignsPage = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-background-dark">
+      <div className="min-h-screen bg-[#050505]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
-            <div className="flex items-center">
-              <svg className="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
-              <p className="text-red-400">Error loading campaigns: {error}</p>
+          <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-6">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center">
+                <FiX className="w-4 h-4 text-red-400" />
+              </div>
+              <p className="text-red-400 text-sm">Error loading campaigns: {error}</p>
             </div>
           </div>
         </div>
@@ -263,49 +159,26 @@ const BrowseCampaignsPage = () => {
   }
 
   return (
-    <div className="relative min-h-screen bg-background-dark">
-      {/* Interactive Mesh Grid Canvas */}
-      <canvas
-        id="mesh-canvas-browse"
-        className="fixed inset-0 pointer-events-none z-0"
-      />
-
-      {/* Static Background Gradients */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(56,116,255,0.03)_0%,transparent_50%)]" />
-        <div className="absolute top-1/4 right-0 w-1/2 h-1/2 bg-[radial-gradient(circle_at_center,rgba(56,195,255,0.02)_0%,transparent_50%)]" />
-        <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-[radial-gradient(circle_at_center,rgba(168,85,247,0.02)_0%,transparent_50%)]" />
-      </div>
-
-      {/* Floating Decorative Elements */}
-      <div className="fixed -top-32 -right-32 w-96 h-96 opacity-20 animate-float-slow pointer-events-none z-0">
-        <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="100" cy="100" r="80" stroke="currentColor" strokeWidth="2" className="text-primary"/>
-          <circle cx="100" cy="100" r="60" stroke="currentColor" strokeWidth="2" className="text-secondary"/>
-          <circle cx="100" cy="100" r="40" fill="currentColor" className="text-primary/30"/>
-        </svg>
-      </div>
-      
-      <div className="fixed -bottom-32 -left-32 w-80 h-80 opacity-15 animate-float-slower pointer-events-none z-0">
-        <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M100 20L180 100L100 180L20 100Z" stroke="currentColor" strokeWidth="2" className="text-secondary"/>
-          <path d="M100 50L150 100L100 150L50 100Z" fill="currentColor" className="text-secondary/20"/>
-        </svg>
+    <div className="relative min-h-screen bg-[#050505] text-white">
+      {/* Ambient Background */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-white/5 rounded-full blur-[150px] opacity-10"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-white/5 rounded-full blur-[150px] opacity-10"></div>
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="space-y-8">
           {/* Header */}
-          <div className="text-left fade-in-up">
-            <h1 className="text-5xl font-bold font-display bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent mb-3">
+          <div className="text-left">
+            <h1 className="text-4xl md:text-5xl font-serif text-white mb-3">
               Browse Campaigns
             </h1>
-            <p className="text-lg text-white/70 font-body">Discover and support amazing causes from around the world</p>
+            <p className="text-lg text-white/60 font-sans max-w-2xl">Discover and support amazing causes from around the world.</p>
           </div>
 
           {/* Search and Filters */}
-          <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-xl rounded-2xl border-2 border-gray-700 p-6 hover:border-primary/50 transition-all duration-300">
-            <div className="space-y-4">
+          <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6">
+            <div className="space-y-6">
               {/* Search Bar */}
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -313,10 +186,10 @@ const BrowseCampaignsPage = () => {
                 </div>
                 <input
                   type="text"
-                  placeholder="Search campaigns by title or description..."
+                  placeholder="Search campaigns..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 bg-gray-900/50 border-2 border-gray-700 rounded-xl text-white placeholder-white/40 font-body focus:ring-2 focus:ring-primary focus:border-primary hover:border-gray-600 transition-all duration-300"
+                  className="w-full pl-12 pr-4 py-3 bg-[#0A0A0A] border border-white/10 rounded-xl text-white placeholder-white/40 font-sans focus:ring-1 focus:ring-white/50 focus:border-white/50 transition-all"
                 />
               </div>
 
@@ -325,11 +198,10 @@ const BrowseCampaignsPage = () => {
                 <div className="flex items-center gap-4">
                   <button
                     onClick={() => setIsFiltersOpen(!isFiltersOpen)}
-                    className={`flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 font-body transition-all duration-300 ${
-                      activeFiltersCount > 0
-                        ? 'bg-gradient-to-r from-primary/20 to-secondary/20 border-primary/50 text-primary hover:border-primary'
-                        : 'bg-gray-900/50 border-gray-700 text-white/70 hover:bg-gray-800/50 hover:border-gray-600'
-                    } md:hidden`}
+                    className={`flex items-center gap-2 px-5 py-2.5 rounded-xl border font-medium transition-all ${activeFiltersCount > 0
+                      ? 'bg-white text-black border-white hover:bg-gray-200'
+                      : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white'
+                      } md:hidden`}
                   >
                     <FiSliders className="w-4 h-4" />
                     Filters {activeFiltersCount > 0 && `(${activeFiltersCount})`}
@@ -338,7 +210,7 @@ const BrowseCampaignsPage = () => {
                   {activeFiltersCount > 0 && (
                     <button
                       onClick={clearFilters}
-                      className="px-4 py-2 text-sm bg-white/10 text-white rounded-xl hover:bg-white/20 font-body transition-all duration-300"
+                      className="px-4 py-2 text-sm text-white/60 hover:text-white font-medium transition-colors"
                     >
                       Clear All
                     </button>
@@ -346,11 +218,11 @@ const BrowseCampaignsPage = () => {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <span className="text-sm text-white/60 whitespace-nowrap font-body font-semibold uppercase">Sort by:</span>
+                  <span className="text-sm text-white/60 whitespace-nowrap font-medium uppercase tracking-wider">Sort by:</span>
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
-                    className="px-4 py-2 bg-gray-900/50 border-2 border-gray-700 rounded-xl text-white text-sm font-body focus:ring-2 focus:ring-primary focus:border-primary hover:border-gray-600 transition-all duration-300"
+                    className="px-4 py-2 bg-[#0A0A0A] border border-white/10 rounded-xl text-white text-sm font-sans focus:ring-1 focus:ring-white/50 focus:border-white/50 cursor-pointer hover:bg-white/5 transition-colors"
                   >
                     <option value="newest">Newest First</option>
                     <option value="oldest">Oldest First</option>
@@ -367,33 +239,30 @@ const BrowseCampaignsPage = () => {
           </div>
 
           {/* Results Summary */}
-          <div className="flex justify-between items-center flex-wrap gap-4 fade-in-up">
-            <p className="text-white/70 font-body">
-              Showing <span className="text-white font-bold">{filteredCampaigns.length}</span> of <span className="text-white font-bold">{campaigns?.length || 0}</span> campaigns
+          <div className="flex justify-between items-center flex-wrap gap-4">
+            <p className="text-white/60 text-sm">
+              Showing <span className="text-white font-medium">{filteredCampaigns.length}</span> of <span className="text-white font-medium">{campaigns?.length || 0}</span> campaigns
             </p>
-            {activeFiltersCount > 0 && (
-              <span className="px-4 py-2 bg-gradient-to-r from-primary/20 to-secondary/20 border-2 border-primary/40 text-primary text-sm rounded-full font-body font-semibold">
-                {activeFiltersCount} filter{activeFiltersCount !== 1 ? 's' : ''} active
-              </span>
-            )}
           </div>
 
           {/* Campaigns Grid */}
           {filteredCampaigns.length === 0 ? (
-            <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-xl rounded-2xl border-2 border-gray-700 p-12 text-center hover:border-primary/30 transition-all duration-300 scale-in">
+            <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-16 text-center">
               <div className="space-y-4">
-                <FiSearch className="w-16 h-16 text-white/40 mx-auto" />
-                <h3 className="text-2xl font-bold font-display text-white/70">No Campaigns Found</h3>
-                <p className="text-white/60 font-body max-w-md mx-auto">
+                <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <FiSearch className="w-8 h-8 text-white/40" />
+                </div>
+                <h3 className="text-2xl font-serif text-white">No Campaigns Found</h3>
+                <p className="text-white/60 max-w-md mx-auto">
                   {activeFiltersCount > 0
                     ? "Try adjusting your filters or search terms to find more campaigns."
-                    : "There are no campaigns available at the moment. Check back later!"
+                    : "There are no campaigns available at the moment."
                   }
                 </p>
                 {activeFiltersCount > 0 && (
                   <button
                     onClick={clearFilters}
-                    className="px-8 py-3 bg-gradient-to-r from-primary to-secondary text-white rounded-xl hover:scale-105 font-body font-semibold transition-all duration-300 shadow-lg shadow-primary/20"
+                    className="px-8 py-3 bg-white text-black rounded-xl hover:bg-gray-200 font-medium transition-all mt-4"
                   >
                     Clear Filters
                   </button>
@@ -403,7 +272,7 @@ const BrowseCampaignsPage = () => {
           ) : isLoading ? (
             <CampaignCardSkeleton count={6} />
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 stagger-children">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredCampaigns.map((campaign) => (
                 <CampaignCard
                   key={campaign.id}
@@ -417,26 +286,26 @@ const BrowseCampaignsPage = () => {
           {/* Mobile Filters Panel */}
           {isFiltersOpen && (
             <div className="fixed inset-0 z-50 md:hidden">
-              <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setIsFiltersOpen(false)} />
-              <div className="absolute right-0 top-0 h-full w-80 bg-background-dark border-l-2 border-gray-700 p-6 overflow-y-auto">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-2xl font-bold font-display text-white">Filters</h3>
+              <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setIsFiltersOpen(false)} />
+              <div className="absolute right-0 top-0 h-full w-80 bg-[#0A0A0A] border-l border-white/10 p-6 overflow-y-auto">
+                <div className="flex items-center justify-between mb-8">
+                  <h3 className="text-2xl font-serif text-white">Filters</h3>
                   <button
                     onClick={() => setIsFiltersOpen(false)}
-                    className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300"
+                    className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
                   >
                     <FiX className="w-6 h-6" />
                   </button>
                 </div>
 
-                <div className="space-y-6">
+                <div className="space-y-8">
                   {/* Status Filter */}
                   <div>
-                    <label className="block text-sm font-semibold font-body uppercase text-white/70 mb-3">Status</label>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-white/40 mb-3">Status</label>
                     <select
                       value={statusFilter}
                       onChange={(e) => setStatusFilter(e.target.value)}
-                      className="w-full px-4 py-3 bg-gray-900/50 border-2 border-gray-700 rounded-xl text-white font-body focus:ring-2 focus:ring-primary focus:border-primary hover:border-gray-600 transition-all duration-300"
+                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-1 focus:ring-white/50 focus:border-white/50"
                     >
                       <option value="all">All Campaigns</option>
                       <option value="Active">Active</option>
@@ -447,11 +316,11 @@ const BrowseCampaignsPage = () => {
 
                   {/* Sort Options */}
                   <div>
-                    <label className="block text-sm font-semibold font-body uppercase text-white/70 mb-3">Sort By</label>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-white/40 mb-3">Sort By</label>
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
-                      className="w-full px-4 py-3 bg-gray-900/50 border-2 border-gray-700 rounded-xl text-white font-body focus:ring-2 focus:ring-primary focus:border-primary hover:border-gray-600 transition-all duration-300"
+                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-1 focus:ring-white/50 focus:border-white/50"
                     >
                       <option value="newest">Newest First</option>
                       <option value="oldest">Oldest First</option>
@@ -463,7 +332,7 @@ const BrowseCampaignsPage = () => {
 
                   {/* Goal Range */}
                   <div>
-                    <label className="block text-sm font-semibold font-body uppercase text-white/70 mb-3">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-white/40 mb-3">
                       Goal Range: {formatDOT(goalRange[0])} - {formatDOT(goalRange[1])} DOT
                     </label>
                     <input
@@ -473,7 +342,7 @@ const BrowseCampaignsPage = () => {
                       step="1000"
                       value={goalRange[0]}
                       onChange={(e) => setGoalRange([Number(e.target.value), goalRange[1]])}
-                      className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary"
+                      className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-white"
                     />
                     <input
                       type="range"
@@ -482,51 +351,24 @@ const BrowseCampaignsPage = () => {
                       step="1000"
                       value={goalRange[1]}
                       onChange={(e) => setGoalRange([goalRange[0], Number(e.target.value)])}
-                      className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary mt-2"
-                    />
-                  </div>
-
-                  {/* Progress Range */}
-                  <div>
-                    <label className="block text-sm font-semibold font-body uppercase text-white/70 mb-3">
-                      Progress: {progressRange[0]}% - {progressRange[1]}%
-                    </label>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={progressRange[0]}
-                      onChange={(e) => setProgressRange([Number(e.target.value), progressRange[1]])}
-                      className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary"
-                    />
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={progressRange[1]}
-                      onChange={(e) => setProgressRange([progressRange[0], Number(e.target.value)])}
-                      className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary mt-2"
+                      className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-white mt-4"
                     />
                   </div>
 
                   {/* Categories */}
                   <div>
-                    <label className="block text-sm font-semibold font-body uppercase text-white/70 mb-3">Categories</label>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-white/40 mb-3">Categories</label>
                     <div className="flex flex-wrap gap-2">
                       {availableCategories.map((category) => (
                         <button
                           key={category}
                           onClick={() => handleCategoryToggle(category)}
-                          className={`px-4 py-2 text-sm font-body rounded-full transition-all duration-300 ${
-                            selectedCategories.includes(category)
-                              ? 'bg-gradient-to-r from-primary to-secondary text-white border-2 border-primary'
-                              : 'bg-gray-900/50 border-2 border-gray-700 text-white/70 hover:bg-gray-800/50 hover:border-gray-600'
-                          }`}
+                          className={`px-3 py-1.5 text-xs font-medium rounded-full transition-all border ${selectedCategories.includes(category)
+                            ? 'bg-white text-black border-white'
+                            : 'bg-white/5 border-white/10 text-white/60 hover:text-white hover:border-white/30'
+                            }`}
                         >
                           {category}
-                          {selectedCategories.includes(category) && (
-                            <FiX className="inline w-3 h-3 ml-1" />
-                          )}
                         </button>
                       ))}
                     </div>
@@ -536,7 +378,7 @@ const BrowseCampaignsPage = () => {
                   {activeFiltersCount > 0 && (
                     <button
                       onClick={clearFilters}
-                      className="w-full px-6 py-3 bg-gradient-to-r from-primary to-secondary text-white rounded-xl hover:scale-105 font-body font-semibold transition-all duration-300 shadow-lg shadow-primary/20"
+                      className="w-full px-6 py-3 bg-white/10 text-white rounded-xl hover:bg-white/20 font-medium transition-colors"
                     >
                       Clear All Filters
                     </button>

@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useCampaign } from '../contexts/CampaignContext';
 import { useWallet } from '../contexts/WalletContext';
+import { FiArrowRight, FiTrendingUp, FiActivity, FiUsers } from 'react-icons/fi';
 
 const NewDashboardPage = () => {
   const { campaigns, isLoading, refreshCampaigns } = useCampaign();
@@ -49,31 +50,49 @@ const NewDashboardPage = () => {
   const activeCampaigns = campaigns.filter((c) => c.status === 'Active');
 
   return (
-    <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+    <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
       <div className="mb-12">
-        <h1 className="text-4xl md:text-5xl font-bold font-display tracking-tight text-white">Dashboard</h1>
-        <p className="mt-2 text-lg text-white/60 font-body">Overview of the DotNation ecosystem.</p>
+        <h1 className="text-4xl md:text-5xl font-serif text-white mb-2">Dashboard</h1>
+        <p className="text-lg text-white/60 font-sans">Overview of the DotNation ecosystem.</p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-        <div className="p-6 rounded-xl border border-white/10 bg-white/5 backdrop-blur-lg hover:bg-white/10 transition-all duration-300">
-          <p className="text-sm font-medium text-white/60">Total Raised</p>
-          <p className="text-3xl font-bold font-display text-white mt-2">{formatDOT(totalRaised)} DOT</p>
-          <p className="text-sm text-green-400 font-medium mt-1">+15.2% last 30 days</p>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div className="p-6 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10 transition-all duration-300 group">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-sm font-medium text-white/60 uppercase tracking-wider">Total Raised</p>
+            <FiTrendingUp className="text-white/40 group-hover:text-white transition-colors" />
+          </div>
+          <p className="text-3xl font-serif text-white mb-2">{formatDOT(totalRaised)} DOT</p>
+          <div className="flex items-center gap-2 text-xs">
+            <span className="text-green-400 font-medium">+15.2%</span>
+            <span className="text-white/40">last 30 days</span>
+          </div>
         </div>
 
-        <div className="p-6 rounded-xl border border-white/10 bg-white/5 backdrop-blur-lg hover:bg-white/10 transition-all duration-300">
-          <p className="text-sm font-medium text-white/60">Active Projects</p>
-          <p className="text-3xl font-bold font-display text-white mt-2">{activeCampaigns.length}</p>
-          <p className="text-sm text-white/50 font-medium mt-1">3 new projects this week</p>
+        <div className="p-6 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10 transition-all duration-300 group">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-sm font-medium text-white/60 uppercase tracking-wider">Active Projects</p>
+            <FiActivity className="text-white/40 group-hover:text-white transition-colors" />
+          </div>
+          <p className="text-3xl font-serif text-white mb-2">{activeCampaigns.length}</p>
+          <div className="flex items-center gap-2 text-xs">
+            <span className="text-white font-medium">3 new</span>
+            <span className="text-white/40">this week</span>
+          </div>
         </div>
 
-        <div className="p-6 rounded-xl border border-white/10 bg-white/5 backdrop-blur-lg hover:bg-white/10 transition-all duration-300">
-          <p className="text-sm font-medium text-white/60">Unique Contributors</p>
-          <p className="text-3xl font-bold font-display text-white mt-2">3,456</p>
-          <p className="text-sm text-white/50 font-medium mt-1">Growing daily</p>
+        <div className="p-6 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10 transition-all duration-300 group">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-sm font-medium text-white/60 uppercase tracking-wider">Contributors</p>
+            <FiUsers className="text-white/40 group-hover:text-white transition-colors" />
+          </div>
+          <p className="text-3xl font-serif text-white mb-2">3,456</p>
+          <div className="flex items-center gap-2 text-xs">
+            <span className="text-white font-medium">Growing</span>
+            <span className="text-white/40">daily</span>
+          </div>
         </div>
       </div>
 
@@ -82,16 +101,16 @@ const NewDashboardPage = () => {
         {/* Trending Projects */}
         <div className="lg:col-span-2">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold font-display text-white">Trending Projects</h2>
-            <Link to="/campaigns" className="text-sm font-medium text-primary hover:underline">
-              View All
+            <h2 className="text-2xl font-serif text-white">Trending Projects</h2>
+            <Link to="/campaigns" className="flex items-center gap-2 text-sm font-medium text-white/60 hover:text-white transition-colors">
+              View All <FiArrowRight />
             </Link>
           </div>
 
-           {isLoading ? (
+          {isLoading ? (
             <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-              <p className="text-white/60 mt-4">Loading campaigns...</p>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto"></div>
+              <p className="text-white/60 mt-4 text-sm">Loading campaigns...</p>
             </div>
           ) : trendingCampaigns.length > 0 ? (
             <div className="space-y-4">
@@ -99,51 +118,38 @@ const NewDashboardPage = () => {
                 <Link
                   key={campaign.id}
                   to={`/campaign/${campaign.id}`}
-                  className="grid grid-cols-[auto,1fr,auto,auto] items-center gap-4 p-4 rounded-xl border border-white/10 bg-white/5 backdrop-blur-lg hover:bg-white/10 transition-colors duration-300"
+                  className="group grid grid-cols-[auto,1fr,auto] md:grid-cols-[auto,1fr,auto,auto] items-center gap-4 p-4 rounded-xl border border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10 transition-all duration-300 hover:scale-[1.01]"
                 >
-                  <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-primary/30 to-purple-500/30 flex items-center justify-center">
-                    <svg
-                      className="w-8 h-8 text-primary"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M13 10V3L4 14h7v7l9-11h-7z"
-                      />
-                    </svg>
+                  <div className="w-14 h-14 rounded-lg bg-[#111] border border-white/10 flex items-center justify-center group-hover:border-white/30 transition-colors">
+                    <span className="font-serif text-xl text-white/80">{campaign.title.charAt(0)}</span>
                   </div>
 
-                  <div>
-                    <h3 className="font-bold font-display text-lg text-white">{campaign.title}</h3>
-                    <p className="text-sm text-white/60">By {campaign.beneficiary?.slice(0, 8)}...</p>
+                  <div className="min-w-0">
+                    <h3 className="font-serif text-lg text-white truncate group-hover:text-white transition-colors">{campaign.title}</h3>
+                    <p className="text-sm text-white/50 truncate">By {campaign.beneficiary?.slice(0, 8)}...</p>
                   </div>
 
-                  <div className="text-right">
-                     <p className="font-bold font-display text-lg text-white">{formatDOT(campaign.raised)} DOT</p>
-                     <p className="text-sm text-white/60">{Math.round(calculateProgress(campaign.raised, campaign.goal))}% funded</p>
+                  <div className="text-right hidden md:block">
+                    <p className="font-medium text-white">{formatDOT(campaign.raised)} DOT</p>
+                    <p className="text-xs text-white/50">{Math.round(calculateProgress(campaign.raised, campaign.goal))}% funded</p>
                   </div>
 
-                  <div className="pl-4">
-                    <button className="flex items-center justify-center rounded-full h-10 px-6 bg-primary/20 text-white text-sm font-bold tracking-wide hover:bg-primary/30 transition-colors duration-300">
-                      Fund
-                    </button>
+                  <div className="pl-2">
+                    <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-white group-hover:text-black transition-all">
+                      <FiArrowRight className="w-4 h-4" />
+                    </div>
                   </div>
                 </Link>
               ))}
             </div>
           ) : (
-            <div className="text-center py-12 p-6 rounded-xl border border-white/10 bg-white/5 backdrop-blur-lg">
-              <p className="text-white/60">No campaigns available yet.</p>
+            <div className="text-center py-12 p-6 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md">
+              <p className="text-white/60 mb-4">No campaigns available yet.</p>
               <Link
                 to="/create-campaign"
-                className="inline-block mt-4 text-primary hover:underline font-medium"
+                className="inline-flex items-center gap-2 px-6 py-2 bg-white text-black rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
               >
-                Create the first campaign
+                Start a Campaign
               </Link>
             </div>
           )}
@@ -152,47 +158,44 @@ const NewDashboardPage = () => {
         {/* Sidebar */}
         <div className="space-y-8">
           {/* Your Contributions */}
-          <div className="p-6 rounded-xl border border-white/10 bg-white/5 backdrop-blur-lg">
-            <h3 className="text-2xl font-bold font-display mb-6 text-white">Your Contributions</h3>
+          <div className="p-6 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md">
+            <h3 className="text-xl font-serif mb-6 text-white">Your Contributions</h3>
 
             {selectedAccount ? (
               <>
                 <div className="space-y-4">
                   {myContributions.map((contribution, index) => (
-                    <div key={index}>
+                    <div key={index} className="group">
                       <div className="flex justify-between items-center mb-1">
-                        <p className="text-white font-medium">{contribution.name}</p>
-                        <p className="text-primary font-bold">{contribution.amount} DOT</p>
+                        <p className="text-white font-medium text-sm group-hover:text-white transition-colors">{contribution.name}</p>
+                        <p className="text-white/80 font-mono text-sm">{contribution.amount} DOT</p>
                       </div>
-                      <p className="text-xs text-white/50">{contribution.date}</p>
-                      {index < myContributions.length - 1 && <div className="w-full h-px bg-white/10 mt-4" />}
+                      <p className="text-xs text-white/40">{contribution.date}</p>
+                      {index < myContributions.length - 1 && <div className="w-full h-px bg-white/5 mt-3" />}
                     </div>
                   ))}
                 </div>
 
-                <button className="mt-6 w-full flex items-center justify-center rounded-full h-10 bg-white/10 text-white text-sm font-bold tracking-wide hover:bg-white/20 transition-colors duration-300">
+                <button className="mt-6 w-full py-2.5 rounded-lg border border-white/10 bg-white/5 text-white text-sm font-medium hover:bg-white/10 transition-colors">
                   View History
                 </button>
               </>
             ) : (
               <div className="text-center py-8">
-                <p className="text-white/60 mb-4">Connect your wallet to see your contributions</p>
+                <p className="text-white/50 text-sm mb-4">Connect your wallet to see your contributions</p>
+                <button onClick={() => { }} className="text-white hover:underline text-sm">Connect Wallet</button>
               </div>
             )}
           </div>
 
           {/* Categories */}
-          <div className="p-6 rounded-xl border border-white/10 bg-white/5 backdrop-blur-lg">
-            <h3 className="text-2xl font-bold font-display mb-6 text-white">Categories</h3>
+          <div className="p-6 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md">
+            <h3 className="text-xl font-serif mb-6 text-white">Categories</h3>
             <div className="flex flex-wrap gap-2">
               {['Technology', 'Art', 'Environment', 'Social Good', 'DeFi', 'Gaming'].map((category) => (
                 <button
                   key={category}
-                  className={`px-3 py-1 text-sm rounded-full font-medium transition-colors ${
-                    category === 'Technology'
-                      ? 'bg-primary/20 text-primary'
-                      : 'bg-white/10 text-white/80 hover:bg-white/20'
-                  }`}
+                  className="px-3 py-1.5 text-xs rounded-full font-medium transition-colors bg-white/5 border border-white/10 text-white/70 hover:bg-white/10 hover:text-white hover:border-white/20"
                 >
                   {category}
                 </button>

@@ -179,7 +179,7 @@ const CampaignDetailsPage = () => {
     const progress = calculateProgress(campaign.raised, campaign.goal);
     const deadlineStatus = getDeadlineStatus(campaign.deadline);
     const stateColor = getCampaignStateColor(campaign.state);
-    
+
     // Helper function to compare addresses regardless of SS58 format
     const addressesMatch = (addr1, addr2) => {
       if (!addr1 || !addr2) return false;
@@ -192,7 +192,7 @@ const CampaignDetailsPage = () => {
         return false;
       }
     };
-    
+
     const isOwner = selectedAccount && addressesMatch(selectedAccount.address, campaign.owner);
     const userDonation = donations.find(d => addressesMatch(d.donor, selectedAccount?.address));
 
@@ -213,10 +213,10 @@ const CampaignDetailsPage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background-dark flex items-center justify-center">
+      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-primary mx-auto"></div>
-          <p className="mt-4 text-white/70 font-body">Loading campaign details...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-white mx-auto"></div>
+          <p className="mt-4 text-white/50 font-sans">Loading campaign details...</p>
         </div>
       </div>
     );
@@ -224,14 +224,11 @@ const CampaignDetailsPage = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-background-dark">
+      <div className="min-h-screen bg-[#050505]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <div className="bg-red-500/10 border-2 border-red-500/20 rounded-2xl p-6">
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
             <div className="flex items-center">
-              <svg className="w-6 h-6 text-red-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
-              <p className="text-red-400 font-body">Error loading campaign: {error}</p>
+              <p className="text-white/60 font-sans">Error loading campaign: {error}</p>
             </div>
           </div>
         </div>
@@ -241,17 +238,14 @@ const CampaignDetailsPage = () => {
 
   if (!campaign && !isLoading) {
     return (
-      <div className="min-h-screen bg-background-dark flex items-center justify-center">
+      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
         <div className="max-w-md mx-auto px-4">
-          <div className="bg-yellow-500/10 border-2 border-yellow-500/30 rounded-2xl p-8 text-center">
-            <svg className="w-16 h-16 text-yellow-400 mx-auto mb-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-            </svg>
-            <h2 className="text-2xl font-bold text-yellow-400 mb-2">Campaign Not Found</h2>
-            <p className="text-white/70 font-body mb-6">The campaign you're looking for doesn't exist or has been removed.</p>
-            <a 
-              href="/campaigns" 
-              className="inline-block px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-bold rounded-xl hover:scale-105 transition-all duration-300"
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-8 text-center">
+            <h2 className="text-2xl font-serif text-white mb-2">Campaign Not Found</h2>
+            <p className="text-white/60 font-sans mb-6">The campaign you&apos;re looking for doesn&apos;t exist or has been removed.</p>
+            <a
+              href="/campaigns"
+              className="inline-block px-6 py-3 bg-white text-black font-medium rounded-xl hover:bg-gray-200 transition-all duration-300"
             >
               Browse All Campaigns
             </a>
@@ -262,39 +256,29 @@ const CampaignDetailsPage = () => {
   }
 
   const stateColorClasses = {
-    green: 'bg-green-500/20 text-green-400 border-green-500/30',
-    blue: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-    red: 'bg-red-500/20 text-red-400 border-red-500/30',
-    yellow: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-    gray: 'bg-gray-500/20 text-gray-400 border-gray-500/30'
+    green: 'bg-white/10 text-white border-white/20',
+    blue: 'bg-white/10 text-white border-white/20',
+    red: 'bg-white/10 text-white border-white/20',
+    yellow: 'bg-white/10 text-white border-white/20',
+    gray: 'bg-white/10 text-white border-white/20'
   };
 
   return (
-    <div className="relative min-h-screen bg-background-dark">
-      {/* Animated Background Gradients */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(56,116,255,0.05)_0%,transparent_50%)] animate-pulse-slow" />
-        <div className="absolute top-1/4 right-0 w-1/2 h-1/2 bg-[radial-gradient(circle_at_center,rgba(0,234,211,0.03)_0%,transparent_50%)] animate-pulse-slow" />
-        <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-[radial-gradient(circle_at_center,rgba(168,85,247,0.03)_0%,transparent_50%)] animate-pulse-slow" />
-      </div>
-
-      {/* Floating Decorative Elements */}
-      <div className="fixed top-20 right-10 w-64 h-64 opacity-10 animate-float-slow pointer-events-none z-0">
-        <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="100" cy="100" r="60" stroke="currentColor" strokeWidth="2" className="text-primary"/>
-          <circle cx="100" cy="100" r="40" fill="currentColor" className="text-primary/30"/>
-        </svg>
+    <div className="relative min-h-screen bg-[#050505] text-white">
+      {/* Ambient Background */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-white/5 rounded-full blur-[150px] opacity-10"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-white/5 rounded-full blur-[150px] opacity-10"></div>
       </div>
 
       {/* Toast Notification */}
       {showToast && (
         <div className="fixed top-4 right-4 z-50 animate-slide-in-right">
-          <div className={`px-6 py-4 rounded-xl border-2 backdrop-blur-xl ${
-            showToast.type === 'success' 
-              ? 'bg-green-500/20 border-green-500/50 text-green-400' 
-              : 'bg-red-500/20 border-red-500/50 text-red-400'
-          }`}>
-            <p className="font-body font-semibold">{showToast.message}</p>
+          <div className={`px-6 py-4 rounded-xl border backdrop-blur-xl ${showToast.type === 'success'
+            ? 'bg-white/10 border-white/20 text-white'
+            : 'bg-white/10 border-white/20 text-white'
+            }`}>
+            <p className="font-sans font-medium">{showToast.message}</p>
           </div>
         </div>
       )}
@@ -304,48 +288,48 @@ const CampaignDetailsPage = () => {
           {/* Campaign Details */}
           <div className="space-y-6">
             {/* Campaign Image */}
-            <div className="relative rounded-2xl overflow-hidden group fade-in-up">
+            <div className="relative rounded-2xl overflow-hidden group">
               <img
                 src={campaign.imageUrl || 'https://via.placeholder.com/800x400?text=Campaign+Image'}
                 alt={campaign.title}
                 className="w-full h-96 object-cover group-hover:scale-105 transition-transform duration-500"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
             </div>
 
             {/* Campaign Header */}
-            <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-xl rounded-2xl border-2 border-gray-700 p-6 hover:border-primary/50 transition-all duration-300 fade-in-up">
+            <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6">
               <div className="flex justify-between items-start flex-wrap gap-4 mb-4">
-                <h1 className="text-4xl font-bold font-display text-white">{campaign.title}</h1>
+                <h1 className="text-4xl font-bold font-serif text-white">{campaign.title}</h1>
                 <div className="flex items-center gap-2">
-                  <span className={`px-4 py-2 rounded-xl border-2 font-body font-semibold ${stateColorClasses[campaignStats?.stateColor] || stateColorClasses.gray}`}>
+                  <span className={`px-4 py-2 rounded-xl border font-sans font-medium ${stateColorClasses[campaignStats?.stateColor] || stateColorClasses.gray}`}>
                     {campaign.state}
                   </span>
                   <div className="flex gap-1">
                     <button
                       onClick={() => handleShare('twitter')}
-                      className="p-2 text-white/60 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-300"
+                      className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300"
                       title="Share on Twitter"
                     >
                       <FiTwitter className="w-5 h-5" />
                     </button>
                     <button
                       onClick={() => handleShare('facebook')}
-                      className="p-2 text-white/60 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-300"
+                      className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300"
                       title="Share on Facebook"
                     >
                       <FiFacebook className="w-5 h-5" />
                     </button>
                     <button
                       onClick={() => handleShare('linkedin')}
-                      className="p-2 text-white/60 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-300"
+                      className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300"
                       title="Share on LinkedIn"
                     >
                       <FiLinkedin className="w-5 h-5" />
                     </button>
                     <button
                       onClick={() => handleShare('copy')}
-                      className="p-2 text-white/60 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-300"
+                      className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300"
                       title="Copy link"
                     >
                       <FiCopy className="w-5 h-5" />
@@ -356,72 +340,71 @@ const CampaignDetailsPage = () => {
 
               {/* Campaign Stats Grid */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-gray-900/50 rounded-xl p-4 border-2 border-gray-700 hover:border-green-400/50 hover:scale-105 transition-all duration-300 group">
+                <div className="bg-white/5 rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-all duration-300 group">
                   <div className="flex items-center gap-2 mb-2">
-                    <FiTrendingUp className="w-5 h-5 text-green-400 group-hover:scale-110 transition-transform" />
-                    <span className="text-sm font-body font-semibold uppercase text-white/70">Funds Raised</span>
+                    <FiTrendingUp className="w-5 h-5 text-white/60 group-hover:text-white transition-colors" />
+                    <span className="text-xs font-sans font-bold uppercase tracking-wider text-white/40">Funds Raised</span>
                   </div>
-                  <p className="text-2xl font-bold font-display text-green-400">{campaignStats?.formattedRaised} DOT</p>
-                  <p className="text-sm text-white/60 font-body">of {campaignStats?.formattedGoal} DOT goal</p>
+                  <p className="text-2xl font-serif text-white">{campaignStats?.formattedRaised} DOT</p>
+                  <p className="text-sm text-white/40 font-sans">of {campaignStats?.formattedGoal} DOT goal</p>
                 </div>
 
-                <div className="bg-gray-900/50 rounded-xl p-4 border-2 border-gray-700 hover:border-blue-400/50 hover:scale-105 transition-all duration-300 group">
+                <div className="bg-white/5 rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-all duration-300 group">
                   <div className="flex items-center gap-2 mb-2">
-                    <FiTarget className="w-5 h-5 text-blue-400 group-hover:scale-110 transition-transform" />
-                    <span className="text-sm font-body font-semibold uppercase text-white/70">Progress</span>
+                    <FiTarget className="w-5 h-5 text-white/60 group-hover:text-white transition-colors" />
+                    <span className="text-xs font-sans font-bold uppercase tracking-wider text-white/40">Progress</span>
                   </div>
-                  <p className="text-2xl font-bold font-display text-blue-400">{campaignStats?.progress.toFixed(1)}%</p>
-                  <div className="mt-2 w-full bg-gray-700 rounded-full h-2 overflow-hidden">
-                    <div 
-                      className="bg-gradient-to-r from-primary to-secondary h-2 rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(56,116,255,0.5)] animate-pulse-slow"
+                  <p className="text-2xl font-serif text-white">{campaignStats?.progress.toFixed(1)}%</p>
+                  <div className="mt-2 w-full bg-white/10 rounded-full h-1 overflow-hidden">
+                    <div
+                      className="bg-white h-1 rounded-full transition-all duration-500"
                       style={{ width: `${Math.min(campaignStats?.progress || 0, 100)}%` }}
                     ></div>
                   </div>
                 </div>
 
-                <div className="bg-gray-900/50 rounded-xl p-4 border-2 border-gray-700 hover:border-yellow-400/50 hover:scale-105 transition-all duration-300 group">
+                <div className="bg-white/5 rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-all duration-300 group">
                   <div className="flex items-center gap-2 mb-2">
-                    <FiCalendar className="w-5 h-5 text-yellow-400 group-hover:scale-110 transition-transform" />
-                    <span className="text-sm font-body font-semibold uppercase text-white/70">Time Left</span>
+                    <FiCalendar className="w-5 h-5 text-white/60 group-hover:text-white transition-colors" />
+                    <span className="text-xs font-sans font-bold uppercase tracking-wider text-white/40">Time Left</span>
                   </div>
-                  <p className="text-2xl font-bold font-display text-yellow-400">
+                  <p className="text-2xl font-serif text-white">
                     {campaignStats?.deadlineStatus.message}
                   </p>
-                  <p className="text-sm text-white/60 font-body">Deadline: {formatDate(campaign.deadline)}</p>
+                  <p className="text-sm text-white/40 font-sans">Deadline: {formatDate(campaign.deadline)}</p>
                 </div>
               </div>
 
               {/* Campaign Details */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 pt-6 border-t-2 border-gray-700">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 pt-6 border-t border-white/10">
                 <div>
-                  <p className="text-sm font-body font-semibold uppercase text-white/60 mb-1">Created by</p>
-                  <p className="text-white font-body font-mono">{shortenAddress(campaign.owner)}</p>
+                  <p className="text-xs font-sans font-bold uppercase tracking-wider text-white/40 mb-1">Created by</p>
+                  <p className="text-white font-mono text-sm">{shortenAddress(campaign.owner)}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-body font-semibold uppercase text-white/60 mb-1">Beneficiary</p>
-                  <p className="text-white font-body font-mono">{shortenAddress(campaign.beneficiary)}</p>
+                  <p className="text-xs font-sans font-bold uppercase tracking-wider text-white/40 mb-1">Beneficiary</p>
+                  <p className="text-white font-mono text-sm">{shortenAddress(campaign.beneficiary)}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-body font-semibold uppercase text-white/60 mb-1">Total Donors</p>
+                  <p className="text-xs font-sans font-bold uppercase tracking-wider text-white/40 mb-1">Total Donors</p>
                   <div className="flex items-center gap-2">
-                    <FiUsers className="w-5 h-5 text-primary" />
-                    <p className="text-white font-body font-bold">{donations.length}</p>
+                    <FiUsers className="w-4 h-4 text-white/60" />
+                    <p className="text-white font-sans font-medium">{donations.length}</p>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Tabs */}
-            <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-xl rounded-2xl border-2 border-gray-700 p-6 fade-in-up">
+            <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6">
               {/* Tab Headers */}
-              <div className="flex flex-wrap gap-2 border-b-2 border-gray-700 pb-4 mb-6">
+              <div className="flex flex-wrap gap-2 border-b border-white/10 pb-4 mb-6">
                 <button
                   onClick={() => setActiveTab('about')}
-                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-body font-semibold transition-all duration-300 ${
-                    activeTab === 'about'
-                      ? 'bg-gradient-to-r from-primary to-secondary text-white shadow-lg shadow-primary/30 scale-105'
-                      : 'text-white/60 hover:text-white hover:bg-white/10 hover:scale-105'
-                  }`}
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-sans font-medium transition-all duration-300 ${activeTab === 'about'
+                    ? 'bg-white text-black'
+                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                    }`}
                 >
                   <FiHeart className="w-4 h-4" />
                   About
@@ -429,11 +412,10 @@ const CampaignDetailsPage = () => {
                 {campaign.uses_milestones && (
                   <button
                     onClick={() => setActiveTab('milestones')}
-                    className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-body font-semibold transition-all duration-300 ${
-                      activeTab === 'milestones'
-                        ? 'bg-gradient-to-r from-primary to-secondary text-white shadow-lg shadow-primary/30 scale-105'
-                        : 'text-white/60 hover:text-white hover:bg-white/10 hover:scale-105'
-                    }`}
+                    className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-sans font-medium transition-all duration-300 ${activeTab === 'milestones'
+                      ? 'bg-white text-black'
+                      : 'text-white/60 hover:text-white hover:bg-white/5'
+                      }`}
                   >
                     <FiTarget className="w-4 h-4" />
                     Milestones
@@ -441,44 +423,40 @@ const CampaignDetailsPage = () => {
                 )}
                 <button
                   onClick={() => setActiveTab('updates')}
-                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-body font-semibold transition-all duration-300 ${
-                    activeTab === 'updates'
-                      ? 'bg-gradient-to-r from-primary to-secondary text-white shadow-lg shadow-primary/30 scale-105'
-                      : 'text-white/60 hover:text-white hover:bg-white/10 hover:scale-105'
-                  }`}
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-sans font-medium transition-all duration-300 ${activeTab === 'updates'
+                    ? 'bg-white text-black'
+                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                    }`}
                 >
                   <FiTrendingUp className="w-4 h-4" />
                   Updates
                 </button>
                 <button
                   onClick={() => setActiveTab('discussion')}
-                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-body font-semibold transition-all duration-300 ${
-                    activeTab === 'discussion'
-                      ? 'bg-gradient-to-r from-primary to-secondary text-white shadow-lg shadow-primary/30 scale-105'
-                      : 'text-white/60 hover:text-white hover:bg-white/10 hover:scale-105'
-                  }`}
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-sans font-medium transition-all duration-300 ${activeTab === 'discussion'
+                    ? 'bg-white text-black'
+                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                    }`}
                 >
                   <FiMessageSquare className="w-4 h-4" />
                   Discussion
                 </button>
                 <button
                   onClick={() => setActiveTab('donors')}
-                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-body font-semibold transition-all duration-300 ${
-                    activeTab === 'donors'
-                      ? 'bg-gradient-to-r from-primary to-secondary text-white shadow-lg shadow-primary/30 scale-105'
-                      : 'text-white/60 hover:text-white hover:bg-white/10 hover:scale-105'
-                  }`}
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-sans font-medium transition-all duration-300 ${activeTab === 'donors'
+                    ? 'bg-white text-black'
+                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                    }`}
                 >
                   <FiUsers className="w-4 h-4" />
                   Donors ({donations.length})
                 </button>
                 <button
                   onClick={() => setActiveTab('crosschain')}
-                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-body font-semibold transition-all duration-300 ${
-                    activeTab === 'crosschain'
-                      ? 'bg-gradient-to-r from-primary to-secondary text-white shadow-lg shadow-primary/30 scale-105'
-                      : 'text-white/60 hover:text-white hover:bg-white/10 hover:scale-105'
-                  }`}
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-sans font-medium transition-all duration-300 ${activeTab === 'crosschain'
+                    ? 'bg-white text-black'
+                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                    }`}
                 >
                   <span className="text-lg">🌉</span>
                   Cross-Chain
@@ -488,23 +466,23 @@ const CampaignDetailsPage = () => {
               {/* Tab Content */}
               {activeTab === 'about' && (
                 <div className="animate-fade-in">
-                  <h2 className="text-2xl font-bold font-display text-white mb-4">About this campaign</h2>
-                  <p className="text-white/80 font-body leading-relaxed whitespace-pre-wrap">{campaign.description}</p>
-                  
+                  <h2 className="text-2xl font-bold font-serif text-white mb-4">About this campaign</h2>
+                  <p className="text-white/80 font-sans leading-relaxed whitespace-pre-wrap">{campaign.description}</p>
+
                   {/* Show milestone creation for owners if campaign doesn't have milestones yet */}
                   {campaignStats?.isOwner && !campaign.uses_milestones && campaign.state === 'Active' && (
-                    <div className="mt-6 p-4 bg-blue-500/10 border-2 border-blue-500/30 rounded-xl">
+                    <div className="mt-6 p-4 bg-white/5 border border-white/10 rounded-xl">
                       <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
-                        <FiTarget className="w-5 h-5 text-blue-400" />
+                        <FiTarget className="w-5 h-5 text-white" />
                         Enable Milestone-Based Funding?
                       </h3>
-                      <p className="text-white/70 text-sm mb-4">
-                        Add milestones to your campaign for transparent, accountable fund releases. 
+                      <p className="text-white/60 text-sm mb-4">
+                        Add milestones to your campaign for transparent, accountable fund releases.
                         Donors will vote on each milestone before funds are released.
                       </p>
                       <button
                         onClick={() => setActiveTab('milestones')}
-                        className="btn btn-primary btn-sm"
+                        className="px-4 py-2 bg-white text-black rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
                       >
                         Add Milestones
                       </button>
@@ -519,12 +497,12 @@ const CampaignDetailsPage = () => {
                     <MilestoneVoting campaign={campaign} />
                   ) : (
                     <div className="text-center py-8">
-                      <FiTarget className="w-12 h-12 text-white/40 mx-auto mb-4" />
-                      <p className="text-white/60 font-body">
+                      <FiTarget className="w-12 h-12 text-white/20 mx-auto mb-4" />
+                      <p className="text-white/60 font-sans">
                         This campaign does not use milestones. Funds will be released once when the goal is reached.
                       </p>
                       {campaignStats?.isOwner && campaign.state === 'Active' && (
-                        <p className="text-white/50 font-body text-sm mt-4">
+                        <p className="text-white/40 font-sans text-sm mt-4">
                           Milestone creation feature coming soon!
                         </p>
                       )}
@@ -535,8 +513,8 @@ const CampaignDetailsPage = () => {
 
               {activeTab === 'updates' && (
                 <div className="animate-fade-in">
-                  <h2 className="text-2xl font-bold font-display text-white mb-4">Campaign Updates</h2>
-                  <p className="text-white/60 font-body italic">
+                  <h2 className="text-2xl font-bold font-serif text-white mb-4">Campaign Updates</h2>
+                  <p className="text-white/60 font-sans italic">
                     No updates yet. Campaign updates will appear here as the creator shares progress.
                   </p>
                 </div>
@@ -544,8 +522,8 @@ const CampaignDetailsPage = () => {
 
               {activeTab === 'discussion' && (
                 <div className="animate-fade-in">
-                  <h2 className="text-2xl font-bold font-display text-white mb-4">Discussion</h2>
-                  <p className="text-white/60 font-body italic">
+                  <h2 className="text-2xl font-bold font-serif text-white mb-4">Discussion</h2>
+                  <p className="text-white/60 font-sans italic">
                     Comments and discussion feature coming soon. Stay tuned!
                   </p>
                 </div>
@@ -553,23 +531,23 @@ const CampaignDetailsPage = () => {
 
               {activeTab === 'donors' && (
                 <div className="animate-fade-in space-y-4">
-                  <h2 className="text-2xl font-bold font-display text-white mb-4">Recent Donations</h2>
+                  <h2 className="text-2xl font-bold font-serif text-white mb-4">Recent Donations</h2>
                   {donations.length > 0 ? (
                     donations.slice(0, 10).map((donation, index) => (
-                      <div key={index} className="bg-gray-900/50 rounded-xl p-4 border-2 border-gray-700 hover:border-primary/50 hover:scale-105 transition-all duration-300">
+                      <div key={index} className="bg-white/5 rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-all duration-300">
                         <div className="flex justify-between items-center">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold">
+                            <div className="w-10 h-10 rounded-full bg-[#111] border border-white/10 flex items-center justify-center text-white font-serif">
                               {shortenAddress(donation.donor)[0]}
                             </div>
                             <div>
-                              <p className="text-white font-body font-semibold font-mono">{shortenAddress(donation.donor)}</p>
-                              <p className="text-sm text-white/60 font-body">
+                              <p className="text-white font-sans font-medium font-mono">{shortenAddress(donation.donor)}</p>
+                              <p className="text-sm text-white/40 font-sans">
                                 {formatDateTime(donation.timestamp)}
                               </p>
                             </div>
                           </div>
-                          <span className="px-4 py-2 bg-green-500/20 text-green-400 rounded-xl font-body font-bold border-2 border-green-500/30">
+                          <span className="px-4 py-2 bg-white/5 text-white rounded-xl font-mono text-sm border border-white/10">
                             {formatDOT(donation.amount)} DOT
                           </span>
                         </div>
@@ -577,8 +555,8 @@ const CampaignDetailsPage = () => {
                     ))
                   ) : (
                     <div className="text-center py-12">
-                      <FiHeart className="w-12 h-12 text-white/40 mx-auto mb-4" />
-                      <p className="text-white/60 font-body italic">
+                      <FiHeart className="w-12 h-12 text-white/20 mx-auto mb-4" />
+                      <p className="text-white/60 font-sans italic">
                         No donations yet. Be the first to support this campaign!
                       </p>
                     </div>
@@ -591,29 +569,29 @@ const CampaignDetailsPage = () => {
                   <div className="flex items-center gap-3 mb-4">
                     <span className="text-5xl">🌉</span>
                     <div>
-                      <h2 className="text-2xl font-bold font-display text-white">Cross-Chain Donations</h2>
-                      <p className="text-white/70 font-body">Powered by Polkadot XCM</p>
+                      <h2 className="text-2xl font-bold font-serif text-white">Cross-Chain Donations</h2>
+                      <p className="text-white/60 font-sans">Powered by Polkadot XCM</p>
                     </div>
                   </div>
 
-                   <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border-2 border-blue-500/30 rounded-xl p-6">
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-6">
                     <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
                       <span>⚡</span>
                       What is Cross-Chain Donation?
                     </h3>
-                    <p className="text-white/80 font-body leading-relaxed mb-4">
-                      With Polkadot's XCM (Cross-Consensus Messaging), you can donate to this campaign 
-                      from <span className="font-bold text-cyan-400">ANY</span> connected parachain! 
+                    <p className="text-white/80 font-sans leading-relaxed mb-4">
+                      With Polkadot's XCM (Cross-Consensus Messaging), you can donate to this campaign
+                      from <span className="font-bold text-white">ANY</span> connected parachain!
                       No need to bridge assets manually - XCM handles everything automatically.
                     </p>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                      <div className="bg-gray-900/50 rounded-lg p-4 border border-blue-500/20">
+                      <div className="bg-[#0A0A0A] rounded-lg p-4 border border-white/10">
                         <div className="flex items-center gap-2 mb-2">
                           <span className="text-2xl">💰</span>
                           <h4 className="font-bold text-white">Supported Chains</h4>
                         </div>
-                        <ul className="text-sm text-white/70 space-y-1">
+                        <ul className="text-sm text-white/60 space-y-1">
                           <li>• Polkadot Relay Chain</li>
                           <li>• Moonbeam (GLMR, USDC)</li>
                           <li>• Acala (ACA, aUSD)</li>
@@ -622,12 +600,12 @@ const CampaignDetailsPage = () => {
                         </ul>
                       </div>
 
-                      <div className="bg-gray-900/50 rounded-lg p-4 border border-blue-500/20">
+                      <div className="bg-[#0A0A0A] rounded-lg p-4 border border-white/10">
                         <div className="flex items-center gap-2 mb-2">
                           <span className="text-2xl">⚙️</span>
                           <h4 className="font-bold text-white">How It Works</h4>
                         </div>
-                        <ol className="text-sm text-white/70 space-y-1">
+                        <ol className="text-sm text-white/60 space-y-1">
                           <li>1. Select your source chain</li>
                           <li>2. Choose asset (DOT, USDC, etc.)</li>
                           <li>3. Enter amount</li>
@@ -638,12 +616,12 @@ const CampaignDetailsPage = () => {
                     </div>
                   </div>
 
-                  <div className="bg-green-500/10 border-2 border-green-500/30 rounded-xl p-4">
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-4">
                     <div className="flex items-start gap-3">
                       <span className="text-2xl">✅</span>
                       <div>
-                        <h4 className="font-bold text-green-400 mb-1">Why Cross-Chain?</h4>
-                        <ul className="text-sm text-white/70 space-y-1">
+                        <h4 className="font-bold text-white mb-1">Why Cross-Chain?</h4>
+                        <ul className="text-sm text-white/60 space-y-1">
                           <li>• <strong>Convenience:</strong> Use assets from any chain</li>
                           <li>• <strong>Security:</strong> Native Polkadot protocol (no bridges!)</li>
                           <li>• <strong>Speed:</strong> Transfers complete in seconds</li>
@@ -653,13 +631,13 @@ const CampaignDetailsPage = () => {
                     </div>
                   </div>
 
-                  <div className="bg-yellow-500/10 border-2 border-yellow-500/30 rounded-xl p-4">
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-4">
                     <div className="flex items-start gap-3">
                       <span className="text-2xl">💡</span>
                       <div>
-                        <h4 className="font-bold text-yellow-400 mb-1">Pro Tip</h4>
-                        <p className="text-sm text-white/70">
-                          Cross-chain donations work seamlessly with our <strong>Quadratic Funding</strong> system! 
+                        <h4 className="font-bold text-white mb-1">Pro Tip</h4>
+                        <p className="text-sm text-white/60">
+                          Cross-chain donations work seamlessly with our <strong>Quadratic Funding</strong> system!
                           Your donation will receive matching multipliers just like regular donations.
                         </p>
                       </div>
@@ -667,8 +645,8 @@ const CampaignDetailsPage = () => {
                   </div>
 
                   <div className="text-center pt-4">
-                    <p className="text-white/60 text-sm font-body">
-                      👉 Use the <strong className="text-cyan-400">Cross-Chain Donation</strong> section 
+                    <p className="text-white/60 text-sm font-sans">
+                      👉 Use the <strong className="text-white">Cross-Chain Donation</strong> section
                       below to get started!
                     </p>
                   </div>
@@ -681,11 +659,11 @@ const CampaignDetailsPage = () => {
               <button
                 onClick={handleWithdraw}
                 disabled={isWithdrawing}
-                className="w-full py-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl font-body font-bold text-lg hover:scale-105 transition-all duration-300 shadow-lg shadow-green-500/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full py-4 bg-white text-black rounded-xl font-sans font-bold text-lg hover:bg-gray-200 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isWithdrawing ? (
                   <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-black"></div>
                     Processing withdrawal...
                   </>
                 ) : (
@@ -702,11 +680,11 @@ const CampaignDetailsPage = () => {
               <button
                 onClick={handleCancelCampaign}
                 disabled={isCancelling}
-                className="w-full py-4 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl font-body font-bold text-lg hover:scale-105 transition-all duration-300 shadow-lg shadow-red-500/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full py-4 bg-red-500/10 text-red-400 border border-red-500/30 rounded-xl font-sans font-bold text-lg hover:bg-red-500/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isCancelling ? (
                   <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-red-400"></div>
                     Cancelling campaign...
                   </>
                 ) : (
@@ -723,11 +701,11 @@ const CampaignDetailsPage = () => {
               <button
                 onClick={handleClaimRefund}
                 disabled={isClaimingRefund}
-                className="w-full py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-body font-bold text-lg hover:scale-105 transition-all duration-300 shadow-lg shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full py-4 bg-white text-black rounded-xl font-sans font-bold text-lg hover:bg-gray-200 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isClaimingRefund ? (
                   <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-black"></div>
                     Claiming refund...
                   </>
                 ) : (
@@ -744,8 +722,8 @@ const CampaignDetailsPage = () => {
           <div className={`grid gap-8 ${campaign.state === 'Active' ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1 max-w-2xl mx-auto'}`}>
             {/* Regular Donation Interface */}
             <ErrorBoundary>
-              <DonationInterface 
-                campaignId={id} 
+              <DonationInterface
+                campaignId={id}
                 campaign={campaign}
                 onDonationSuccess={async () => {
                   // Refresh campaign details after successful donation
@@ -761,7 +739,7 @@ const CampaignDetailsPage = () => {
             {/* Cross-Chain Donation Interface */}
             {campaign.state === 'Active' && (
               <ErrorBoundary>
-                <CrossChainDonate 
+                <CrossChainDonate
                   campaignId={id}
                   contractAddress={import.meta.env.VITE_CONTRACT_ADDRESS}
                   onSuccess={async (xcmData) => {
@@ -770,7 +748,7 @@ const CampaignDetailsPage = () => {
                       type: 'success',
                       message: `Cross-chain donation of ${xcmData.amount} ${xcmData.asset} from ${xcmData.chain} successful!`
                     });
-                    
+
                     // Refresh campaign details after XCM delivery
                     setTimeout(async () => {
                       const details = await getCampaignDetails(id);
