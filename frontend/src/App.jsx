@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext.jsx';
 import { ApiProvider } from './contexts/ApiContext.jsx';
 import { WalletProvider } from './contexts/WalletContext.jsx';
@@ -42,185 +42,201 @@ const CreatorFeed = React.lazy(() => import('./components/CreatorFeed.jsx'));
 const CreatorDashboard = React.lazy(() => import('./pages/CreatorDashboard.jsx'));
 const IPFSTest = React.lazy(() => import('./components/IPFSTest.jsx'));
 
-const router = createBrowserRouter([
-  {
-    path: '/',
-    element: <NewLandingPage />,
-  },
-  {
-    path: '/dashboard',
-    element: <NewDashboardLayout />,
-    children: [
-      { index: true, element: <NewDashboardPage /> },
-    ],
-  },
-  {
-    path: '/campaigns',
-    element: <NewDashboardLayout />,
-    children: [
-      { index: true, element: <CampaignsListPage /> },
-    ],
-  },
-  {
-    path: '/create-campaign',
-    element: <NewDashboardLayout />,
-    children: [
-      { index: true, element: <CreateCampaignPage /> },
-    ],
-  },
-  {
-    path: '/campaign/:id',
-    element: <NewDashboardLayout />,
-    children: [
-      {
-        index: true,
-        element: (
-          <ErrorBoundary>
-            <CampaignDetailsPage />
-          </ErrorBoundary>
-        )
-      },
-    ],
-  },
-  {
-    path: '/my-campaigns',
-    element: <NewDashboardLayout />,
-    children: [
-      { index: true, element: <MyCampaignsPage /> },
-    ],
-  },
-  {
-    path: '/my-donations',
-    element: <NewDashboardLayout />,
-    children: [
-      { index: true, element: <MyDonationsPage /> },
-    ],
-  },
-  {
-    path: '/my-nfts',
-    element: <NewDashboardLayout />,
-    children: [
-      { index: true, element: <MyNftsPage /> },
-    ],
-  },
-  {
-    path: '/leaderboard',
-    element: <NewDashboardLayout />,
-    children: [
-      { index: true, element: <LeaderboardPage /> },
-    ],
-  },
-  {
-    path: '/batch-create',
-    element: <NewDashboardLayout />,
-    children: [
-      { index: true, element: <BatchCampaignCreator /> },
-    ],
-  },
-  {
-    path: '/batch-withdraw',
-    element: <NewDashboardLayout />,
-    children: [
-      { index: true, element: <BatchWithdrawal /> },
-    ],
-  },
-  {
-    path: '/admin/matching-pool',
-    element: <NewDashboardLayout />,
-    children: [
-      { index: true, element: <MatchingPoolAdmin /> },
-    ],
-  },
-  {
-    path: '/browse',
-    element: <NewDashboardLayout />,
-    children: [
-      { index: true, element: <BrowseCampaignsPage /> },
-    ],
-  },
-  {
-    path: '/profile',
-    element: <NewDashboardLayout />,
-    children: [
-      { index: true, element: <UserProfilePage /> },
-    ],
-  },
-  {
-    path: '/settings',
-    element: <NewDashboardLayout />,
-    children: [
-      { index: true, element: <NewSettingsPage /> },
-    ],
-  },
-  {
-    path: '/about',
-    element: <NewDashboardLayout />,
-    children: [
-      { index: true, element: <AboutPage /> },
-    ],
-  },
-  {
-    path: '/contact',
-    element: <ContactPage />,
-  },
-  {
-    path: '/privacy',
-    element: <NewDashboardLayout />,
-    children: [
-      { index: true, element: <PrivacyPolicyPage /> },
-    ],
-  },
-  {
-    path: '/login',
-    element: <LoginPage />,
-  },
-  {
-    path: '/signup',
-    element: <SignupPage />,
-  },
-  {
-    path: '/diagnostic',
-    element: <DiagnosticPage />,
-  },
-  {
-    path: '/members',
-    element: <MembersLandingPage />,
-  },
-  {
-    path: '/members/browse',
-    element: <MembersPage />,
-  },
-  {
-    path: '/members/dashboard',
-    element: <MembersDashboard />,
-  },
-  {
-    path: '/members/:creatorId',
-    element: <CreatorProfilePage />,
-  },
-  {
-    path: '/members/feed/:creatorId',
-    element: <CreatorFeed />,
-  },
-  {
-    path: '/creator/dashboard',
-    element: <CreatorDashboard />,
-  },
-  {
-    path: '/test/ipfs',
-    element: <IPFSTest />,
-  },
-  {
-    path: '*',
-    element: <NotFoundPage />,
-  },
-]);
-
 const SuspenseFallback = () => (
   <div className="flex justify-center items-center h-screen bg-background-dark">
     <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary"></div>
   </div>
 );
+
+// Wrapper component to apply ThemeRouter to all routes
+const RootLayout = () => {
+  return (
+    <ThemeRouter>
+      <Suspense fallback={<SuspenseFallback />}>
+        <Outlet />
+      </Suspense>
+    </ThemeRouter>
+  );
+};
+
+const router = createBrowserRouter([
+  {
+    element: <RootLayout />,
+    children: [
+      {
+        path: '/',
+        element: <NewLandingPage />,
+      },
+      {
+        path: '/dashboard',
+        element: <NewDashboardLayout />,
+        children: [
+          { index: true, element: <NewDashboardPage /> },
+        ],
+      },
+      {
+        path: '/campaigns',
+        element: <NewDashboardLayout />,
+        children: [
+          { index: true, element: <CampaignsListPage /> },
+        ],
+      },
+      {
+        path: '/create-campaign',
+        element: <NewDashboardLayout />,
+        children: [
+          { index: true, element: <CreateCampaignPage /> },
+        ],
+      },
+      {
+        path: '/campaign/:id',
+        element: <NewDashboardLayout />,
+        children: [
+          {
+            index: true,
+            element: (
+              <ErrorBoundary>
+                <CampaignDetailsPage />
+              </ErrorBoundary>
+            )
+          },
+        ],
+      },
+      {
+        path: '/my-campaigns',
+        element: <NewDashboardLayout />,
+        children: [
+          { index: true, element: <MyCampaignsPage /> },
+        ],
+      },
+      {
+        path: '/my-donations',
+        element: <NewDashboardLayout />,
+        children: [
+          { index: true, element: <MyDonationsPage /> },
+        ],
+      },
+      {
+        path: '/my-nfts',
+        element: <NewDashboardLayout />,
+        children: [
+          { index: true, element: <MyNftsPage /> },
+        ],
+      },
+      {
+        path: '/leaderboard',
+        element: <NewDashboardLayout />,
+        children: [
+          { index: true, element: <LeaderboardPage /> },
+        ],
+      },
+      {
+        path: '/batch-create',
+        element: <NewDashboardLayout />,
+        children: [
+          { index: true, element: <BatchCampaignCreator /> },
+        ],
+      },
+      {
+        path: '/batch-withdraw',
+        element: <NewDashboardLayout />,
+        children: [
+          { index: true, element: <BatchWithdrawal /> },
+        ],
+      },
+      {
+        path: '/admin/matching-pool',
+        element: <NewDashboardLayout />,
+        children: [
+          { index: true, element: <MatchingPoolAdmin /> },
+        ],
+      },
+      {
+        path: '/browse',
+        element: <NewDashboardLayout />,
+        children: [
+          { index: true, element: <BrowseCampaignsPage /> },
+        ],
+      },
+      {
+        path: '/profile',
+        element: <NewDashboardLayout />,
+        children: [
+          { index: true, element: <UserProfilePage /> },
+        ],
+      },
+      {
+        path: '/settings',
+        element: <NewDashboardLayout />,
+        children: [
+          { index: true, element: <NewSettingsPage /> },
+        ],
+      },
+      {
+        path: '/about',
+        element: <NewDashboardLayout />,
+        children: [
+          { index: true, element: <AboutPage /> },
+        ],
+      },
+      {
+        path: '/privacy',
+        element: <NewDashboardLayout />,
+        children: [
+          { index: true, element: <PrivacyPolicyPage /> },
+        ],
+      },
+      {
+        path: '/contact',
+        element: <ContactPage />,
+      },
+      {
+        path: '/login',
+        element: <LoginPage />,
+      },
+      {
+        path: '/signup',
+        element: <SignupPage />,
+      },
+      {
+        path: '/diagnostic',
+        element: <DiagnosticPage />,
+      },
+      {
+        path: '/members',
+        element: <MembersLandingPage />,
+      },
+      {
+        path: '/members/browse',
+        element: <MembersPage />,
+      },
+      {
+        path: '/members/dashboard',
+        element: <MembersDashboard />,
+      },
+      {
+        path: '/members/:creatorId',
+        element: <CreatorProfilePage />,
+      },
+      {
+        path: '/members/feed/:creatorId',
+        element: <CreatorFeed />,
+      },
+      {
+        path: '/creator/dashboard',
+        element: <CreatorDashboard />,
+      },
+      {
+        path: '/test/ipfs',
+        element: <IPFSTest />,
+      },
+      {
+        path: '*',
+        element: <NotFoundPage />,
+      },
+    ],
+  },
+]);
 
 // Initialize Sentry on app start (with error handling)
 try {
@@ -246,23 +262,19 @@ function App() {
       }}
     >
       <ThemeProvider>
-        <ThemeRouter>
-          <ApiProvider>
-            <WalletProvider>
-              <CampaignProvider>
-                <BatchOperationsProvider>
-                  <NftProvider>
-                    <MembershipProvider>
-                      <Suspense fallback={<SuspenseFallback />}>
-                        <RouterProvider router={router} />
-                      </Suspense>
-                    </MembershipProvider>
-                  </NftProvider>
-                </BatchOperationsProvider>
-              </CampaignProvider>
-            </WalletProvider>
-          </ApiProvider>
-        </ThemeRouter>
+        <ApiProvider>
+          <WalletProvider>
+            <CampaignProvider>
+              <BatchOperationsProvider>
+                <NftProvider>
+                  <MembershipProvider>
+                    <RouterProvider router={router} />
+                  </MembershipProvider>
+                </NftProvider>
+              </BatchOperationsProvider>
+            </CampaignProvider>
+          </WalletProvider>
+        </ApiProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );
