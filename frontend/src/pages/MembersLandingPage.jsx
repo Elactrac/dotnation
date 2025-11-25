@@ -1,28 +1,21 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { FiMenu, FiX, FiUsers, FiAnchor, FiLayers, FiShield } from 'react-icons/fi';
+import { Link, NavLink } from 'react-router-dom';
+import { FiMenu, FiX, FiAnchor, FiLayers, FiShield, FiArrowRight } from 'react-icons/fi';
 import '../styles/light-theme.css';
-
-// Mock data for creators
-const mockCreators = [
-    { name: 'Sarah Chen', category: 'Content Creator', supporters: 1243, image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=400&fit=crop&q=80' },
-    { name: 'Marcus Johnson', category: 'Artist', supporters: 892, image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&q=80' },
-    { name: 'Emily Rodriguez', category: 'Musician', supporters: 2156, image: 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=400&h=400&fit=crop&q=80' },
-    { name: 'Alex Kim', category: 'Developer', supporters: 567, image: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&h=400&fit=crop&q=80' }
-];
 
 const MembersLandingPage = () => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     return (
         <div className="min-h-screen bg-[var(--bg-color)] text-[var(--primary-text)] font-sans selection:bg-white/20 selection:text-white overflow-x-hidden">
-            {/* Ambient Background Glow */}
+            {/* Ambient Background Glow (Lighter/Hybrid feel) */}
             <div className="fixed inset-0 pointer-events-none">
-                <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-purple-900/20 rounded-full blur-[120px] opacity-40"></div>
-                <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-blue-900/20 rounded-full blur-[120px] opacity-40"></div>
+                <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-purple-900/10 rounded-full blur-[120px] opacity-30"></div>
+                <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-blue-900/10 rounded-full blur-[120px] opacity-30"></div>
+                <div className="absolute top-[40%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-[40%] h-[40%] bg-white/5 rounded-full blur-[100px] opacity-20"></div>
             </div>
 
-            {/* Navigation */}
+            {/* Navigation (Matches NewDashboardLayout) */}
             <nav className="sticky top-0 w-full z-50 border-b border-[var(--glass-border)] bg-[var(--bg-color)]/80 backdrop-blur-xl">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
                     <Link to="/" className="flex items-center gap-3 group">
@@ -34,9 +27,10 @@ const MembersLandingPage = () => {
 
                     {/* Desktop Navigation */}
                     <div className="hidden md:flex items-center gap-8">
-                        <Link to="/" className="text-sm font-medium text-[var(--secondary-text)] hover:text-white transition-colors">Campaigns</Link>
-                        <Link to="/members" className="text-sm font-medium text-white border-b border-white pb-0.5">Members</Link>
-                        <Link to="/about" className="text-sm font-medium text-[var(--secondary-text)] hover:text-white transition-colors">About</Link>
+                        <NavLink to="/dashboard" className={({ isActive }) => isActive ? "text-white font-bold border-b border-white pb-0.5" : "text-[var(--secondary-text)] hover:text-white transition-colors"}>Dashboard</NavLink>
+                        <NavLink to="/campaigns" className={({ isActive }) => isActive ? "text-white font-bold border-b border-white pb-0.5" : "text-[var(--secondary-text)] hover:text-white transition-colors"}>Campaigns</NavLink>
+                        <NavLink to="/members" className={({ isActive }) => isActive ? "text-white font-bold border-b border-white pb-0.5" : "text-[var(--secondary-text)] hover:text-white transition-colors"}>Members</NavLink>
+                        <NavLink to="/about" className={({ isActive }) => isActive ? "text-white font-bold border-b border-white pb-0.5" : "text-[var(--secondary-text)] hover:text-white transition-colors"}>About</NavLink>
                     </div>
 
                     {/* Desktop CTA */}
@@ -62,7 +56,8 @@ const MembersLandingPage = () => {
                 {mobileMenuOpen && (
                     <div className="md:hidden bg-[var(--bg-color)] border-t border-[var(--glass-border)]">
                         <div className="px-4 py-4 space-y-3">
-                            <Link to="/" className="block text-base font-medium text-[var(--secondary-text)] hover:text-white py-2">Campaigns</Link>
+                            <Link to="/dashboard" className="block text-base font-medium text-[var(--secondary-text)] hover:text-white py-2">Dashboard</Link>
+                            <Link to="/campaigns" className="block text-base font-medium text-[var(--secondary-text)] hover:text-white py-2">Campaigns</Link>
                             <Link to="/members" className="block text-base font-medium text-white py-2">Members</Link>
                             <Link to="/about" className="block text-base font-medium text-[var(--secondary-text)] hover:text-white py-2">About</Link>
                             <Link to="/login" className="block text-base font-medium text-[var(--secondary-text)] hover:text-white py-2">Log in</Link>
@@ -74,36 +69,62 @@ const MembersLandingPage = () => {
                 )}
             </nav>
 
-            {/* Hero Section */}
-            <section className="relative w-full py-20 lg:py-32 overflow-hidden">
+            {/* Hero Section (Collage Layout) */}
+            <section className="relative w-full py-20 lg:py-28 overflow-hidden">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                    <div className="text-center max-w-4xl mx-auto mb-16">
-                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-panel mb-8 animate-fade-in-up">
-                            <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                            <span className="text-sm font-medium text-[var(--secondary-text)] tracking-wide uppercase">The New Standard</span>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+                        {/* Left Content */}
+                        <div className="text-left animate-fade-in-up">
+                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-panel mb-8">
+                                <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                                <span className="text-sm font-medium text-white tracking-wide uppercase">For Serious Creators</span>
+                            </div>
+
+                            <h1 className="font-serif text-5xl sm:text-6xl lg:text-7xl leading-[1.1] tracking-tight text-white mb-8 text-balance drop-shadow-2xl">
+                                Build your <br />
+                                <span className="italic text-white/90">legacy.</span>
+                            </h1>
+
+                            <p className="text-lg sm:text-xl text-[var(--secondary-text)] max-w-xl leading-relaxed mb-10 text-balance font-light">
+                                Paperweight is the home for creators who value permanence. Anchor your community on the blockchain and own your future.
+                            </p>
+
+                            <div className="flex flex-col sm:flex-row items-center gap-4">
+                                <Link to="/members/browse" className="w-full sm:w-auto px-8 py-4 bg-white text-black text-lg font-semibold rounded-lg hover:bg-gray-100 transition-all hover:scale-105 shadow-[0_0_30px_rgba(255,255,255,0.2)] flex items-center justify-center gap-2">
+                                    Start Creating <FiArrowRight />
+                                </Link>
+                                <Link to="/about" className="w-full sm:w-auto px-8 py-4 glass-panel text-white text-lg font-medium rounded-lg hover:bg-white/10 transition-all flex items-center justify-center">
+                                    Learn More
+                                </Link>
+                            </div>
                         </div>
 
-                        <h1 className="font-serif text-5xl sm:text-7xl lg:text-8xl leading-[0.9] tracking-tight text-white mb-8 text-balance drop-shadow-2xl">
-                            Anchor your <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40">value.</span>
-                        </h1>
+                        {/* Right Collage (Glass Paperweight Style) */}
+                        <div className="relative h-[600px] w-full hidden lg:block">
+                            {/* Floating Glass Cards */}
+                            <div className="absolute top-0 right-0 w-72 h-96 glass-panel rounded-2xl overflow-hidden transform rotate-3 hover:rotate-0 transition-all duration-700 hover:scale-105 z-20 shadow-2xl">
+                                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&h=800&fit=crop&q=80" alt="Creator" className="w-full h-full object-cover opacity-90 hover:opacity-100 transition-opacity" />
+                                <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent">
+                                    <p className="text-white font-serif text-xl">Sarah Chen</p>
+                                    <p className="text-white/70 text-sm">Visual Artist</p>
+                                </div>
+                            </div>
 
-                        <p className="text-lg sm:text-xl text-[var(--secondary-text)] max-w-2xl mx-auto leading-relaxed mb-10 text-balance font-light">
-                            Substance in a digital world. Build a community that lasts with the premium membership platform for serious creators.
-                        </p>
+                            <div className="absolute bottom-10 left-10 w-64 h-80 glass-panel rounded-2xl overflow-hidden transform -rotate-6 hover:rotate-0 transition-all duration-700 hover:scale-105 z-10 shadow-2xl">
+                                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=800&fit=crop&q=80" alt="Creator" className="w-full h-full object-cover opacity-90 hover:opacity-100 transition-opacity" />
+                                <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent">
+                                    <p className="text-white font-serif text-xl">Marcus J.</p>
+                                    <p className="text-white/70 text-sm">Musician</p>
+                                </div>
+                            </div>
 
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                            <Link to="/members/browse" className="w-full sm:w-auto px-8 py-4 bg-white text-black text-lg font-semibold rounded-lg hover:bg-gray-100 transition-all hover:scale-105 shadow-[0_0_40px_rgba(255,255,255,0.2)]">
-                                Start Creating
-                            </Link>
-                            <Link to="/about" className="w-full sm:w-auto px-8 py-4 glass-panel text-white text-lg font-medium rounded-lg hover:bg-white/10 transition-all">
-                                Learn More
-                            </Link>
+                            {/* Decorative Elements */}
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-to-tr from-purple-500/10 to-blue-500/10 rounded-full blur-3xl -z-10 animate-pulse-slow"></div>
                         </div>
                     </div>
 
-                    {/* Glass Cards Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mt-20">
+                    {/* Glass Cards Grid (Value Props) */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mt-32">
                         {/* Card 1 */}
                         <div className="glass-panel rounded-2xl p-8 hover:-translate-y-2 transition-transform duration-500 group">
                             <div className="w-14 h-14 bg-white/5 rounded-xl flex items-center justify-center mb-6 group-hover:bg-white/10 transition-colors border border-white/10">
@@ -111,7 +132,7 @@ const MembersLandingPage = () => {
                             </div>
                             <h3 className="font-serif text-2xl text-white mb-3">Permanent</h3>
                             <p className="text-[var(--secondary-text)] leading-relaxed">
-                                Your content and community aren&apos;t fleeting. We provide the infrastructure to make them last forever on the blockchain.
+                                Your content and community aren&apos;t fleeting. We provide the infrastructure to make them last forever.
                             </p>
                         </div>
 
@@ -122,7 +143,7 @@ const MembersLandingPage = () => {
                             </div>
                             <h3 className="font-serif text-2xl text-white mb-3">Transparent</h3>
                             <p className="text-[var(--secondary-text)] leading-relaxed">
-                                Clear glass, clear value. See exactly where every dollar goes with our fully transparent revenue model.
+                                Clear glass, clear value. See exactly where every dollar goes with our fully transparent model.
                             </p>
                         </div>
 
@@ -133,7 +154,7 @@ const MembersLandingPage = () => {
                             </div>
                             <h3 className="font-serif text-2xl text-white mb-3">Protected</h3>
                             <p className="text-[var(--secondary-text)] leading-relaxed">
-                                A heavy weight against censorship. Your platform, your rules. No one can take it away from you.
+                                A heavy weight against censorship. Your platform, your rules. No one can take it away.
                             </p>
                         </div>
                     </div>
@@ -158,43 +179,6 @@ const MembersLandingPage = () => {
                 </div>
             </section>
 
-            {/* Featured Creators */}
-            <section className="w-full py-20">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-end justify-between mb-12">
-                        <div>
-                            <h2 className="font-serif text-4xl sm:text-5xl text-white mb-4">Curated Creators</h2>
-                            <p className="text-[var(--secondary-text)] text-lg">Join the few who are building the future.</p>
-                        </div>
-                        <Link to="/members/browse" className="hidden sm:inline-block text-white border-b border-white/30 pb-1 hover:border-white transition-colors">
-                            View Directory →
-                        </Link>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {mockCreators.map((creator, index) => (
-                            <div key={index} className="group relative aspect-[3/4] overflow-hidden rounded-xl bg-gray-900">
-                                <img
-                                    src={creator.image}
-                                    alt={creator.name}
-                                    className="w-full h-full object-cover object-center opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 grayscale group-hover:grayscale-0"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent">
-                                    <div className="absolute bottom-0 left-0 w-full p-6 translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-                                        <h3 className="font-serif text-2xl text-white mb-1">{creator.name}</h3>
-                                        <p className="text-white/70 text-sm mb-3">{creator.category}</p>
-                                        <div className="flex items-center gap-2 text-xs font-medium text-white/50 uppercase tracking-wider">
-                                            <FiUsers className="w-3 h-3" />
-                                            <span>{creator.supporters.toLocaleString()} Supporters</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
             {/* CTA Section */}
             <section className="w-full py-32 relative overflow-hidden">
                 <div className="absolute inset-0 bg-white/5"></div>
@@ -212,19 +196,20 @@ const MembersLandingPage = () => {
             </section>
 
             {/* Footer */}
-            <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-[var(--glass-border)] bg-[var(--bg-color)]">
-                <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-                    <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-white text-black rounded flex items-center justify-center font-serif font-bold">P</div>
-                        <span className="font-serif text-xl text-white">Paperweight</span>
+            <footer className="border-t border-[var(--glass-border)] bg-[var(--bg-color)] py-12">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-white text-black rounded-md flex items-center justify-center font-serif font-bold">P</div>
+                        <span className="text-white font-serif text-xl">Paperweight</span>
                     </div>
-                    <div className="text-sm text-[var(--secondary-text)]">
-                        © 2025 Paperweight. All rights reserved.
+                    <div className="flex gap-8 text-sm text-[var(--secondary-text)]">
+                        <Link to="/about" className="hover:text-white transition-colors">About</Link>
+                        <Link to="/privacy" className="hover:text-white transition-colors">Privacy</Link>
+                        <Link to="/terms" className="hover:text-white transition-colors">Terms</Link>
+                        <Link to="/contact" className="hover:text-white transition-colors">Contact</Link>
                     </div>
-                    <div className="flex gap-8">
-                        <a href="#" className="text-[var(--secondary-text)] hover:text-white transition-colors text-sm">Twitter</a>
-                        <a href="#" className="text-[var(--secondary-text)] hover:text-white transition-colors text-sm">Discord</a>
-                        <a href="#" className="text-[var(--secondary-text)] hover:text-white transition-colors text-sm">Manifesto</a>
+                    <div className="text-[var(--secondary-text)] text-sm">
+                        &copy; 2024 Paperweight. All rights reserved.
                     </div>
                 </div>
             </footer>

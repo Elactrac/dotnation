@@ -84,7 +84,7 @@ const NewDashboardLayout = () => {
         setIsMobileMenuOpen(false);
       }
     };
-    
+
     if (isMobileMenuOpen) {
       document.addEventListener('keydown', handleEscape);
       // Prevent body scroll when mobile menu is open
@@ -121,116 +121,119 @@ const NewDashboardLayout = () => {
       {/* Main Layout Container */}
       <div className="relative flex flex-col min-h-screen z-10">
         {/* Header */}
-        <header className="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap px-4 md:px-10 py-4 border-b border-white/10 backdrop-blur-md bg-background-dark/50">
+        <header className="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap px-4 md:px-10 py-4 border-b border-[var(--glass-border)] backdrop-blur-xl bg-[var(--bg-color)]/80">
           <div className="flex items-center gap-3 text-white">
-            <Link to="/" className="flex items-center gap-3" aria-label="DotNation home page">
-              <svg
-                className="text-primary size-8"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-                aria-hidden="true"
-              >
-                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
-                <circle cx="12" cy="12" fill="currentColor" r="4" />
-              </svg>
-              <h2 className="text-white text-xl md:text-2xl font-bold font-display">DotNation</h2>
+            <Link to="/" className="flex items-center gap-3 group" aria-label="Paperweight home page">
+              <div className="w-10 h-10 bg-white text-black rounded-lg flex items-center justify-center font-serif text-xl font-bold group-hover:scale-105 transition-transform shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+                P
+              </div>
+              <h2 className="text-white text-2xl font-bold font-serif tracking-tight">Paperweight</h2>
             </Link>
           </div>
 
           <div className="flex flex-1 justify-end gap-4 md:gap-8 items-center">
             {/* Desktop Navigation - Hidden on mobile */}
             <nav className="hidden lg:flex items-center gap-8 text-sm font-medium" aria-label="Primary navigation">
-               <NavLink
-                 to="/dashboard"
-                 className={({ isActive }) =>
-                   isActive
-                     ? "text-white font-bold"
-                     : "text-white/80 hover:text-white transition-colors duration-300"
-                 }
-                 aria-label="Dashboard"
-               >
-                 Dashboard
-               </NavLink>
-               <NavLink
-                 to="/campaigns"
-                 className={({ isActive }) =>
-                   isActive
-                     ? "text-white font-bold"
-                     : "text-white/80 hover:text-white transition-colors duration-300"
-                 }
-                 aria-label="Browse all projects"
-               >
-                 Projects
-               </NavLink>
-               <NavLink
-                 to="/my-campaigns"
-                 className={({ isActive }) =>
-                   isActive
-                     ? "text-white font-bold"
-                     : "text-white/80 hover:text-white transition-colors duration-300"
-                 }
-                 aria-label="My campaigns"
-               >
-                 My Campaigns
-               </NavLink>
-               <NavLink
-                 to="/leaderboard"
-                 className={({ isActive }) =>
-                   isActive
-                     ? "text-white font-bold"
-                     : "text-white/80 hover:text-white transition-colors duration-300"
-                 }
-                 aria-label="View leaderboard"
-               >
-                 Leaderboard
-               </NavLink>
-               <div
-                 className="relative"
-                 ref={batchOpsRef}
-                 onMouseEnter={() => setIsBatchOpsOpen(true)}
-                 onMouseLeave={() => setIsBatchOpsOpen(false)}
-               >
-                 <button
-                   className="text-white/80 hover:text-white transition-colors duration-300 flex items-center gap-1"
-                   onClick={() => setIsBatchOpsOpen(!isBatchOpsOpen)}
-                   onKeyDown={handleBatchOpsKeyDown}
-                   aria-expanded={isBatchOpsOpen}
-                   aria-haspopup="true"
-                   aria-label="Batch operations menu"
-                 >
-                   Batch Ops
-                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                     <path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-                   </svg>
-                 </button>
-                 {isBatchOpsOpen && (
-                   <div
-                     className="absolute top-full left-0 mt-2 w-48 rounded-lg bg-background-dark/95 backdrop-blur-lg border border-white/10 shadow-xl transition-all duration-200 z-50"
-                     role="menu"
-                     aria-label="Batch operations"
-                   >
-                     <NavLink
-                       to="/batch-create"
-                       className="block px-4 py-2 text-sm text-white/80 hover:text-white hover:bg-white/5 rounded-t-lg transition-colors"
-                       role="menuitem"
-                       onClick={() => setIsBatchOpsOpen(false)}
-                     >
-                       Batch Create Campaigns
-                     </NavLink>
-                     <NavLink
-                       to="/batch-withdraw"
-                       className="block px-4 py-2 text-sm text-white/80 hover:text-white hover:bg-white/5 rounded-b-lg transition-colors"
-                       role="menuitem"
-                       onClick={() => setIsBatchOpsOpen(false)}
-                     >
-                       Batch Withdraw
-                     </NavLink>
-                   </div>
-                 )}
-                </div>
-             </nav>
+              <NavLink
+                to="/dashboard"
+                className={({ isActive }) =>
+                  isActive
+                    ? "text-white font-bold border-b border-white pb-0.5"
+                    : "text-[var(--secondary-text)] hover:text-white transition-colors duration-300"
+                }
+                aria-label="Dashboard"
+              >
+                Dashboard
+              </NavLink>
+              <NavLink
+                to="/campaigns"
+                className={({ isActive }) =>
+                  isActive
+                    ? "text-white font-bold border-b border-white pb-0.5"
+                    : "text-[var(--secondary-text)] hover:text-white transition-colors duration-300"
+                }
+                aria-label="Browse all projects"
+              >
+                Campaigns
+              </NavLink>
+              <NavLink
+                to="/members"
+                className={({ isActive }) =>
+                  isActive
+                    ? "text-white font-bold border-b border-white pb-0.5"
+                    : "text-[var(--secondary-text)] hover:text-white transition-colors duration-300"
+                }
+                aria-label="Members Area"
+              >
+                Members
+              </NavLink>
+              <NavLink
+                to="/my-campaigns"
+                className={({ isActive }) =>
+                  isActive
+                    ? "text-white font-bold border-b border-white pb-0.5"
+                    : "text-[var(--secondary-text)] hover:text-white transition-colors duration-300"
+                }
+                aria-label="My campaigns"
+              >
+                My Campaigns
+              </NavLink>
+              <NavLink
+                to="/leaderboard"
+                className={({ isActive }) =>
+                  isActive
+                    ? "text-white font-bold border-b border-white pb-0.5"
+                    : "text-[var(--secondary-text)] hover:text-white transition-colors duration-300"
+                }
+                aria-label="View leaderboard"
+              >
+                Leaderboard
+              </NavLink>
+              <div
+                className="relative"
+                ref={batchOpsRef}
+                onMouseEnter={() => setIsBatchOpsOpen(true)}
+                onMouseLeave={() => setIsBatchOpsOpen(false)}
+              >
+                <button
+                  className="text-[var(--secondary-text)] hover:text-white transition-colors duration-300 flex items-center gap-1"
+                  onClick={() => setIsBatchOpsOpen(!isBatchOpsOpen)}
+                  onKeyDown={handleBatchOpsKeyDown}
+                  aria-expanded={isBatchOpsOpen}
+                  aria-haspopup="true"
+                  aria-label="Batch operations menu"
+                >
+                  Batch Ops
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+                  </svg>
+                </button>
+                {isBatchOpsOpen && (
+                  <div
+                    className="absolute top-full left-0 mt-2 w-48 rounded-lg glass-panel transition-all duration-200 z-50"
+                    role="menu"
+                    aria-label="Batch operations"
+                  >
+                    <NavLink
+                      to="/batch-create"
+                      className="block px-4 py-2 text-sm text-[var(--secondary-text)] hover:text-white hover:bg-white/5 transition-colors"
+                      role="menuitem"
+                      onClick={() => setIsBatchOpsOpen(false)}
+                    >
+                      Batch Create Campaigns
+                    </NavLink>
+                    <NavLink
+                      to="/batch-withdraw"
+                      className="block px-4 py-2 text-sm text-[var(--secondary-text)] hover:text-white hover:bg-white/5 transition-colors"
+                      role="menuitem"
+                      onClick={() => setIsBatchOpsOpen(false)}
+                    >
+                      Batch Withdraw
+                    </NavLink>
+                  </div>
+                )}
+              </div>
+            </nav>
 
             {/* Desktop action buttons - Hidden on mobile */}
             <div className="hidden md:flex gap-4">
@@ -273,114 +276,113 @@ const NewDashboardLayout = () => {
 
                   {/* Dropdown Menu */}
                   {isWalletMenuOpen && (
-                  <div
-                    className="absolute right-0 mt-2 w-80 rounded-xl border border-white/10 bg-background-dark/95 backdrop-blur-lg shadow-xl transition-all duration-200 overflow-hidden z-[100]"
-                    role="menu"
-                    aria-label="Wallet menu"
-                  >
-                    <div className="p-4 max-h-[500px] overflow-y-auto overflow-x-hidden">
-                      <div role="status" aria-label="Connected wallet account">
-                        <p className="text-xs text-white/50 mb-2">Connected Account</p>
-                        <div className="mb-4">
-                          <p className="text-sm text-white font-medium truncate">{selectedAccount.meta.name}</p>
-                          <p className="text-xs text-white/60 font-mono truncate break-all">{shortenAddress(selectedAccount.address)}</p>
-                        </div>
-                      </div>
-                      
-                      {accounts.length > 1 && (
-                        <div className="mb-4" role="group" aria-label="Switch wallet account">
-                          <p className="text-xs text-white/50 mb-2">Switch Account ({accounts.length})</p>
-                          <div className="space-y-1.5 max-h-60 overflow-y-auto overflow-x-hidden" role="radiogroup">
-                            {accounts.map((account) => (
-                              <button
-                                key={account.address}
-                                onClick={() => {
-                                  switchAccount(account);
-                                  setIsWalletMenuOpen(false);
-                                }}
-                                className={`w-full text-left px-3 py-2.5 rounded-lg text-sm ${
-                                  account.address === selectedAccount.address
-                                    ? 'bg-primary/20 text-primary border border-primary/30'
-                                    : 'text-white/70 hover:bg-white/10 border border-transparent'
-                                } transition-all`}
-                                role="menuitemradio"
-                                aria-checked={account.address === selectedAccount.address}
-                                aria-label={`Switch to ${account.meta.name || shortenAddress(account.address)}`}
-                              >
-                                <div className="flex items-center justify-between gap-2 min-w-0">
-                                  <div className="min-w-0 flex-1 overflow-hidden">
-                                    <div className="font-medium truncate">{account.meta.name || shortenAddress(account.address)}</div>
-                                    <div className="text-xs opacity-60 truncate font-mono">{shortenAddress(account.address)}</div>
-                                  </div>
-                                  {account.address === selectedAccount.address && (
-                                    <span className="flex-shrink-0 text-primary ml-2">✓</span>
-                                  )}
-                                </div>
-                              </button>
-                            ))}
+                    <div
+                      className="absolute right-0 mt-2 w-80 rounded-xl border border-white/10 bg-background-dark/95 backdrop-blur-lg shadow-xl transition-all duration-200 overflow-hidden z-[100]"
+                      role="menu"
+                      aria-label="Wallet menu"
+                    >
+                      <div className="p-4 max-h-[500px] overflow-y-auto overflow-x-hidden">
+                        <div role="status" aria-label="Connected wallet account">
+                          <p className="text-xs text-white/50 mb-2">Connected Account</p>
+                          <div className="mb-4">
+                            <p className="text-sm text-white font-medium truncate">{selectedAccount.meta.name}</p>
+                            <p className="text-xs text-white/60 font-mono truncate break-all">{shortenAddress(selectedAccount.address)}</p>
                           </div>
                         </div>
-                      )}
-                      
-                      <div className="space-y-2" role="group" aria-label="Wallet actions">
-                        <button
-                          onClick={() => {
-                            navigate('/profile');
-                            setIsWalletMenuOpen(false);
-                          }}
-                          className="w-full px-4 py-2 rounded-lg bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors border border-primary/30 truncate"
-                          role="menuitem"
-                          aria-label="View profile"
-                        >
-                          <span aria-hidden="true">👤</span> View Profile
-                        </button>
-                        <button
-                          onClick={() => {
-                            navigate('/my-campaigns');
-                            setIsWalletMenuOpen(false);
-                          }}
-                          className="w-full px-4 py-2 rounded-lg bg-white/5 text-white text-sm font-medium hover:bg-white/10 transition-colors truncate"
-                          role="menuitem"
-                          aria-label="View my campaigns"
-                        >
-                          My Campaigns
-                        </button>
-                        <button
-                          onClick={() => {
-                            navigate('/my-donations');
-                            setIsWalletMenuOpen(false);
-                          }}
-                          className="w-full px-4 py-2 rounded-lg bg-white/5 text-white text-sm font-medium hover:bg-white/10 transition-colors truncate"
-                          role="menuitem"
-                          aria-label="View my donations"
-                        >
-                          My Donations
-                        </button>
-                        <button
-                          onClick={() => {
-                            navigate('/my-nfts');
-                            setIsWalletMenuOpen(false);
-                          }}
-                          className="w-full px-4 py-2 rounded-lg bg-white/5 text-white text-sm font-medium hover:bg-white/10 transition-colors truncate"
-                          role="menuitem"
-                          aria-label="View my NFTs"
-                        >
-                          My NFTs
-                        </button>
-                        <button
-                          onClick={() => {
-                            disconnectWallet();
-                            setIsWalletMenuOpen(false);
-                          }}
-                          className="w-full px-4 py-2 rounded-lg bg-white/10 text-white text-sm font-medium hover:bg-white/20 transition-colors truncate"
-                          role="menuitem"
-                          aria-label="Disconnect wallet"
-                        >
-                          Disconnect
-                        </button>
+
+                        {accounts.length > 1 && (
+                          <div className="mb-4" role="group" aria-label="Switch wallet account">
+                            <p className="text-xs text-white/50 mb-2">Switch Account ({accounts.length})</p>
+                            <div className="space-y-1.5 max-h-60 overflow-y-auto overflow-x-hidden" role="radiogroup">
+                              {accounts.map((account) => (
+                                <button
+                                  key={account.address}
+                                  onClick={() => {
+                                    switchAccount(account);
+                                    setIsWalletMenuOpen(false);
+                                  }}
+                                  className={`w-full text-left px-3 py-2.5 rounded-lg text-sm ${account.address === selectedAccount.address
+                                      ? 'bg-primary/20 text-primary border border-primary/30'
+                                      : 'text-white/70 hover:bg-white/10 border border-transparent'
+                                    } transition-all`}
+                                  role="menuitemradio"
+                                  aria-checked={account.address === selectedAccount.address}
+                                  aria-label={`Switch to ${account.meta.name || shortenAddress(account.address)}`}
+                                >
+                                  <div className="flex items-center justify-between gap-2 min-w-0">
+                                    <div className="min-w-0 flex-1 overflow-hidden">
+                                      <div className="font-medium truncate">{account.meta.name || shortenAddress(account.address)}</div>
+                                      <div className="text-xs opacity-60 truncate font-mono">{shortenAddress(account.address)}</div>
+                                    </div>
+                                    {account.address === selectedAccount.address && (
+                                      <span className="flex-shrink-0 text-primary ml-2">✓</span>
+                                    )}
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="space-y-2" role="group" aria-label="Wallet actions">
+                          <button
+                            onClick={() => {
+                              navigate('/profile');
+                              setIsWalletMenuOpen(false);
+                            }}
+                            className="w-full px-4 py-2 rounded-lg bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors border border-primary/30 truncate"
+                            role="menuitem"
+                            aria-label="View profile"
+                          >
+                            <span aria-hidden="true">👤</span> View Profile
+                          </button>
+                          <button
+                            onClick={() => {
+                              navigate('/my-campaigns');
+                              setIsWalletMenuOpen(false);
+                            }}
+                            className="w-full px-4 py-2 rounded-lg bg-white/5 text-white text-sm font-medium hover:bg-white/10 transition-colors truncate"
+                            role="menuitem"
+                            aria-label="View my campaigns"
+                          >
+                            My Campaigns
+                          </button>
+                          <button
+                            onClick={() => {
+                              navigate('/my-donations');
+                              setIsWalletMenuOpen(false);
+                            }}
+                            className="w-full px-4 py-2 rounded-lg bg-white/5 text-white text-sm font-medium hover:bg-white/10 transition-colors truncate"
+                            role="menuitem"
+                            aria-label="View my donations"
+                          >
+                            My Donations
+                          </button>
+                          <button
+                            onClick={() => {
+                              navigate('/my-nfts');
+                              setIsWalletMenuOpen(false);
+                            }}
+                            className="w-full px-4 py-2 rounded-lg bg-white/5 text-white text-sm font-medium hover:bg-white/10 transition-colors truncate"
+                            role="menuitem"
+                            aria-label="View my NFTs"
+                          >
+                            My NFTs
+                          </button>
+                          <button
+                            onClick={() => {
+                              disconnectWallet();
+                              setIsWalletMenuOpen(false);
+                            }}
+                            className="w-full px-4 py-2 rounded-lg bg-white/10 text-white text-sm font-medium hover:bg-white/20 transition-colors truncate"
+                            role="menuitem"
+                            aria-label="Disconnect wallet"
+                          >
+                            Disconnect
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
                   )}
                 </div>
               ) : (
@@ -390,9 +392,9 @@ const NewDashboardLayout = () => {
                   aria-label="Connect wallet to DotNation"
                 >
                   Connect Wallet
-                 </button>
-               )}
-             </div>
+                </button>
+              )}
+            </div>
 
             {/* Mobile Menu Button */}
             <button
@@ -428,9 +430,8 @@ const NewDashboardLayout = () => {
         {/* Mobile Menu Drawer */}
         <div
           id="mobile-menu"
-          className={`fixed top-0 right-0 h-full w-80 bg-background-dark/98 backdrop-blur-lg border-l border-white/10 shadow-2xl transform transition-transform duration-300 ease-in-out z-50 lg:hidden ${
-            isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
-          }`}
+          className={`fixed top-0 right-0 h-full w-80 bg-background-dark/98 backdrop-blur-lg border-l border-white/10 shadow-2xl transform transition-transform duration-300 ease-in-out z-50 lg:hidden ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
+            }`}
           role="navigation"
           aria-label="Mobile navigation"
         >
@@ -455,10 +456,9 @@ const NewDashboardLayout = () => {
                 to="/dashboard"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={({ isActive }) =>
-                  `px-4 py-3 rounded-lg text-base font-medium transition-colors ${
-                    isActive
-                      ? 'bg-primary/20 text-primary border border-primary/30'
-                      : 'text-white/80 hover:bg-white/5 hover:text-white'
+                  `px-4 py-3 rounded-lg text-base font-medium transition-colors ${isActive
+                    ? 'bg-primary/20 text-primary border border-primary/30'
+                    : 'text-white/80 hover:bg-white/5 hover:text-white'
                   }`
                 }
               >
@@ -468,10 +468,9 @@ const NewDashboardLayout = () => {
                 to="/campaigns"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={({ isActive }) =>
-                  `px-4 py-3 rounded-lg text-base font-medium transition-colors ${
-                    isActive
-                      ? 'bg-primary/20 text-primary border border-primary/30'
-                      : 'text-white/80 hover:bg-white/5 hover:text-white'
+                  `px-4 py-3 rounded-lg text-base font-medium transition-colors ${isActive
+                    ? 'bg-primary/20 text-primary border border-primary/30'
+                    : 'text-white/80 hover:bg-white/5 hover:text-white'
                   }`
                 }
               >
@@ -481,10 +480,9 @@ const NewDashboardLayout = () => {
                 to="/my-campaigns"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={({ isActive }) =>
-                  `px-4 py-3 rounded-lg text-base font-medium transition-colors ${
-                    isActive
-                      ? 'bg-primary/20 text-primary border border-primary/30'
-                      : 'text-white/80 hover:bg-white/5 hover:text-white'
+                  `px-4 py-3 rounded-lg text-base font-medium transition-colors ${isActive
+                    ? 'bg-primary/20 text-primary border border-primary/30'
+                    : 'text-white/80 hover:bg-white/5 hover:text-white'
                   }`
                 }
               >
@@ -494,10 +492,9 @@ const NewDashboardLayout = () => {
                 to="/leaderboard"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={({ isActive }) =>
-                  `px-4 py-3 rounded-lg text-base font-medium transition-colors ${
-                    isActive
-                      ? 'bg-primary/20 text-primary border border-primary/30'
-                      : 'text-white/80 hover:bg-white/5 hover:text-white'
+                  `px-4 py-3 rounded-lg text-base font-medium transition-colors ${isActive
+                    ? 'bg-primary/20 text-primary border border-primary/30'
+                    : 'text-white/80 hover:bg-white/5 hover:text-white'
                   }`
                 }
               >
@@ -511,10 +508,9 @@ const NewDashboardLayout = () => {
                   to="/batch-create"
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={({ isActive }) =>
-                    `px-4 py-3 rounded-lg text-base font-medium transition-colors ${
-                      isActive
-                        ? 'bg-primary/20 text-primary border border-primary/30'
-                        : 'text-white/80 hover:bg-white/5 hover:text-white'
+                    `px-4 py-3 rounded-lg text-base font-medium transition-colors ${isActive
+                      ? 'bg-primary/20 text-primary border border-primary/30'
+                      : 'text-white/80 hover:bg-white/5 hover:text-white'
                     }`
                   }
                 >
@@ -524,10 +520,9 @@ const NewDashboardLayout = () => {
                   to="/batch-withdraw"
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={({ isActive }) =>
-                    `px-4 py-3 rounded-lg text-base font-medium transition-colors ${
-                      isActive
-                        ? 'bg-primary/20 text-primary border border-primary/30'
-                        : 'text-white/80 hover:bg-white/5 hover:text-white'
+                    `px-4 py-3 rounded-lg text-base font-medium transition-colors ${isActive
+                      ? 'bg-primary/20 text-primary border border-primary/30'
+                      : 'text-white/80 hover:bg-white/5 hover:text-white'
                     }`
                   }
                 >

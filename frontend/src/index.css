@@ -303,7 +303,7 @@ header {
 /* CSS VARIABLES (Color Palette) */
 /* CSS VARIABLES (Paperweight Palette) */
 :root {
-    /* Deep, rich background */
+    /* Deep, rich background (Dark Mode) */
     --bg-color: #050505;
 
     /* Typography */
@@ -320,11 +320,19 @@ header {
     /* Stark white for high contrast */
     --secondary-accent: rgba(255, 255, 255, 0.2);
 
-    /* Glass System */
+    /* Glass System (Dark) */
     --glass-bg: rgba(255, 255, 255, 0.03);
     --glass-border: rgba(255, 255, 255, 0.08);
     --glass-highlight: rgba(255, 255, 255, 0.15);
     --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.36);
+
+    /* Glass System (Light/Hybrid) */
+    --glass-bg-light: rgba(255, 255, 255, 0.7);
+    --glass-border-light: rgba(0, 0, 0, 0.05);
+    --glass-highlight-light: rgba(255, 255, 255, 0.5);
+    --glass-shadow-light: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
+    --text-dark: #1a1a1a;
+    --text-secondary-dark: #4a4a4a;
 
     /* Status Colors (Muted/Elegant) */
     --success-color: #A7F3D0;
@@ -362,8 +370,19 @@ body {
     overflow: hidden;
 }
 
+.glass-panel-light {
+    background: var(--glass-bg-light);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border-light);
+    box-shadow: var(--glass-shadow-light);
+    position: relative;
+    overflow: hidden;
+}
+
 /* Specular Highlight (Top Border Gradient) */
-.glass-panel::before {
+.glass-panel::before,
+.glass-panel-light::before {
     content: '';
     position: absolute;
     top: 0;
@@ -378,7 +397,8 @@ body {
 }
 
 /* Noise Texture Overlay */
-.glass-panel::after {
+.glass-panel::after,
+.glass-panel-light::after {
     content: '';
     position: absolute;
     inset: 0;
