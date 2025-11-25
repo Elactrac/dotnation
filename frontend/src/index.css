@@ -326,13 +326,13 @@ header {
     --glass-highlight: rgba(255, 255, 255, 0.15);
     --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.36);
 
-    /* Glass System (Light/Hybrid) */
-    --glass-bg-light: rgba(255, 255, 255, 0.7);
-    --glass-border-light: rgba(0, 0, 0, 0.05);
-    --glass-highlight-light: rgba(255, 255, 255, 0.5);
-    --glass-shadow-light: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
-    --text-dark: #1a1a1a;
-    --text-secondary-dark: #4a4a4a;
+    /* Glass System (Unified Dark) - Remapped Light variables to Dark for consistency */
+    --glass-bg-light: var(--glass-bg);
+    --glass-border-light: var(--glass-border);
+    --glass-highlight-light: var(--glass-highlight);
+    --glass-shadow-light: var(--glass-shadow);
+    --text-dark: var(--primary-text);
+    --text-secondary-dark: var(--secondary-text);
 
     /* Status Colors (Muted/Elegant) */
     --success-color: #A7F3D0;

@@ -1,18 +1,17 @@
 import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { FiMenu, FiX, FiAnchor, FiLayers, FiShield, FiArrowRight } from 'react-icons/fi';
-import '../styles/light-theme.css';
 
 const MembersLandingPage = () => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     return (
         <div className="min-h-screen bg-[var(--bg-color)] text-[var(--primary-text)] font-sans selection:bg-white/20 selection:text-white overflow-x-hidden">
-            {/* Ambient Background Glow (Lighter/Hybrid feel) */}
+            {/* Ambient Background Glow (Dark Mode) */}
             <div className="fixed inset-0 pointer-events-none">
-                <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-purple-900/10 rounded-full blur-[120px] opacity-30"></div>
-                <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-blue-900/10 rounded-full blur-[120px] opacity-30"></div>
-                <div className="absolute top-[40%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-[40%] h-[40%] bg-white/5 rounded-full blur-[100px] opacity-20"></div>
+                <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-purple-900/20 rounded-full blur-[120px] opacity-20"></div>
+                <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-blue-900/20 rounded-full blur-[120px] opacity-20"></div>
+                <div className="absolute top-[40%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-[40%] h-[40%] bg-white/5 rounded-full blur-[100px] opacity-10"></div>
             </div>
 
             {/* Navigation (Matches NewDashboardLayout) */}

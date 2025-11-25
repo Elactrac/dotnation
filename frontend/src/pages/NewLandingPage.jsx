@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useWallet } from '../contexts/WalletContext';
-import { FiMenu, FiX, FiArrowRight, FiTrendingUp, FiShield, FiGlobe, FiCpu, FiLayers } from 'react-icons/fi';
+import { FiMenu, FiX, FiArrowRight, FiTrendingUp, FiShield, FiGlobe, FiCpu, FiLayers, FiChevronDown } from 'react-icons/fi';
 
 const NewLandingPage = () => {
   const { accounts, selectedAccount, connectWallet, switchAccount, disconnectWallet } = useWallet();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [openFaqIndex, setOpenFaqIndex] = useState(null);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -23,6 +24,59 @@ const NewLandingPage = () => {
     if (!address) return '';
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
+
+  const toggleFaq = (index) => {
+    setOpenFaqIndex(openFaqIndex === index ? null : index);
+  };
+
+  const faqs = [
+    {
+      question: "How does DotNation ensure security?",
+      answer: "We use smart contracts to lock funds in escrow. Funds are only released when campaign creators meet pre-defined milestones, verified by the community."
+    },
+    {
+      question: "What cryptocurrencies are supported?",
+      answer: "We support DOT, KSM, and major parachain tokens like GLMR, ACA, and ASTR via XCM (Cross-Consensus Messaging)."
+    },
+    {
+      question: "Is there a fee to start a campaign?",
+      answer: "Creating a campaign is free (excluding gas fees). We take a small percentage (2%) only from successful campaigns to support the protocol."
+    },
+    {
+      question: "What is Quadratic Funding?",
+      answer: "It's a matching mechanism where a pool of funds is distributed based on the number of contributors rather than the amount donated, favoring broad community support."
+    }
+  ];
+
+  const featuredCampaigns = [
+    {
+      title: "PolkaDex Mobile",
+      category: "DeFi",
+      image: "https://images.unsplash.com/photo-1611974765270-ca12586343bb?w=600&h=400&fit=crop&q=80",
+      raised: "12,450 DOT",
+      goal: "15,000 DOT",
+      progress: 83,
+      author: "PolkaDex Team"
+    },
+    {
+      title: "EcoChain Sensors",
+      category: "Hardware",
+      image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&h=400&fit=crop&q=80",
+      raised: "45,200 DOT",
+      goal: "50,000 DOT",
+      progress: 90,
+      author: "GreenTech Labs"
+    },
+    {
+      title: "Web3 Edu Platform",
+      category: "Education",
+      image: "https://images.unsplash.com/photo-1501504905252-473c47e087f8?w=600&h=400&fit=crop&q=80",
+      raised: "5,100 DOT",
+      goal: "10,000 DOT",
+      progress: 51,
+      author: "LearnDAO"
+    }
+  ];
 
   return (
     <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-white/20 selection:text-white overflow-x-hidden">
@@ -223,6 +277,104 @@ const NewLandingPage = () => {
         </div>
       </section>
 
+      {/* Featured Campaigns Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-white/5">
+        <div className="flex justify-between items-end mb-12">
+          <div>
+            <h2 className="text-3xl md:text-4xl font-serif text-white mb-2">Trending Projects</h2>
+            <p className="text-white/60">Support the most innovative ideas on Polkadot.</p>
+          </div>
+          <Link to="/dashboard" className="hidden sm:flex items-center gap-2 text-white/70 hover:text-white transition-colors">
+            View All <FiArrowRight />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {featuredCampaigns.map((campaign, index) => (
+            <div key={index} className="group rounded-2xl bg-[#0A0A0A] border border-white/10 overflow-hidden hover:border-white/20 transition-all hover:-translate-y-1">
+              <div className="relative h-48 overflow-hidden">
+                <img src={campaign.image} alt={campaign.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <div className="absolute top-4 left-4 px-3 py-1 bg-black/60 backdrop-blur-md rounded-full text-xs font-medium text-white border border-white/10">
+                  {campaign.category}
+                </div>
+              </div>
+              <div className="p-6">
+                <h3 className="text-xl font-serif text-white mb-2">{campaign.title}</h3>
+                <p className="text-white/50 text-sm mb-4">by {campaign.author}</p>
+
+                <div className="w-full bg-white/10 rounded-full h-1.5 mb-4">
+                  <div className="bg-white h-1.5 rounded-full" style={{ width: `${campaign.progress}%` }}></div>
+                </div>
+
+                <div className="flex justify-between items-center text-sm mb-6">
+                  <span className="text-white font-medium">{campaign.raised}</span>
+                  <span className="text-white/40">of {campaign.goal}</span>
+                </div>
+
+                <button className="w-full py-2.5 bg-white/5 hover:bg-white text-white hover:text-black rounded-lg transition-all font-medium text-sm">
+                  Fund Project
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-8 text-center sm:hidden">
+          <Link to="/dashboard" className="inline-flex items-center gap-2 text-white/70 hover:text-white transition-colors">
+            View All Projects <FiArrowRight />
+          </Link>
+        </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section id="how-it-works" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-white/5 bg-white/[0.02]">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-serif text-white mb-4">Launch in 3 Steps</h2>
+          <p className="text-white/60 max-w-2xl mx-auto">From idea to funded reality in minutes.</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
+          {/* Connecting Line (Desktop) */}
+          <div className="hidden md:block absolute top-12 left-[16%] right-[16%] h-0.5 bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+
+          {/* Step 1 */}
+          <div className="relative flex flex-col items-center text-center">
+            <div className="w-24 h-24 rounded-2xl bg-[#0A0A0A] border border-white/10 flex items-center justify-center mb-6 relative z-10 shadow-xl">
+              <span className="text-3xl">👛</span>
+              <div className="absolute -top-3 -right-3 w-8 h-8 bg-white text-black rounded-full flex items-center justify-center font-bold text-sm border-4 border-[#050505]">1</div>
+            </div>
+            <h3 className="text-xl font-serif text-white mb-3">Connect Wallet</h3>
+            <p className="text-white/60 text-sm leading-relaxed max-w-xs">
+              Link your Polkadot wallet. No sign-ups, no passwords. You own your identity.
+            </p>
+          </div>
+
+          {/* Step 2 */}
+          <div className="relative flex flex-col items-center text-center">
+            <div className="w-24 h-24 rounded-2xl bg-[#0A0A0A] border border-white/10 flex items-center justify-center mb-6 relative z-10 shadow-xl">
+              <span className="text-3xl">🎯</span>
+              <div className="absolute -top-3 -right-3 w-8 h-8 bg-white text-black rounded-full flex items-center justify-center font-bold text-sm border-4 border-[#050505]">2</div>
+            </div>
+            <h3 className="text-xl font-serif text-white mb-3">Define Milestones</h3>
+            <p className="text-white/60 text-sm leading-relaxed max-w-xs">
+              Set clear goals and funding tiers. Build trust by releasing funds as you deliver.
+            </p>
+          </div>
+
+          {/* Step 3 */}
+          <div className="relative flex flex-col items-center text-center">
+            <div className="w-24 h-24 rounded-2xl bg-[#0A0A0A] border border-white/10 flex items-center justify-center mb-6 relative z-10 shadow-xl">
+              <span className="text-3xl">🚀</span>
+              <div className="absolute -top-3 -right-3 w-8 h-8 bg-white text-black rounded-full flex items-center justify-center font-bold text-sm border-4 border-[#050505]">3</div>
+            </div>
+            <h3 className="text-xl font-serif text-white mb-3">Rally Community</h3>
+            <p className="text-white/60 text-sm leading-relaxed max-w-xs">
+              Share your campaign. Backers fund with crypto and receive NFT badges.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Advanced Features (Retained & Restyled) */}
       <section id="features" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-white/5">
         <div className="text-center mb-16">
@@ -256,6 +408,32 @@ const NewLandingPage = () => {
               <span>Fair Distribution</span>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto border-t border-white/5">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-serif text-white mb-4">Frequently Asked Questions</h2>
+        </div>
+
+        <div className="space-y-4">
+          {faqs.map((faq, index) => (
+            <div key={index} className="border border-white/10 rounded-xl bg-[#0A0A0A] overflow-hidden">
+              <button
+                onClick={() => toggleFaq(index)}
+                className="w-full flex items-center justify-between p-6 text-left hover:bg-white/5 transition-colors"
+              >
+                <span className="font-medium text-white">{faq.question}</span>
+                <FiChevronDown className={`w-5 h-5 text-white/50 transition-transform duration-300 ${openFaqIndex === index ? 'rotate-180' : ''}`} />
+              </button>
+              <div className={`overflow-hidden transition-all duration-300 ${openFaqIndex === index ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}>
+                <div className="p-6 pt-0 text-white/60 text-sm leading-relaxed border-t border-white/5">
+                  {faq.answer}
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
