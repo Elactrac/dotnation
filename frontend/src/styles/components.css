@@ -1,78 +1,131 @@
-/* Design System Components */
+/* Paperweight Design System Components */
 
-/* Buttons */
+/* Flashlight Hover Effect for Primary Buttons */
+.btn-flashlight {
+  @apply relative overflow-hidden bg-white text-black font-semibold py-3 px-6 rounded-sm transition-all duration-600 ease-gravity focus:outline-none focus:ring-2 focus:ring-white/50;
+}
+
+.btn-flashlight::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  transition: left 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.btn-flashlight:hover::before {
+  left: 100%;
+}
+
+.btn-flashlight:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(255, 255, 255, 0.25);
+}
+
+/* Buttons - Editorial Noir Style */
 .btn-primary {
-  @apply bg-primary text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-glow focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50;
+  @apply bg-white text-black font-semibold py-3 px-6 rounded-sm transition-all duration-600 ease-gravity focus:outline-none focus:ring-2 focus:ring-white/50;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
 }
 
 .btn-secondary {
-  @apply bg-secondary text-background-dark font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-glow-secondary focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-opacity-50;
+  @apply bg-transparent text-white border border-border-strong font-medium py-3 px-6 rounded-sm transition-all duration-600 ease-gravity focus:outline-none focus:ring-2 focus:ring-white/30;
+}
+
+.btn-secondary:hover {
+  @apply border-white;
 }
 
 .btn-outline {
-  @apply border-2 border-primary text-primary bg-transparent font-semibold py-3 px-6 rounded-lg transition-all duration-300 hover:bg-primary hover:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50;
+  @apply border border-border-strong text-white bg-transparent font-medium py-3 px-6 rounded-sm transition-all duration-600 ease-gravity hover:border-white focus:outline-none focus:ring-2 focus:ring-white/30;
 }
 
 .btn-ghost {
-  @apply text-text-secondary bg-transparent font-medium py-2 px-4 rounded-lg transition-all duration-300 hover:bg-surface hover:text-text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50;
+  @apply text-text-secondary bg-transparent font-medium py-2 px-4 rounded-sm transition-all duration-600 ease-gravity hover:bg-background-overlay hover:text-text-primary focus:outline-none;
 }
 
-/* Cards */
+/* Heavy Glass Cards - Paperweight Style */
 .card {
-  @apply bg-surface border border-border rounded-xl shadow-soft backdrop-blur-sm transition-all duration-300 hover:shadow-medium;
+  @apply bg-gradient-to-b from-background-overlay to-transparent border border-border-subtle rounded-card backdrop-blur-glass shadow-glass transition-all duration-600 ease-gravity;
 }
 
 .card-hover {
   @apply hover:shadow-hard hover:-translate-y-1;
 }
 
+/* Glass utilities */
+.glass {
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.glass-subtle {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
 /* Inputs */
 .input-primary {
-  @apply bg-surface border border-border rounded-lg px-4 py-3 text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300;
+  @apply bg-background-overlay border border-border-subtle rounded-sm px-4 py-3 text-text-primary placeholder-text-muted focus:outline-none focus:ring-1 focus:ring-white/20 focus:border-border-strong transition-all duration-600 ease-gravity;
 }
 
 .input-error {
-  @apply border-error focus:ring-error;
+  @apply border-error focus:ring-error/30;
 }
 
-/* Typography */
+/* Typography - Playfair Display for headings */
 .text-display-2xl {
-  @apply text-5xl font-display font-bold text-text-primary leading-tight;
+  @apply text-5xl font-display text-text-primary leading-tight tracking-tighter;
 }
 
 .text-display-xl {
-  @apply text-4xl font-display font-bold text-text-primary leading-tight;
+  @apply text-4xl font-display text-text-primary leading-tight tracking-tighter;
 }
 
 .text-display-lg {
-  @apply text-3xl font-display font-bold text-text-primary leading-tight;
+  @apply text-3xl font-display text-text-primary leading-tight tracking-tighter;
 }
 
 .text-display-md {
-  @apply text-2xl font-display font-semibold text-text-primary leading-tight;
+  @apply text-2xl font-display text-text-primary leading-tight tracking-tighter;
 }
 
 .text-display-sm {
-  @apply text-xl font-display font-semibold text-text-primary leading-tight;
+  @apply text-xl font-display text-text-primary leading-tight tracking-tighter;
 }
 
 .text-body-lg {
-  @apply text-lg font-body text-text-primary leading-relaxed;
+  @apply text-lg font-sans text-text-primary leading-relaxed;
 }
 
 .text-body-md {
-  @apply text-base font-body text-text-primary leading-relaxed;
+  @apply text-base font-sans text-text-primary leading-relaxed;
 }
 
 .text-body-sm {
-  @apply text-sm font-body text-text-primary leading-relaxed;
+  @apply text-sm font-sans text-text-primary leading-relaxed;
 }
 
 .text-caption {
-  @apply text-xs font-body text-text-secondary uppercase tracking-wide;
+  @apply text-xs font-sans text-text-secondary uppercase tracking-wide;
 }
-
-/* Status Colors - Now defined in Tailwind config */
 
 /* Layout */
 .container-padding {
@@ -92,11 +145,11 @@
   @apply shadow-glow;
 }
 
-.glow-secondary {
-  @apply shadow-glow-secondary;
+/* Animations */
+.animate-gravity {
+  transition-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition-duration: 600ms;
 }
-
-/* Animations - Now defined in Tailwind config */
 
 /* Responsive Utilities */
 .mobile-hidden {
@@ -109,29 +162,29 @@
 
 /* Focus States */
 .focus-ring {
-  @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50;
+  @apply focus:outline-none focus:ring-1 focus:ring-white/30;
 }
 
 /* Loading States */
 .loading-spinner {
-  @apply animate-spin-slow rounded-full border-2 border-primary border-t-transparent;
+  @apply animate-spin-slow rounded-full border-2 border-white border-t-transparent;
 }
 
 /* Status Badges */
 .badge-success {
-  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-success/10 text-success;
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-sm text-xs font-medium bg-success/10 text-success;
 }
 
 .badge-warning {
-  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-warning/10 text-warning;
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-sm text-xs font-medium bg-warning/10 text-warning;
 }
 
 .badge-error {
-  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-error/10 text-error;
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-sm text-xs font-medium bg-error/10 text-error;
 }
 
 .badge-info {
-  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-info/10 text-info;
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-sm text-xs font-medium bg-info/10 text-info;
 }
 
 /* Form Elements */
@@ -149,11 +202,11 @@
 
 /* Navigation */
 .nav-link {
-  @apply text-text-secondary hover:text-primary transition-colors duration-300 font-medium;
+  @apply text-text-secondary hover:text-text-primary transition-all duration-600 ease-gravity font-medium;
 }
 
 .nav-link-active {
-  @apply text-primary font-semibold;
+  @apply text-text-primary font-semibold;
 }
 
 /* Grid Layouts */
@@ -197,7 +250,7 @@
 
 /* Dark theme input override */
 .input-primary {
-  background-color: rgba(255, 255, 255, 0.05) !important;
+  background-color: rgba(255, 255, 255, 0.02) !important;
   border-color: rgba(255, 255, 255, 0.1) !important;
   color: white !important;
 }
@@ -207,5 +260,5 @@
 }
 
 .input-primary:focus {
-  border-color: #3874ff !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
 }

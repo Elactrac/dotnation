@@ -155,75 +155,75 @@ export const DonationInterface = memo(({ campaignId, campaign, onDonationSuccess
     <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-xl rounded-3xl p-6 md:p-8 shadow-2xl border-2 border-primary/30 hover:border-primary/50 transition-all duration-500 w-full"
+        className="bg-surface/50 backdrop-blur-xl rounded-2xl p-6 md:p-8 border border-border hover:border-primary/30 transition-all duration-500 w-full"
         role="region"
         aria-label="Campaign donation interface"
       >
         <div className="space-y-8">
-          <div className="flex items-center gap-4 pb-6 border-b-2 border-gray-700">
-            <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500 to-red-600 text-white shadow-lg" aria-hidden="true">
-              <Heart className="w-8 h-8" fill="currentColor" />
+          <div className="flex items-center gap-4 pb-6 border-b border-border">
+            <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 text-primary" aria-hidden="true">
+              <Heart className="w-7 h-7" fill="currentColor" />
             </div>
             <div className="flex-1">
-              <h3 className="text-3xl font-bold text-white">Support Campaign</h3>
-              <p className="text-base text-gray-400">Make a difference today</p>
+              <h3 className="text-2xl font-bold text-text-primary font-serif">Support Campaign</h3>
+              <p className="text-sm text-text-secondary">Make a difference today</p>
             </div>
             {nftEnabled && (
-              <div className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full px-4 py-2" role="status" aria-label="NFT receipt enabled for donations">
-                <Gift className="w-4 h-4 text-white" aria-hidden="true" />
-                <span className="text-sm font-semibold text-white">NFT Receipt</span>
+              <div className="flex items-center gap-2 bg-secondary/10 rounded-full px-4 py-2" role="status" aria-label="NFT receipt enabled for donations">
+                <Gift className="w-4 h-4 text-secondary" aria-hidden="true" />
+                <span className="text-sm font-medium text-secondary">NFT Receipt</span>
               </div>
             )}
           </div>
 
           {campaign && (
-            <div className="bg-gradient-to-br from-blue-600/20 to-purple-600/20 rounded-2xl p-5 border-2 border-blue-500/30" role="status" aria-label={`Campaign progress: ${formatDOT(campaign.raised)} DOT raised of ${formatDOT(campaign.goal)} DOT goal, ${progress.toFixed(1)}% complete`}>
+            <div className="bg-primary/5 rounded-xl p-5 border border-primary/20" role="status" aria-label={`Campaign progress: ${formatDOT(campaign.raised)} DOT raised of ${formatDOT(campaign.goal)} DOT goal, ${progress.toFixed(1)}% complete`}>
               <div className="flex items-center gap-2 mb-3">
-                <TrendingUp className="w-5 h-5 text-blue-400" aria-hidden="true" />
-                <p className="text-sm font-semibold text-blue-300">Progress</p>
+                <TrendingUp className="w-5 h-5 text-primary" aria-hidden="true" />
+                <p className="text-sm font-semibold text-primary">Progress</p>
               </div>
-              <p className="text-3xl font-bold text-white mb-1">{formatDOT(campaign.raised)} DOT</p>
+              <p className="text-3xl font-bold text-text-primary font-serif mb-1">{formatDOT(campaign.raised)} DOT</p>
               <div className="flex items-baseline justify-between">
-                <p className="text-sm text-gray-300">of {formatDOT(campaign.goal)} DOT goal</p>
-                <p className="text-sm font-bold text-blue-400">{progress.toFixed(1)}%</p>
+                <p className="text-sm text-text-secondary">of {formatDOT(campaign.goal)} DOT goal</p>
+                <p className="text-sm font-bold text-primary">{progress.toFixed(1)}%</p>
               </div>
-              <div className="mt-3 w-full bg-gray-700 rounded-full h-2.5" role="progressbar" aria-valuenow={Math.min(progress, 100)} aria-valuemin="0" aria-valuemax="100">
-                <div className="bg-gradient-to-r from-blue-500 to-purple-600 h-2.5 rounded-full transition-all" style={{ width: `${Math.min(progress, 100)}%` }}></div>
+              <div className="mt-3 w-full bg-border rounded-full h-2" role="progressbar" aria-valuenow={Math.min(progress, 100)} aria-valuemin="0" aria-valuemax="100">
+                <div className="bg-primary h-2 rounded-full transition-all" style={{ width: `${Math.min(progress, 100)}%` }}></div>
               </div>
             </div>
           )}
 
           {!selectedAccount && (
-            <div className="bg-yellow-500/10 border-2 border-yellow-500/50 rounded-2xl p-4" role="alert">
+            <div className="bg-warning/10 border border-warning/30 rounded-xl p-4" role="alert">
               <div className="flex items-start gap-3">
-                <Wallet className="w-5 h-5 text-yellow-400" aria-hidden="true" />
+                <Wallet className="w-5 h-5 text-warning" aria-hidden="true" />
                 <div>
-                  <p className="font-bold text-yellow-300">Wallet Not Connected</p>
-                  <p className="text-sm text-yellow-200/80 mt-1">Connect your wallet to donate</p>
+                  <p className="font-bold text-warning">Wallet Not Connected</p>
+                  <p className="text-sm text-warning/80 mt-1">Connect your wallet to donate</p>
                 </div>
               </div>
             </div>
           )}
 
           {!contract && selectedAccount && (
-            <div className="bg-orange-500/10 border-2 border-orange-500/50 rounded-2xl p-4" role="alert">
+            <div className="bg-warning/10 border border-warning/30 rounded-xl p-4" role="alert">
               <div className="flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-orange-400" aria-hidden="true" />
+                <AlertCircle className="w-5 h-5 text-warning" aria-hidden="true" />
                 <div>
-                  <p className="font-bold text-orange-300">Contract Not Loaded</p>
-                  <p className="text-sm text-orange-200/80 mt-1">Check network connection</p>
+                  <p className="font-bold text-warning">Contract Not Loaded</p>
+                  <p className="text-sm text-warning/80 mt-1">Check network connection</p>
                 </div>
               </div>
             </div>
           )}
 
           {!isActive && (
-            <div className="bg-blue-500/10 border-2 border-blue-500/50 rounded-2xl p-4" role="alert">
+            <div className="bg-info/10 border border-info/30 rounded-xl p-4" role="alert">
               <div className="flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-blue-400" aria-hidden="true" />
+                <AlertCircle className="w-5 h-5 text-info" aria-hidden="true" />
                 <div>
-                  <p className="font-bold text-blue-300">Campaign Ended</p>
-                  <p className="text-sm text-blue-200/80 mt-1">{hasEnded ? 'Deadline reached' : 'No longer accepting donations'}</p>
+                  <p className="font-bold text-info">Campaign Ended</p>
+                  <p className="text-sm text-info/80 mt-1">{hasEnded ? 'Deadline reached' : 'No longer accepting donations'}</p>
                 </div>
               </div>
             </div>
@@ -232,7 +232,7 @@ export const DonationInterface = memo(({ campaignId, campaign, onDonationSuccess
           {selectedAccount && contract && isActive && (
             <>
               <div role="group" aria-label="Quick amount selection">
-                <label className="block text-sm font-bold text-gray-300 mb-3">Quick Select</label>
+                <label className="block text-sm font-bold text-text-secondary mb-3 uppercase tracking-wider">Quick Select</label>
                 <div className="grid grid-cols-2 gap-2">
                   {suggestedAmounts.map((value) => (
                     <button
@@ -241,9 +241,9 @@ export const DonationInterface = memo(({ campaignId, campaign, onDonationSuccess
                       disabled={isSubmitting}
                       className={`px-4 py-3 text-sm font-bold rounded-xl transition-all ${
                         amount === value.toString()
-                          ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg'
-                          : 'bg-gray-800 border-2 border-gray-700 text-gray-300 hover:border-blue-500/50'
-                      } ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}`}
+                          ? 'bg-white text-black'
+                          : 'bg-surface border border-border text-text-secondary hover:border-primary/50 hover:text-text-primary'
+                      } ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02]'}`}
                       aria-label={`Select ${value} DOT as donation amount`}
                       aria-pressed={amount === value.toString()}
                     >
@@ -254,7 +254,7 @@ export const DonationInterface = memo(({ campaignId, campaign, onDonationSuccess
               </div>
 
               <div>
-                <label htmlFor="donation-amount" className="block text-sm font-bold text-gray-300 mb-2">Custom Amount</label>
+                <label htmlFor="donation-amount" className="block text-sm font-bold text-text-secondary mb-2 uppercase tracking-wider">Custom Amount</label>
                 <div className="relative">
                   <input
                     id="donation-amount"
@@ -265,17 +265,17 @@ export const DonationInterface = memo(({ campaignId, campaign, onDonationSuccess
                     placeholder="0.00"
                     step="0.001"
                     min="0.001"
-                    className={`w-full px-4 py-4 bg-gray-800 border-2 ${
-                      error ? 'border-red-500' : 'border-gray-700 focus:border-blue-500'
-                    } rounded-xl text-white text-lg font-bold placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50`}
+                    className={`w-full px-4 py-4 bg-background-dark border ${
+                      error ? 'border-error' : 'border-border focus:border-primary'
+                    } rounded-xl text-text-primary text-lg font-bold placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-primary/30`}
                     aria-invalid={error ? 'true' : 'false'}
                     aria-describedby={error ? 'donation-amount-error' : undefined}
                     aria-label="Enter custom donation amount in DOT"
                   />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold" aria-hidden="true">DOT</span>
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted font-bold" aria-hidden="true">DOT</span>
                 </div>
                 {error && (
-                  <p className="text-red-400 text-sm mt-2 flex items-center gap-1" id="donation-amount-error" role="alert">
+                  <p className="text-error text-sm mt-2 flex items-center gap-1" id="donation-amount-error" role="alert">
                     <AlertCircle className="w-4 h-4" aria-hidden="true" />
                     {error}
                   </p>
@@ -287,10 +287,10 @@ export const DonationInterface = memo(({ campaignId, campaign, onDonationSuccess
                 whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
                 onClick={handleDonate}
                 disabled={isSubmitting || !amount || !!error}
-                className={`w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 ${
+                className={`w-full py-4 rounded-sm font-semibold text-lg flex items-center justify-center gap-2 transition-all duration-600 ease-gravity ${
                   isSubmitting || !amount || !!error
-                    ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-pink-500 to-red-600 text-white hover:shadow-2xl'
+                    ? 'bg-surface text-text-muted cursor-not-allowed'
+                    : 'bg-white text-black hover:-translate-y-px hover:shadow-btn-hover'
                 }`}
                 aria-label={isSubmitting ? 'Processing donation transaction' : `Donate ${amount || '0'} DOT to campaign`}
                 aria-busy={isSubmitting}
@@ -309,7 +309,7 @@ export const DonationInterface = memo(({ campaignId, campaign, onDonationSuccess
                 )}
               </motion.button>
 
-              <div className="text-center text-xs text-gray-400 bg-gray-800/50 rounded-xl p-3 border border-gray-700" role="status">
+              <div className="text-center text-xs text-text-muted bg-surface rounded-xl p-3 border border-border" role="status">
                 <span aria-label="Secure transaction via Polkadot.js extension">🔒 Secure transaction via Polkadot.js extension</span>
               </div>
             </>

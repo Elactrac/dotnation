@@ -9,6 +9,8 @@ import { NftProvider } from './contexts/NftContext.jsx';
 import { MembershipProvider } from './contexts/MembershipContext.jsx';
 import ErrorBoundary from './components/ErrorBoundary';
 import ThemeRouter from './components/ThemeRouter.jsx';
+import ProtectedRoute from './components/ProtectedRoute.jsx';
+import AdminRoute from './components/AdminRoute.jsx';
 import { initSentry, trackError } from './utils/sentry';
 
 const NewLandingPage = React.lazy(() => import('./pages/NewLandingPage'));
@@ -27,6 +29,7 @@ const UserProfilePage = React.lazy(() => import('./pages/UserProfilePage.jsx'));
 const AboutPage = React.lazy(() => import('./pages/AboutPage.jsx'));
 const ContactPage = React.lazy(() => import('./pages/ContactPage.jsx'));
 const PrivacyPolicyPage = React.lazy(() => import('./pages/PrivacyPolicyPage.jsx'));
+const TermsPage = React.lazy(() => import('./pages/TermsPage.jsx'));
 const LoginPage = React.lazy(() => import('./pages/LoginPage.jsx'));
 const SignupPage = React.lazy(() => import('./pages/SignupPage.jsx'));
 const NotFoundPage = React.lazy(() => import('./pages/NotFoundPage.jsx'));
@@ -85,7 +88,7 @@ const router = createBrowserRouter([
         path: '/create-campaign',
         element: <NewDashboardLayout />,
         children: [
-          { index: true, element: <CreateCampaignPage /> },
+          { index: true, element: <ProtectedRoute><CreateCampaignPage /></ProtectedRoute> },
         ],
       },
       {
@@ -106,21 +109,21 @@ const router = createBrowserRouter([
         path: '/my-campaigns',
         element: <NewDashboardLayout />,
         children: [
-          { index: true, element: <MyCampaignsPage /> },
+          { index: true, element: <ProtectedRoute><MyCampaignsPage /></ProtectedRoute> },
         ],
       },
       {
         path: '/my-donations',
         element: <NewDashboardLayout />,
         children: [
-          { index: true, element: <MyDonationsPage /> },
+          { index: true, element: <ProtectedRoute><MyDonationsPage /></ProtectedRoute> },
         ],
       },
       {
         path: '/my-nfts',
         element: <NewDashboardLayout />,
         children: [
-          { index: true, element: <MyNftsPage /> },
+          { index: true, element: <ProtectedRoute><MyNftsPage /></ProtectedRoute> },
         ],
       },
       {
@@ -134,21 +137,21 @@ const router = createBrowserRouter([
         path: '/batch-create',
         element: <NewDashboardLayout />,
         children: [
-          { index: true, element: <BatchCampaignCreator /> },
+          { index: true, element: <ProtectedRoute><BatchCampaignCreator /></ProtectedRoute> },
         ],
       },
       {
         path: '/batch-withdraw',
         element: <NewDashboardLayout />,
         children: [
-          { index: true, element: <BatchWithdrawal /> },
+          { index: true, element: <ProtectedRoute><BatchWithdrawal /></ProtectedRoute> },
         ],
       },
       {
         path: '/admin/matching-pool',
         element: <NewDashboardLayout />,
         children: [
-          { index: true, element: <MatchingPoolAdmin /> },
+          { index: true, element: <AdminRoute><MatchingPoolAdmin /></AdminRoute> },
         ],
       },
       {
@@ -162,14 +165,14 @@ const router = createBrowserRouter([
         path: '/profile',
         element: <NewDashboardLayout />,
         children: [
-          { index: true, element: <UserProfilePage /> },
+          { index: true, element: <ProtectedRoute><UserProfilePage /></ProtectedRoute> },
         ],
       },
       {
         path: '/settings',
         element: <NewDashboardLayout />,
         children: [
-          { index: true, element: <NewSettingsPage /> },
+          { index: true, element: <ProtectedRoute><NewSettingsPage /></ProtectedRoute> },
         ],
       },
       {
@@ -184,6 +187,13 @@ const router = createBrowserRouter([
         element: <NewDashboardLayout />,
         children: [
           { index: true, element: <PrivacyPolicyPage /> },
+        ],
+      },
+      {
+        path: '/terms',
+        element: <NewDashboardLayout />,
+        children: [
+          { index: true, element: <TermsPage /> },
         ],
       },
       {
@@ -212,7 +222,7 @@ const router = createBrowserRouter([
       },
       {
         path: '/members/dashboard',
-        element: <MembersDashboard />,
+        element: <ProtectedRoute><MembersDashboard /></ProtectedRoute>,
       },
       {
         path: '/members/:creatorId',
@@ -224,7 +234,7 @@ const router = createBrowserRouter([
       },
       {
         path: '/creator/dashboard',
-        element: <CreatorDashboard />,
+        element: <ProtectedRoute><CreatorDashboard /></ProtectedRoute>,
       },
       {
         path: '/test/ipfs',

@@ -16,14 +16,14 @@ import { generateDescription, generateTitles, detectFraud, generateContractSumma
 // Reusable form components for consistent styling
 const FormField = ({ label, name, error, children, required }) => (
     <div className="space-y-2">
-        <label htmlFor={name} className="block text-sm font-bold font-display text-gray-100">
+        <label htmlFor={name} className="block text-sm font-semibold text-text-primary">
           {label}
-          {required && <span className="text-primary ml-1" aria-label="required">*</span>}
+          {required && <span className="text-white ml-1" aria-label="required">*</span>}
         </label>
         {children}
         {error && (
           <p 
-            className="text-red-400 text-sm mt-1 font-body" 
+            className="text-error text-sm mt-1" 
             id={`${name}-error`}
             role="alert"
             aria-live="polite"
@@ -41,7 +41,7 @@ const InputField = (props) => {
     <input 
       {...props} 
       aria-describedby={hasError && props.name ? `${props.name}-error` : props['aria-describedby']}
-      className={`w-full px-4 py-3 bg-gray-800/50 border-2 ${hasError ? 'border-red-500' : 'border-gray-700'} rounded-xl text-gray-100 font-body placeholder-gray-500 transition-all duration-200 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 hover:border-gray-600 ${props.className || ''}`} 
+      className={`w-full px-4 py-3 bg-background-overlay border ${hasError ? 'border-error' : 'border-border-subtle'} rounded-sm text-text-primary placeholder-text-muted transition-all duration-600 ease-gravity focus:outline-none focus:border-border-strong focus:ring-1 focus:ring-white/20 hover:border-border ${props.className || ''}`} 
     />
   );
 };
@@ -53,7 +53,7 @@ const TextareaField = (props) => {
     <textarea 
       {...props} 
       aria-describedby={hasError && props.name ? `${props.name}-error` : props['aria-describedby']}
-      className={`w-full px-4 py-3 bg-gray-800/50 border-2 ${hasError ? 'border-red-500' : 'border-gray-700'} rounded-xl text-gray-100 font-body placeholder-gray-500 transition-all duration-200 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 hover:border-gray-600 resize-none ${props.className || ''}`} 
+      className={`w-full px-4 py-3 bg-background-overlay border ${hasError ? 'border-error' : 'border-border-subtle'} rounded-sm text-text-primary placeholder-text-muted transition-all duration-600 ease-gravity focus:outline-none focus:border-border-strong focus:ring-1 focus:ring-white/20 hover:border-border resize-none ${props.className || ''}`} 
     />
   );
 };
@@ -475,12 +475,12 @@ By confirming, you will create this campaign on the blockchain.
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className={`p-4 rounded-xl border ${
+              className={`p-4 rounded-sm border ${
                 fraudCheckResult.riskLevel === 'low'
-                  ? 'bg-green-500/10 border-green-500/30 text-green-400'
+                  ? 'bg-success/10 border-success/30 text-success'
                   : fraudCheckResult.riskLevel === 'medium'
-                  ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400'
-                  : 'bg-red-500/10 border-red-500/30 text-red-400'
+                  ? 'bg-warning/10 border-warning/30 text-warning'
+                  : 'bg-error/10 border-error/30 text-error'
               }`}
               role="alert"
               aria-live="polite"
@@ -492,7 +492,7 @@ By confirming, you will create this campaign on the blockchain.
                 </div>
                 <button
                   onClick={() => setFraudCheckResult(null)}
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="text-text-muted hover:text-text-primary transition-colors"
                   type="button"
                   aria-label="Dismiss fraud analysis result"
                 >
@@ -542,7 +542,7 @@ By confirming, you will create this campaign on the blockchain.
                 type="button"
                 onClick={handleGenerateTitles}
                 disabled={isGenerating}
-                className="px-4 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 whitespace-nowrap"
+                className="px-4 py-3 bg-background-surface hover:bg-background-overlay text-text-primary border border-border-subtle rounded-sm transition-all duration-600 ease-gravity disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 whitespace-nowrap"
                 aria-label="Generate AI title suggestions"
               >
                 {isGenerating ? (
@@ -558,7 +558,7 @@ By confirming, you will create this campaign on the blockchain.
                 )}
               </button>
             </div>
-            <div className="text-xs text-gray-400 text-right">
+            <div className="text-xs text-text-muted text-right">
               {formData.title.length}/100 characters
             </div>
             
@@ -574,7 +574,7 @@ By confirming, you will create this campaign on the blockchain.
                   aria-label="AI title suggestions"
                   aria-live="polite"
                 >
-                  <div className="text-sm text-gray-400 font-semibold">AI Suggestions (click to use):</div>
+                  <div className="text-sm text-text-muted font-semibold">AI Suggestions (click to use):</div>
                   {titleSuggestions.map((title, idx) => (
                     <motion.button
                       key={idx}
@@ -583,7 +583,7 @@ By confirming, you will create this campaign on the blockchain.
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: idx * 0.05 }}
                       onClick={() => selectTitle(title)}
-                      className="w-full text-left px-4 py-3 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 rounded-lg text-sm text-gray-300 transition-colors"
+                      className="w-full text-left px-4 py-3 bg-background-overlay hover:bg-background-surface border border-border-subtle rounded-sm text-sm text-text-secondary hover:text-text-primary transition-all duration-600 ease-gravity"
                       aria-label={`Use suggestion: ${title}`}
                     >
                       {title}
@@ -592,7 +592,7 @@ By confirming, you will create this campaign on the blockchain.
                   <button
                     type="button"
                     onClick={() => setShowTitleSuggestions(false)}
-                    className="text-xs text-gray-500 hover:text-gray-400 transition-colors"
+                    className="text-xs text-text-muted hover:text-text-secondary transition-colors"
                     aria-label="Close title suggestions"
                   >
                     Close suggestions
@@ -622,14 +622,14 @@ By confirming, you will create this campaign on the blockchain.
               type="button"
               onClick={handleGenerateDescription}
               disabled={isGenerating || !formData.title}
-              className="absolute bottom-3 right-3 px-4 py-2 text-sm font-body bg-gradient-to-r from-primary/20 to-secondary/20 hover:from-primary/30 hover:to-secondary/30 text-primary border border-primary/30 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="absolute bottom-3 right-3 px-4 py-2 text-sm bg-background-surface hover:bg-background-overlay text-text-primary border border-border-subtle rounded-sm transition-all duration-600 ease-gravity disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               aria-label="Generate AI description from title"
             >
               <span aria-hidden="true">{isGenerating ? '⏳' : '✨'}</span>
               {isGenerating ? 'Generating...' : 'Generate AI'}
             </button>
           </div>
-          <div className="text-xs text-gray-400 text-right mt-1">
+          <div className="text-xs text-text-muted text-right mt-1">
             {formData.description.length}/1000 characters
           </div>
         </FormField>
@@ -663,9 +663,9 @@ By confirming, you will create this campaign on the blockchain.
                aria-required="true"
                aria-describedby="deadline-help"
              />
-             <p className="text-xs text-gray-400 font-body mt-1" id="deadline-help">
-               Must be between 1 hour and 1 year from now
-             </p>
+              <p className="text-xs text-text-muted mt-1" id="deadline-help">
+                Must be between 1 hour and 1 year from now
+              </p>
            </FormField>
          </div>
 
@@ -691,14 +691,14 @@ By confirming, you will create this campaign on the blockchain.
                     setFormData(prev => ({ ...prev, beneficiary: selectedAccount.address }));
                     setErrors(prev => ({ ...prev, beneficiary: undefined }));
                   }}
-                  className="px-4 py-3 bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 rounded-xl transition-all duration-200 font-body font-medium whitespace-nowrap"
+                  className="px-4 py-3 bg-background-surface hover:bg-background-overlay text-text-primary border border-border-subtle rounded-sm transition-all duration-600 ease-gravity font-medium whitespace-nowrap"
                   aria-label="Use my wallet address as beneficiary"
                 >
                   Use My Address
                 </button>
               )}
             </div>
-            <p className="text-xs text-gray-400 font-body" id="beneficiary-help">
+            <p className="text-xs text-text-muted" id="beneficiary-help">
               The Polkadot address that will receive the funds when the goal is reached
             </p>
           </div>
@@ -738,7 +738,7 @@ By confirming, you will create this campaign on the blockchain.
               <button
                 type="button"
                 onClick={handleAddTag}
-                className="px-6 py-3 bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 rounded-xl transition-all duration-200 font-body font-medium"
+                className="px-6 py-3 bg-background-surface hover:bg-background-overlay text-text-primary border border-border-subtle rounded-sm transition-all duration-600 ease-gravity font-medium"
               >
                 Add
               </button>
@@ -748,13 +748,13 @@ By confirming, you will create this campaign on the blockchain.
                 {formData.tags.map((tag, index) => (
                   <span
                     key={index}
-                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-primary/20 to-secondary/20 border border-primary/30 rounded-full text-sm font-body text-gray-100"
+                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-background-overlay border border-border-subtle rounded-sm text-sm text-text-secondary"
                   >
                     {tag}
                     <button
                       type="button"
                       onClick={() => handleRemoveTag(tag)}
-                      className="hover:text-red-400 transition-colors"
+                      className="hover:text-error transition-colors"
                     >
                       ×
                     </button>
@@ -762,7 +762,7 @@ By confirming, you will create this campaign on the blockchain.
                 ))}
               </div>
             )}
-            <p className="text-xs text-gray-400 font-body">Add up to 5 tags to help people discover your campaign</p>
+            <p className="text-xs text-text-muted">Add up to 5 tags to help people discover your campaign</p>
           </div>
         </FormField>
 
@@ -782,7 +782,7 @@ By confirming, you will create this campaign on the blockchain.
             type="button"
             onClick={handleFraudCheck}
             disabled={isCheckingFraud || !formData.title || !formData.description}
-            className="w-full px-6 py-4 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-bold rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="w-full px-6 py-4 bg-background-surface hover:bg-background-overlay text-text-primary border border-border-subtle font-semibold rounded-sm transition-all duration-600 ease-gravity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             aria-label="Run AI fraud detection analysis"
             aria-describedby="fraud-check-help"
           >
@@ -800,7 +800,7 @@ By confirming, you will create this campaign on the blockchain.
               </>
             )}
           </button>
-          <p className="text-xs text-gray-400 text-center mt-2" id="fraud-check-help">
+          <p className="text-xs text-text-muted text-center mt-2" id="fraud-check-help">
             AI will analyze your campaign for potential fraud indicators before submission
           </p>
         </div>
@@ -809,15 +809,15 @@ By confirming, you will create this campaign on the blockchain.
         <button
           type="submit"
           disabled={isSubmitting || isGeneratingSummary}
-          className="w-full h-14 text-lg font-bold font-display bg-gradient-to-r from-primary to-secondary hover:shadow-glow text-white rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none hover:scale-[1.02] active:scale-[0.98]"
+          className="btn-flashlight w-full h-14 text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           aria-label={isGeneratingSummary ? 'Generating campaign summary' : isSubmitting ? 'Creating campaign on blockchain' : 'Create campaign'}
         >
-          {isGeneratingSummary ? '⏳ Generating Summary...' : isSubmitting ? '🚀 Creating Campaign...' : '✨ Create Campaign'}
+          {isGeneratingSummary ? 'Generating Summary...' : isSubmitting ? 'Creating Campaign...' : 'Create Campaign'}
         </button>
         {!selectedAccount && (
           <div className="text-center">
-            <p className="text-orange-400 text-sm font-body bg-orange-500/10 border border-orange-500/30 rounded-lg px-4 py-3" role="alert">
-              ⚠️ Wallet connection required for actual deployment
+            <p className="text-warning text-sm bg-warning/10 border border-warning/30 rounded-sm px-4 py-3" role="alert">
+              Wallet connection required for actual deployment
             </p>
           </div>
         )}
@@ -832,23 +832,23 @@ By confirming, you will create this campaign on the blockchain.
           aria-modal="true"
           aria-labelledby="modal-title"
         >
-          <div className="bg-gray-900/95 border-2 border-gray-700 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto backdrop-blur-lg animate-scale-in">
+          <div className="bg-background-surface border border-border-subtle rounded-sm shadow-glass max-w-2xl w-full max-h-[80vh] overflow-y-auto backdrop-blur-glass animate-scale-in">
             <div className="p-8">
               <h2 
                 id="modal-title"
-                className="text-2xl font-bold font-display mb-6 text-gray-100 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"
+                className="text-2xl font-serif font-bold mb-6 text-text-primary"
               >
                 Campaign Contract Summary
               </h2>
               <div className="mb-8">
-                <div className="whitespace-pre-wrap text-sm font-body text-gray-300 bg-gray-800/70 p-6 rounded-xl border border-gray-600">
+                <div className="whitespace-pre-wrap text-sm text-text-secondary bg-background-overlay p-6 rounded-sm border border-border-subtle">
                   {contractSummary}
                 </div>
               </div>
               <div className="flex gap-4 justify-end">
                 <button
                   onClick={() => setShowModal(false)}
-                  className="px-6 py-3 border-2 border-gray-600 rounded-xl text-gray-300 font-body font-medium hover:bg-gray-800 hover:border-gray-500 transition-all duration-200 disabled:opacity-50"
+                  className="px-6 py-3 border border-border-subtle rounded-sm text-text-secondary font-medium hover:bg-background-overlay hover:text-text-primary transition-all duration-600 ease-gravity disabled:opacity-50"
                   disabled={isSubmitting}
                   aria-label="Cancel campaign creation"
                 >
@@ -857,10 +857,10 @@ By confirming, you will create this campaign on the blockchain.
                 <button
                   onClick={handleConfirmCreate}
                   disabled={isSubmitting}
-                  className="px-6 py-3 bg-gradient-to-r from-primary to-secondary text-white font-body font-bold rounded-xl hover:shadow-glow transition-all duration-200 disabled:opacity-50 hover:scale-105 active:scale-95"
+                  className="btn-flashlight px-6 py-3"
                   aria-label="Confirm and create campaign on blockchain"
                 >
-                  {isSubmitting ? '⏳ Creating...' : '✅ Confirm & Create Campaign'}
+                  {isSubmitting ? 'Creating...' : 'Confirm & Create Campaign'}
                 </button>
               </div>
             </div>

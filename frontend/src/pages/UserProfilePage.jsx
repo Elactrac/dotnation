@@ -153,10 +153,10 @@ const UserProfilePage = () => {
   if (!selectedAccount) {
     return (
       <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="bg-gradient-to-br from-orange-500/20 to-orange-600/20 backdrop-blur-xl rounded-2xl border-2 border-orange-500/30 p-8 text-center">
+        <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-8 text-center">
           <div className="text-5xl mb-4">⚠️</div>
-          <h2 className="text-2xl font-bold font-display text-gray-100 mb-2">Wallet Not Connected</h2>
-          <p className="text-gray-300 font-body">Please connect your wallet to view your profile.</p>
+          <h2 className="text-2xl font-bold text-white mb-2">Wallet Not Connected</h2>
+          <p className="text-white/60">Please connect your wallet to view your profile.</p>
         </div>
       </div>
     );
@@ -166,20 +166,20 @@ const UserProfilePage = () => {
     <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       {/* Header */}
       <div className="mb-12 animate-fade-in">
-        <h1 className="text-5xl md:text-6xl font-bold font-display tracking-tight bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent mb-4">
+        <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-white mb-4">
           My Profile
         </h1>
-        <p className="text-lg md:text-xl text-gray-300 font-body">
+        <p className="text-lg md:text-xl text-white/60">
           Manage your account and view your impact on the ecosystem
         </p>
       </div>
 
       {/* Profile Card */}
-      <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-xl rounded-3xl border-2 border-gray-700 p-8 mb-8 animate-slide-up">
+      <div className="bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 p-8 mb-8 animate-slide-up">
         <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
           {/* Avatar */}
           <div className="relative">
-            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-5xl font-bold font-display text-white ring-4 ring-primary/30">
+            <div className="w-32 h-32 rounded-full bg-white/10 flex items-center justify-center text-5xl font-bold text-white ring-4 ring-white/10">
               {profile.displayName.charAt(0).toUpperCase()}
             </div>
             <div className="absolute -bottom-2 -right-2 bg-green-500 rounded-full p-2 border-4 border-gray-900">
@@ -191,19 +191,19 @@ const UserProfilePage = () => {
 
           {/* Profile Info */}
           <div className="flex-1 text-center md:text-left">
-            <h2 className="text-3xl font-bold font-display text-gray-100 mb-2">{profile.displayName}</h2>
-            <p className="text-sm font-mono text-gray-400 mb-3 bg-gray-800/50 inline-block px-3 py-1 rounded-lg border border-gray-700">
+            <h2 className="text-3xl font-bold text-white mb-2">{profile.displayName}</h2>
+            <p className="text-sm font-mono text-white/40 mb-3 bg-white/5 inline-block px-3 py-1 rounded-lg border border-white/10">
               {shortenAddress(selectedAccount.address)}
             </p>
             {profile.bio && (
-              <p className="text-gray-300 font-body mb-4">{profile.bio}</p>
+              <p className="text-white/60 mb-4">{profile.bio}</p>
             )}
             <div className="flex flex-wrap gap-3 justify-center md:justify-start">
-              <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500/20 to-green-600/20 border border-green-500/30 rounded-full text-sm font-body text-green-400">
+              <span className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm text-white">
                 <span>⭐</span>
                 <span>{userStats?.reputation}/5 Reputation</span>
               </span>
-              <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500/20 to-blue-600/20 border border-blue-500/30 rounded-full text-sm font-body text-blue-400">
+              <span className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm text-white">
                 <span>📅</span>
                 <span>{userStats?.accountAge} days active</span>
               </span>
@@ -212,13 +212,13 @@ const UserProfilePage = () => {
 
           {/* Wallet Balance */}
           <div className="text-center md:text-right">
-            <p className="text-sm text-gray-400 font-body mb-1">Wallet Balance</p>
-            <p className="text-3xl font-bold font-display text-green-400">
+            <p className="text-sm text-white/40 mb-1">Wallet Balance</p>
+            <p className="text-3xl font-bold text-white">
               {balance ? formatDOT(BigInt(balance) * 1000000000000n) : '0'} DOT
             </p>
             <button
               onClick={() => setIsEditing(!isEditing)}
-              className="mt-4 px-6 py-2 bg-gradient-to-r from-primary/20 to-secondary/20 hover:from-primary/30 hover:to-secondary/30 text-primary border border-primary/30 rounded-xl transition-all duration-200 font-body font-medium"
+              className="mt-4 px-6 py-2 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-xl transition-all duration-200 font-medium"
             >
               {isEditing ? '✏️ Editing...' : '✏️ Edit Profile'}
             </button>
@@ -228,86 +228,86 @@ const UserProfilePage = () => {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-xl rounded-2xl border-2 border-gray-700 p-6 hover:border-primary/50 transition-all duration-300">
-          <p className="text-sm font-bold font-display text-gray-400 uppercase tracking-wider mb-2">
+        <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 hover:border-white/20 transition-all duration-300">
+          <p className="text-sm font-bold text-white/40 uppercase tracking-wider mb-2">
             Campaigns Created
           </p>
-          <p className="text-4xl font-bold font-display text-primary mb-1">
+          <p className="text-4xl font-bold text-white mb-1">
             {userStats?.campaignsCreated || 0}
           </p>
-          <p className="text-sm text-gray-400 font-body">
+          <p className="text-sm text-white/60">
             {userStats?.activeCampaigns || 0} active
           </p>
         </div>
 
-        <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-xl rounded-2xl border-2 border-gray-700 p-6 hover:border-green-500/50 transition-all duration-300">
-          <p className="text-sm font-bold font-display text-gray-400 uppercase tracking-wider mb-2">
+        <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 hover:border-white/20 transition-all duration-300">
+          <p className="text-sm font-bold text-white/40 uppercase tracking-wider mb-2">
             Total Raised
           </p>
-          <p className="text-4xl font-bold font-display text-green-400 mb-1">
+          <p className="text-4xl font-bold text-white mb-1">
             {formatDOT(userStats?.totalRaised || 0n)} DOT
           </p>
-          <p className="text-sm text-gray-400 font-body">
+          <p className="text-sm text-white/60">
             DOT from campaigns
           </p>
         </div>
 
-        <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-xl rounded-2xl border-2 border-gray-700 p-6 hover:border-purple-500/50 transition-all duration-300">
-          <p className="text-sm font-bold font-display text-gray-400 uppercase tracking-wider mb-2">
+        <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 hover:border-white/20 transition-all duration-300">
+          <p className="text-sm font-bold text-white/40 uppercase tracking-wider mb-2">
             Success Rate
           </p>
-          <p className="text-4xl font-bold font-display text-purple-400 mb-1">
+          <p className="text-4xl font-bold text-white mb-1">
             {userStats?.successRate.toFixed(1)}%
           </p>
-          <p className="text-sm text-gray-400 font-body">
+          <p className="text-sm text-white/60">
             {userStats?.successfulCampaigns || 0} successful
           </p>
         </div>
 
-        <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-xl rounded-2xl border-2 border-gray-700 p-6 hover:border-secondary/50 transition-all duration-300">
-          <p className="text-sm font-bold font-display text-gray-400 uppercase tracking-wider mb-2">
+        <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 hover:border-white/20 transition-all duration-300">
+          <p className="text-sm font-bold text-white/40 uppercase tracking-wider mb-2">
             Total Donated
           </p>
-          <p className="text-4xl font-bold font-display text-secondary mb-1">
+          <p className="text-4xl font-bold text-white mb-1">
             {formatDOT(userStats?.totalDonated || 0n)} DOT
           </p>
-          <p className="text-sm text-gray-400 font-body">
+          <p className="text-sm text-white/60">
             to {userStats?.campaignsSupported || 0} campaigns
           </p>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-xl rounded-3xl border-2 border-gray-700 overflow-hidden">
+      <div className="bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 overflow-hidden">
         {/* Tab Headers */}
-        <div className="border-b border-gray-700">
+        <div className="border-b border-white/10">
           <nav className="flex gap-8 px-8">
             <button
               onClick={() => setActiveTab('contributions')}
-              className={`py-4 px-1 border-b-2 transition-colors font-body font-medium ${
+              className={`py-4 px-1 border-b-2 transition-colors font-medium ${
                 activeTab === 'contributions'
-                  ? 'border-primary text-primary'
-                  : 'border-transparent text-gray-400 hover:text-gray-200'
+                  ? 'border-white text-white'
+                  : 'border-transparent text-white/60 hover:text-white'
               }`}
             >
               📊 Contributions
             </button>
             <button
               onClick={() => setActiveTab('projects')}
-              className={`py-4 px-1 border-b-2 transition-colors font-body font-medium ${
+              className={`py-4 px-1 border-b-2 transition-colors font-medium ${
                 activeTab === 'projects'
-                  ? 'border-primary text-primary'
-                  : 'border-transparent text-gray-400 hover:text-gray-200'
+                  ? 'border-white text-white'
+                  : 'border-transparent text-white/60 hover:text-white'
               }`}
             >
               🚀 My Projects
             </button>
             <button
               onClick={() => setActiveTab('settings')}
-              className={`py-4 px-1 border-b-2 transition-colors font-body font-medium ${
+              className={`py-4 px-1 border-b-2 transition-colors font-medium ${
                 activeTab === 'settings'
-                  ? 'border-primary text-primary'
-                  : 'border-transparent text-gray-400 hover:text-gray-200'
+                  ? 'border-white text-white'
+                  : 'border-transparent text-white/60 hover:text-white'
               }`}
             >
               ⚙️ Settings
@@ -320,36 +320,36 @@ const UserProfilePage = () => {
           {/* Contributions Tab */}
           {activeTab === 'contributions' && (
             <div className="space-y-6">
-              <h3 className="text-2xl font-bold font-display text-gray-100 mb-6">Your Contributions</h3>
+              <h3 className="text-2xl font-bold text-white mb-6">Your Contributions</h3>
               
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-gray-700">
-                      <th className="text-left py-4 px-6 text-xs font-bold font-display text-gray-400 uppercase tracking-wider">
+                    <tr className="border-b border-white/10">
+                      <th className="text-left py-4 px-6 text-xs font-bold text-white/40 uppercase tracking-wider">
                         Project
                       </th>
-                      <th className="text-left py-4 px-6 text-xs font-bold font-display text-gray-400 uppercase tracking-wider">
+                      <th className="text-left py-4 px-6 text-xs font-bold text-white/40 uppercase tracking-wider">
                         Amount
                       </th>
-                      <th className="text-left py-4 px-6 text-xs font-bold font-display text-gray-400 uppercase tracking-wider">
+                      <th className="text-left py-4 px-6 text-xs font-bold text-white/40 uppercase tracking-wider">
                         Date
                       </th>
-                      <th className="text-left py-4 px-6 text-xs font-bold font-display text-gray-400 uppercase tracking-wider">
+                      <th className="text-left py-4 px-6 text-xs font-bold text-white/40 uppercase tracking-wider">
                         Status
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-700">
+                  <tbody className="divide-y divide-white/10">
                     {contributions.map((contrib, index) => (
-                      <tr key={index} className="hover:bg-gray-800/50 transition-colors">
-                        <td className="py-4 px-6 text-sm font-body font-medium text-gray-100">
+                      <tr key={index} className="hover:bg-white/5 transition-colors">
+                        <td className="py-4 px-6 text-sm font-medium text-white">
                           {contrib.project}
                         </td>
-                        <td className="py-4 px-6 text-sm font-body text-primary font-bold">
+                        <td className="py-4 px-6 text-sm text-white font-bold">
                           {contrib.amount}
                         </td>
-                        <td className="py-4 px-6 text-sm font-body text-gray-400">
+                        <td className="py-4 px-6 text-sm text-white/60">
                           {new Date(contrib.date).toLocaleDateString('en-US', { 
                             year: 'numeric', 
                             month: 'short', 
@@ -357,10 +357,10 @@ const UserProfilePage = () => {
                           })}
                         </td>
                         <td className="py-4 px-6">
-                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-body font-medium ${
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
                             contrib.status === 'Completed' 
-                              ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                              : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                              ? 'bg-white/10 text-white border border-white/10'
+                              : 'bg-white/10 text-white border border-white/10'
                           }`}>
                             {contrib.status}
                           </span>
@@ -376,20 +376,20 @@ const UserProfilePage = () => {
           {/* Projects Tab */}
           {activeTab === 'projects' && (
             <div className="space-y-6">
-              <h3 className="text-2xl font-bold font-display text-gray-100 mb-6">Your Campaigns</h3>
+              <h3 className="text-2xl font-bold text-white mb-6">Your Campaigns</h3>
               
               {campaigns?.filter(c => c.owner === selectedAccount.address).length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {campaigns.filter(c => c.owner === selectedAccount.address).map((campaign, index) => (
-                    <div key={index} className="bg-gray-800/50 rounded-xl border border-gray-700 p-6 hover:border-primary/50 transition-all">
-                      <h4 className="text-xl font-bold font-display text-gray-100 mb-2">{campaign.title}</h4>
-                      <p className="text-sm text-gray-400 font-body mb-4 line-clamp-2">{campaign.description}</p>
+                    <div key={index} className="bg-white/5 rounded-xl border border-white/10 p-6 hover:border-white/20 transition-all">
+                      <h4 className="text-xl font-bold text-white mb-2">{campaign.title}</h4>
+                      <p className="text-sm text-white/60 mb-4 line-clamp-2">{campaign.description}</p>
                       <div className="flex justify-between items-center">
-                        <span className="text-primary font-body font-bold">{formatDOT(campaign.raised || 0n)} DOT</span>
-                        <span className={`px-3 py-1 rounded-full text-xs font-body font-medium ${
+                        <span className="text-white font-bold">{formatDOT(campaign.raised || 0n)} DOT</span>
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
                           campaign.state === 'Active'
-                            ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                            : 'bg-gray-500/20 text-gray-400 border border-gray-500/30'
+                            ? 'bg-white/10 text-white border border-white/10'
+                            : 'bg-white/5 text-white/60 border border-white/10'
                         }`}>
                           {campaign.state}
                         </span>
@@ -400,10 +400,10 @@ const UserProfilePage = () => {
               ) : (
                 <div className="text-center py-12">
                   <div className="text-6xl mb-4">📦</div>
-                  <p className="text-gray-400 font-body mb-6">You haven&apos;t created any campaigns yet</p>
+                  <p className="text-white/60 mb-6">You haven&apos;t created any campaigns yet</p>
                   <a
                     href="/dashboard/create-campaign"
-                    className="inline-block px-8 py-4 bg-gradient-to-r from-primary to-secondary text-white font-body font-bold rounded-xl hover:shadow-glow transition-all duration-200"
+                    className="inline-block px-8 py-4 bg-white text-black font-bold rounded-xl hover:bg-white/90 transition-all duration-200"
                   >
                     Create Your First Campaign
                   </a>
@@ -416,12 +416,12 @@ const UserProfilePage = () => {
           {activeTab === 'settings' && (
             <div className="space-y-8">
               <div>
-                <h3 className="text-2xl font-bold font-display text-gray-100 mb-6">Profile Settings</h3>
+                <h3 className="text-2xl font-bold text-white mb-6">Profile Settings</h3>
                 
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-bold font-display text-gray-100 mb-2">
+                      <label className="block text-sm font-bold text-white mb-2">
                         Display Name
                       </label>
                       <input
@@ -429,12 +429,12 @@ const UserProfilePage = () => {
                         value={profile.displayName}
                         onChange={(e) => handleInputChange('displayName', e.target.value)}
                         disabled={!isEditing}
-                        className="w-full px-4 py-3 bg-gray-800/50 border-2 border-gray-700 rounded-xl text-gray-100 font-body placeholder-gray-500 transition-all duration-200 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:opacity-50"
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 transition-all duration-200 focus:outline-none focus:border-white/20 focus:ring-2 focus:ring-white/10 disabled:opacity-50"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-bold font-display text-gray-100 mb-2">
+                      <label className="block text-sm font-bold text-white mb-2">
                         Website
                       </label>
                       <input
@@ -443,13 +443,13 @@ const UserProfilePage = () => {
                         onChange={(e) => handleInputChange('website', e.target.value)}
                         disabled={!isEditing}
                         placeholder="https://yourwebsite.com"
-                        className="w-full px-4 py-3 bg-gray-800/50 border-2 border-gray-700 rounded-xl text-gray-100 font-body placeholder-gray-500 transition-all duration-200 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:opacity-50"
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 transition-all duration-200 focus:outline-none focus:border-white/20 focus:ring-2 focus:ring-white/10 disabled:opacity-50"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-bold font-display text-gray-100 mb-2">
+                    <label className="block text-sm font-bold text-white mb-2">
                       Bio
                     </label>
                     <textarea
@@ -458,7 +458,7 @@ const UserProfilePage = () => {
                       disabled={!isEditing}
                       placeholder="Tell us about yourself..."
                       rows={4}
-                      className="w-full px-4 py-3 bg-gray-800/50 border-2 border-gray-700 rounded-xl text-gray-100 font-body placeholder-gray-500 transition-all duration-200 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none disabled:opacity-50"
+                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 transition-all duration-200 focus:outline-none focus:border-white/20 focus:ring-2 focus:ring-white/10 resize-none disabled:opacity-50"
                     />
                   </div>
 
@@ -466,7 +466,7 @@ const UserProfilePage = () => {
                     <button
                       onClick={handleSaveProfile}
                       disabled={isSaving}
-                      className="w-full md:w-auto px-8 py-4 bg-gradient-to-r from-primary to-secondary text-white font-body font-bold rounded-xl hover:shadow-glow transition-all duration-200 disabled:opacity-50"
+                      className="w-full md:w-auto px-8 py-4 bg-white text-black font-bold rounded-xl hover:bg-white/90 transition-all duration-200 disabled:opacity-50"
                     >
                       {isSaving ? '💾 Saving...' : '💾 Save Changes'}
                     </button>
@@ -474,71 +474,71 @@ const UserProfilePage = () => {
                 </div>
               </div>
 
-              <div className="h-px bg-gray-700"></div>
+              <div className="h-px bg-white/10"></div>
 
               <div>
-                <h3 className="text-2xl font-bold font-display text-gray-100 mb-6">Notification Preferences</h3>
+                <h3 className="text-2xl font-bold text-white mb-6">Notification Preferences</h3>
                 
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-gray-100 font-body font-medium">Email Notifications</p>
-                      <p className="text-sm text-gray-400 font-body">Receive email updates about your campaigns and donations</p>
+                      <p className="text-white font-medium">Email Notifications</p>
+                      <p className="text-sm text-white/60">Receive email updates about your campaigns and donations</p>
                     </div>
                     <button
                       onClick={() => handleInputChange('emailNotifications', !profile.emailNotifications)}
                       disabled={!isEditing}
                       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                        profile.emailNotifications ? 'bg-primary' : 'bg-gray-700'
+                        profile.emailNotifications ? 'bg-white' : 'bg-white/20'
                       } disabled:opacity-50`}
                     >
                       <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                          profile.emailNotifications ? 'translate-x-6' : 'translate-x-1'
+                        className={`inline-block h-4 w-4 transform rounded-full transition-transform ${
+                          profile.emailNotifications ? 'bg-black translate-x-6' : 'bg-white translate-x-1'
                         }`}
                       />
                     </button>
                   </div>
 
-                  <div className="h-px bg-gray-700"></div>
+                  <div className="h-px bg-white/10"></div>
 
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-gray-100 font-body font-medium">Campaign Updates</p>
-                      <p className="text-sm text-gray-400 font-body">Get notified when your campaigns receive donations</p>
+                      <p className="text-white font-medium">Campaign Updates</p>
+                      <p className="text-sm text-white/60">Get notified when your campaigns receive donations</p>
                     </div>
                     <button
                       onClick={() => handleInputChange('campaignUpdates', !profile.campaignUpdates)}
                       disabled={!isEditing}
                       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                        profile.campaignUpdates ? 'bg-primary' : 'bg-gray-700'
+                        profile.campaignUpdates ? 'bg-white' : 'bg-white/20'
                       } disabled:opacity-50`}
                     >
                       <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                          profile.campaignUpdates ? 'translate-x-6' : 'translate-x-1'
+                        className={`inline-block h-4 w-4 transform rounded-full transition-transform ${
+                          profile.campaignUpdates ? 'bg-black translate-x-6' : 'bg-white translate-x-1'
                         }`}
                       />
                     </button>
                   </div>
 
-                  <div className="h-px bg-gray-700"></div>
+                  <div className="h-px bg-white/10"></div>
 
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-gray-100 font-body font-medium">Donation Alerts</p>
-                      <p className="text-sm text-gray-400 font-body">Receive notifications for successful donations</p>
+                      <p className="text-white font-medium">Donation Alerts</p>
+                      <p className="text-sm text-white/60">Receive notifications for successful donations</p>
                     </div>
                     <button
                       onClick={() => handleInputChange('donationAlerts', !profile.donationAlerts)}
                       disabled={!isEditing}
                       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                        profile.donationAlerts ? 'bg-primary' : 'bg-gray-700'
+                        profile.donationAlerts ? 'bg-white' : 'bg-white/20'
                       } disabled:opacity-50`}
                     >
                       <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                          profile.donationAlerts ? 'translate-x-6' : 'translate-x-1'
+                        className={`inline-block h-4 w-4 transform rounded-full transition-transform ${
+                          profile.donationAlerts ? 'bg-black translate-x-6' : 'bg-white translate-x-1'
                         }`}
                       />
                     </button>

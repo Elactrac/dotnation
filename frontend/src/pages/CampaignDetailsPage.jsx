@@ -213,10 +213,10 @@ const CampaignDetailsPage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+      <div className="min-h-screen bg-background-dark flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-white mx-auto"></div>
-          <p className="mt-4 text-white/50 font-sans">Loading campaign details...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-text-primary mx-auto"></div>
+          <p className="mt-4 text-text-muted font-sans">Loading campaign details...</p>
         </div>
       </div>
     );
@@ -224,11 +224,11 @@ const CampaignDetailsPage = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#050505]">
+      <div className="min-h-screen bg-background-dark">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+          <div className="bg-surface/50 border border-border rounded-2xl p-6">
             <div className="flex items-center">
-              <p className="text-white/60 font-sans">Error loading campaign: {error}</p>
+              <p className="text-text-secondary font-sans">Error loading campaign: {error}</p>
             </div>
           </div>
         </div>
@@ -238,14 +238,14 @@ const CampaignDetailsPage = () => {
 
   if (!campaign && !isLoading) {
     return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+      <div className="min-h-screen bg-background-dark flex items-center justify-center">
         <div className="max-w-md mx-auto px-4">
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-8 text-center">
-            <h2 className="text-2xl font-serif text-white mb-2">Campaign Not Found</h2>
-            <p className="text-white/60 font-sans mb-6">The campaign you&apos;re looking for doesn&apos;t exist or has been removed.</p>
+          <div className="bg-surface/50 border border-border rounded-2xl p-8 text-center">
+            <h2 className="text-2xl font-serif text-text-primary mb-2">Campaign Not Found</h2>
+            <p className="text-text-secondary font-sans mb-6">The campaign you&apos;re looking for doesn&apos;t exist or has been removed.</p>
             <a
               href="/campaigns"
-              className="inline-block px-6 py-3 bg-white text-black font-medium rounded-xl hover:bg-gray-200 transition-all duration-300"
+              className="inline-block px-6 py-3 bg-white text-black font-semibold rounded-sm hover:-translate-y-px hover:shadow-btn-hover transition-all duration-600 ease-gravity"
             >
               Browse All Campaigns
             </a>
@@ -256,27 +256,27 @@ const CampaignDetailsPage = () => {
   }
 
   const stateColorClasses = {
-    green: 'bg-white/10 text-white border-white/20',
-    blue: 'bg-white/10 text-white border-white/20',
-    red: 'bg-white/10 text-white border-white/20',
-    yellow: 'bg-white/10 text-white border-white/20',
-    gray: 'bg-white/10 text-white border-white/20'
+    green: 'bg-surface/50 text-text-primary border-border',
+    blue: 'bg-surface/50 text-text-primary border-border',
+    red: 'bg-surface/50 text-text-primary border-border',
+    yellow: 'bg-surface/50 text-text-primary border-border',
+    gray: 'bg-surface/50 text-text-primary border-border'
   };
 
   return (
-    <div className="relative min-h-screen bg-[#050505] text-white">
+    <div className="relative min-h-screen bg-background-dark text-text-primary">
       {/* Ambient Background */}
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-white/5 rounded-full blur-[150px] opacity-10"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-white/5 rounded-full blur-[150px] opacity-10"></div>
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-surface/50 rounded-full blur-[150px] opacity-10"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-surface/50 rounded-full blur-[150px] opacity-10"></div>
       </div>
 
       {/* Toast Notification */}
       {showToast && (
         <div className="fixed top-4 right-4 z-50 animate-slide-in-right">
           <div className={`px-6 py-4 rounded-xl border backdrop-blur-xl ${showToast.type === 'success'
-            ? 'bg-white/10 border-white/20 text-white'
-            : 'bg-white/10 border-white/20 text-white'
+            ? 'bg-success/10 border-success/20 text-text-primary'
+            : 'bg-error/10 border-error/20 text-text-primary'
             }`}>
             <p className="font-sans font-medium">{showToast.message}</p>
           </div>
@@ -298,9 +298,9 @@ const CampaignDetailsPage = () => {
             </div>
 
             {/* Campaign Header */}
-            <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6">
+            <div className="bg-surface/50 backdrop-blur-xl rounded-2xl border border-border p-6">
               <div className="flex justify-between items-start flex-wrap gap-4 mb-4">
-                <h1 className="text-4xl font-bold font-serif text-white">{campaign.title}</h1>
+                <h1 className="text-4xl font-bold font-serif text-text-primary">{campaign.title}</h1>
                 <div className="flex items-center gap-2">
                   <span className={`px-4 py-2 rounded-xl border font-sans font-medium ${stateColorClasses[campaignStats?.stateColor] || stateColorClasses.gray}`}>
                     {campaign.state}
@@ -308,28 +308,28 @@ const CampaignDetailsPage = () => {
                   <div className="flex gap-1">
                     <button
                       onClick={() => handleShare('twitter')}
-                      className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300"
+                      className="p-2 text-text-secondary hover:text-text-primary hover:bg-surface rounded-lg transition-all duration-300"
                       title="Share on Twitter"
                     >
                       <FiTwitter className="w-5 h-5" />
                     </button>
                     <button
                       onClick={() => handleShare('facebook')}
-                      className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300"
+                      className="p-2 text-text-secondary hover:text-text-primary hover:bg-surface rounded-lg transition-all duration-300"
                       title="Share on Facebook"
                     >
                       <FiFacebook className="w-5 h-5" />
                     </button>
                     <button
                       onClick={() => handleShare('linkedin')}
-                      className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300"
+                      className="p-2 text-text-secondary hover:text-text-primary hover:bg-surface rounded-lg transition-all duration-300"
                       title="Share on LinkedIn"
                     >
                       <FiLinkedin className="w-5 h-5" />
                     </button>
                     <button
                       onClick={() => handleShare('copy')}
-                      className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300"
+                      className="p-2 text-text-secondary hover:text-text-primary hover:bg-surface rounded-lg transition-all duration-300"
                       title="Copy link"
                     >
                       <FiCopy className="w-5 h-5" />
@@ -340,70 +340,70 @@ const CampaignDetailsPage = () => {
 
               {/* Campaign Stats Grid */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-white/5 rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-all duration-300 group">
+                <div className="bg-surface/50 rounded-xl p-4 border border-border hover:bg-surface transition-all duration-300 group">
                   <div className="flex items-center gap-2 mb-2">
-                    <FiTrendingUp className="w-5 h-5 text-white/60 group-hover:text-white transition-colors" />
-                    <span className="text-xs font-sans font-bold uppercase tracking-wider text-white/40">Funds Raised</span>
+                    <FiTrendingUp className="w-5 h-5 text-text-secondary group-hover:text-text-primary transition-colors" />
+                    <span className="text-xs font-sans font-bold uppercase tracking-wider text-text-muted">Funds Raised</span>
                   </div>
-                  <p className="text-2xl font-serif text-white">{campaignStats?.formattedRaised} DOT</p>
-                  <p className="text-sm text-white/40 font-sans">of {campaignStats?.formattedGoal} DOT goal</p>
+                  <p className="text-2xl font-serif text-text-primary">{campaignStats?.formattedRaised} DOT</p>
+                  <p className="text-sm text-text-muted font-sans">of {campaignStats?.formattedGoal} DOT goal</p>
                 </div>
 
-                <div className="bg-white/5 rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-all duration-300 group">
+                <div className="bg-surface/50 rounded-xl p-4 border border-border hover:bg-surface transition-all duration-300 group">
                   <div className="flex items-center gap-2 mb-2">
-                    <FiTarget className="w-5 h-5 text-white/60 group-hover:text-white transition-colors" />
-                    <span className="text-xs font-sans font-bold uppercase tracking-wider text-white/40">Progress</span>
+                    <FiTarget className="w-5 h-5 text-text-secondary group-hover:text-text-primary transition-colors" />
+                    <span className="text-xs font-sans font-bold uppercase tracking-wider text-text-muted">Progress</span>
                   </div>
-                  <p className="text-2xl font-serif text-white">{campaignStats?.progress.toFixed(1)}%</p>
-                  <div className="mt-2 w-full bg-white/10 rounded-full h-1 overflow-hidden">
+                  <p className="text-2xl font-serif text-text-primary">{campaignStats?.progress.toFixed(1)}%</p>
+                  <div className="mt-2 w-full bg-border rounded-full h-1 overflow-hidden">
                     <div
-                      className="bg-white h-1 rounded-full transition-all duration-500"
+                      className="bg-primary h-1 rounded-full transition-all duration-500"
                       style={{ width: `${Math.min(campaignStats?.progress || 0, 100)}%` }}
                     ></div>
                   </div>
                 </div>
 
-                <div className="bg-white/5 rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-all duration-300 group">
+                <div className="bg-surface/50 rounded-xl p-4 border border-border hover:bg-surface transition-all duration-300 group">
                   <div className="flex items-center gap-2 mb-2">
-                    <FiCalendar className="w-5 h-5 text-white/60 group-hover:text-white transition-colors" />
-                    <span className="text-xs font-sans font-bold uppercase tracking-wider text-white/40">Time Left</span>
+                    <FiCalendar className="w-5 h-5 text-text-secondary group-hover:text-text-primary transition-colors" />
+                    <span className="text-xs font-sans font-bold uppercase tracking-wider text-text-muted">Time Left</span>
                   </div>
-                  <p className="text-2xl font-serif text-white">
+                  <p className="text-2xl font-serif text-text-primary">
                     {campaignStats?.deadlineStatus.message}
                   </p>
-                  <p className="text-sm text-white/40 font-sans">Deadline: {formatDate(campaign.deadline)}</p>
+                  <p className="text-sm text-text-muted font-sans">Deadline: {formatDate(campaign.deadline)}</p>
                 </div>
               </div>
 
               {/* Campaign Details */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 pt-6 border-t border-white/10">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 pt-6 border-t border-border">
                 <div>
-                  <p className="text-xs font-sans font-bold uppercase tracking-wider text-white/40 mb-1">Created by</p>
-                  <p className="text-white font-mono text-sm">{shortenAddress(campaign.owner)}</p>
+                  <p className="text-xs font-sans font-bold uppercase tracking-wider text-text-muted mb-1">Created by</p>
+                  <p className="text-text-primary font-mono text-sm">{shortenAddress(campaign.owner)}</p>
                 </div>
                 <div>
-                  <p className="text-xs font-sans font-bold uppercase tracking-wider text-white/40 mb-1">Beneficiary</p>
-                  <p className="text-white font-mono text-sm">{shortenAddress(campaign.beneficiary)}</p>
+                  <p className="text-xs font-sans font-bold uppercase tracking-wider text-text-muted mb-1">Beneficiary</p>
+                  <p className="text-text-primary font-mono text-sm">{shortenAddress(campaign.beneficiary)}</p>
                 </div>
                 <div>
-                  <p className="text-xs font-sans font-bold uppercase tracking-wider text-white/40 mb-1">Total Donors</p>
+                  <p className="text-xs font-sans font-bold uppercase tracking-wider text-text-muted mb-1">Total Donors</p>
                   <div className="flex items-center gap-2">
-                    <FiUsers className="w-4 h-4 text-white/60" />
-                    <p className="text-white font-sans font-medium">{donations.length}</p>
+                    <FiUsers className="w-4 h-4 text-text-secondary" />
+                    <p className="text-text-primary font-sans font-medium">{donations.length}</p>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Tabs */}
-            <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6">
-              {/* Tab Headers */}
-              <div className="flex flex-wrap gap-2 border-b border-white/10 pb-4 mb-6">
+            <div className="bg-surface/50 backdrop-blur-xl rounded-2xl border border-border p-6">
+              {/* Tab Headers - Scrollable on mobile */}
+              <div className="flex gap-2 border-b border-border pb-4 mb-6 overflow-x-auto scrollbar-hide">
                 <button
                   onClick={() => setActiveTab('about')}
-                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-sans font-medium transition-all duration-300 ${activeTab === 'about'
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-sans font-medium transition-all duration-300 whitespace-nowrap ${activeTab === 'about'
                     ? 'bg-white text-black'
-                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                    : 'text-text-secondary hover:text-text-primary hover:bg-surface'
                     }`}
                 >
                   <FiHeart className="w-4 h-4" />
@@ -412,9 +412,9 @@ const CampaignDetailsPage = () => {
                 {campaign.uses_milestones && (
                   <button
                     onClick={() => setActiveTab('milestones')}
-                    className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-sans font-medium transition-all duration-300 ${activeTab === 'milestones'
+                    className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-sans font-medium transition-all duration-300 whitespace-nowrap ${activeTab === 'milestones'
                       ? 'bg-white text-black'
-                      : 'text-white/60 hover:text-white hover:bg-white/5'
+                      : 'text-text-secondary hover:text-text-primary hover:bg-surface'
                       }`}
                   >
                     <FiTarget className="w-4 h-4" />
@@ -423,9 +423,9 @@ const CampaignDetailsPage = () => {
                 )}
                 <button
                   onClick={() => setActiveTab('updates')}
-                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-sans font-medium transition-all duration-300 ${activeTab === 'updates'
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-sans font-medium transition-all duration-300 whitespace-nowrap ${activeTab === 'updates'
                     ? 'bg-white text-black'
-                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                    : 'text-text-secondary hover:text-text-primary hover:bg-surface'
                     }`}
                 >
                   <FiTrendingUp className="w-4 h-4" />
@@ -433,9 +433,9 @@ const CampaignDetailsPage = () => {
                 </button>
                 <button
                   onClick={() => setActiveTab('discussion')}
-                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-sans font-medium transition-all duration-300 ${activeTab === 'discussion'
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-sans font-medium transition-all duration-300 whitespace-nowrap ${activeTab === 'discussion'
                     ? 'bg-white text-black'
-                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                    : 'text-text-secondary hover:text-text-primary hover:bg-surface'
                     }`}
                 >
                   <FiMessageSquare className="w-4 h-4" />
@@ -443,9 +443,9 @@ const CampaignDetailsPage = () => {
                 </button>
                 <button
                   onClick={() => setActiveTab('donors')}
-                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-sans font-medium transition-all duration-300 ${activeTab === 'donors'
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-sans font-medium transition-all duration-300 whitespace-nowrap ${activeTab === 'donors'
                     ? 'bg-white text-black'
-                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                    : 'text-text-secondary hover:text-text-primary hover:bg-surface'
                     }`}
                 >
                   <FiUsers className="w-4 h-4" />
@@ -453,9 +453,9 @@ const CampaignDetailsPage = () => {
                 </button>
                 <button
                   onClick={() => setActiveTab('crosschain')}
-                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-sans font-medium transition-all duration-300 ${activeTab === 'crosschain'
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-sans font-medium transition-all duration-300 whitespace-nowrap ${activeTab === 'crosschain'
                     ? 'bg-white text-black'
-                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                    : 'text-text-secondary hover:text-text-primary hover:bg-surface'
                     }`}
                 >
                   <span className="text-lg">🌉</span>
@@ -466,23 +466,23 @@ const CampaignDetailsPage = () => {
               {/* Tab Content */}
               {activeTab === 'about' && (
                 <div className="animate-fade-in">
-                  <h2 className="text-2xl font-bold font-serif text-white mb-4">About this campaign</h2>
-                  <p className="text-white/80 font-sans leading-relaxed whitespace-pre-wrap">{campaign.description}</p>
+                  <h2 className="text-2xl font-bold font-serif text-text-primary mb-4">About this campaign</h2>
+                  <p className="text-text-secondary font-sans leading-relaxed whitespace-pre-wrap">{campaign.description}</p>
 
                   {/* Show milestone creation for owners if campaign doesn't have milestones yet */}
                   {campaignStats?.isOwner && !campaign.uses_milestones && campaign.state === 'Active' && (
-                    <div className="mt-6 p-4 bg-white/5 border border-white/10 rounded-xl">
-                      <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
-                        <FiTarget className="w-5 h-5 text-white" />
+                    <div className="mt-6 p-4 bg-surface/50 border border-border rounded-xl">
+                      <h3 className="text-lg font-bold text-text-primary mb-2 flex items-center gap-2">
+                        <FiTarget className="w-5 h-5 text-text-primary" />
                         Enable Milestone-Based Funding?
                       </h3>
-                      <p className="text-white/60 text-sm mb-4">
+                      <p className="text-text-secondary text-sm mb-4">
                         Add milestones to your campaign for transparent, accountable fund releases.
                         Donors will vote on each milestone before funds are released.
                       </p>
                       <button
                         onClick={() => setActiveTab('milestones')}
-                        className="px-4 py-2 bg-white text-black rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
+                        className="px-4 py-2 bg-white text-black rounded-lg text-sm font-medium hover:bg-white/90 transition-colors"
                       >
                         Add Milestones
                       </button>
@@ -497,12 +497,12 @@ const CampaignDetailsPage = () => {
                     <MilestoneVoting campaign={campaign} />
                   ) : (
                     <div className="text-center py-8">
-                      <FiTarget className="w-12 h-12 text-white/20 mx-auto mb-4" />
-                      <p className="text-white/60 font-sans">
+                      <FiTarget className="w-12 h-12 text-text-muted mx-auto mb-4" />
+                      <p className="text-text-secondary font-sans">
                         This campaign does not use milestones. Funds will be released once when the goal is reached.
                       </p>
                       {campaignStats?.isOwner && campaign.state === 'Active' && (
-                        <p className="text-white/40 font-sans text-sm mt-4">
+                        <p className="text-text-muted font-sans text-sm mt-4">
                           Milestone creation feature coming soon!
                         </p>
                       )}
@@ -513,8 +513,8 @@ const CampaignDetailsPage = () => {
 
               {activeTab === 'updates' && (
                 <div className="animate-fade-in">
-                  <h2 className="text-2xl font-bold font-serif text-white mb-4">Campaign Updates</h2>
-                  <p className="text-white/60 font-sans italic">
+                  <h2 className="text-2xl font-bold font-serif text-text-primary mb-4">Campaign Updates</h2>
+                  <p className="text-text-secondary font-sans italic">
                     No updates yet. Campaign updates will appear here as the creator shares progress.
                   </p>
                 </div>
@@ -522,8 +522,8 @@ const CampaignDetailsPage = () => {
 
               {activeTab === 'discussion' && (
                 <div className="animate-fade-in">
-                  <h2 className="text-2xl font-bold font-serif text-white mb-4">Discussion</h2>
-                  <p className="text-white/60 font-sans italic">
+                  <h2 className="text-2xl font-bold font-serif text-text-primary mb-4">Discussion</h2>
+                  <p className="text-text-secondary font-sans italic">
                     Comments and discussion feature coming soon. Stay tuned!
                   </p>
                 </div>
@@ -531,23 +531,23 @@ const CampaignDetailsPage = () => {
 
               {activeTab === 'donors' && (
                 <div className="animate-fade-in space-y-4">
-                  <h2 className="text-2xl font-bold font-serif text-white mb-4">Recent Donations</h2>
+                  <h2 className="text-2xl font-bold font-serif text-text-primary mb-4">Recent Donations</h2>
                   {donations.length > 0 ? (
                     donations.slice(0, 10).map((donation, index) => (
-                      <div key={index} className="bg-white/5 rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-all duration-300">
+                      <div key={index} className="bg-surface/50 rounded-xl p-4 border border-border hover:bg-surface transition-all duration-300">
                         <div className="flex justify-between items-center">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-[#111] border border-white/10 flex items-center justify-center text-white font-serif">
+                            <div className="w-10 h-10 rounded-full bg-background-dark border border-border flex items-center justify-center text-text-primary font-serif">
                               {shortenAddress(donation.donor)[0]}
                             </div>
                             <div>
-                              <p className="text-white font-sans font-medium font-mono">{shortenAddress(donation.donor)}</p>
-                              <p className="text-sm text-white/40 font-sans">
+                              <p className="text-text-primary font-sans font-medium font-mono">{shortenAddress(donation.donor)}</p>
+                              <p className="text-sm text-text-muted font-sans">
                                 {formatDateTime(donation.timestamp)}
                               </p>
                             </div>
                           </div>
-                          <span className="px-4 py-2 bg-white/5 text-white rounded-xl font-mono text-sm border border-white/10">
+                          <span className="px-4 py-2 bg-surface/50 text-text-primary rounded-xl font-mono text-sm border border-border">
                             {formatDOT(donation.amount)} DOT
                           </span>
                         </div>
@@ -555,8 +555,8 @@ const CampaignDetailsPage = () => {
                     ))
                   ) : (
                     <div className="text-center py-12">
-                      <FiHeart className="w-12 h-12 text-white/20 mx-auto mb-4" />
-                      <p className="text-white/60 font-sans italic">
+                      <FiHeart className="w-12 h-12 text-text-muted mx-auto mb-4" />
+                      <p className="text-text-secondary font-sans italic">
                         No donations yet. Be the first to support this campaign!
                       </p>
                     </div>
@@ -569,29 +569,29 @@ const CampaignDetailsPage = () => {
                   <div className="flex items-center gap-3 mb-4">
                     <span className="text-5xl">🌉</span>
                     <div>
-                      <h2 className="text-2xl font-bold font-serif text-white">Cross-Chain Donations</h2>
-                      <p className="text-white/60 font-sans">Powered by Polkadot XCM</p>
+                      <h2 className="text-2xl font-bold font-serif text-text-primary">Cross-Chain Donations</h2>
+                      <p className="text-text-secondary font-sans">Powered by Polkadot XCM</p>
                     </div>
                   </div>
 
-                  <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                    <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
+                  <div className="bg-surface/50 border border-border rounded-xl p-6">
+                    <h3 className="text-lg font-bold text-text-primary mb-3 flex items-center gap-2">
                       <span>⚡</span>
                       What is Cross-Chain Donation?
                     </h3>
-                    <p className="text-white/80 font-sans leading-relaxed mb-4">
+                    <p className="text-text-secondary font-sans leading-relaxed mb-4">
                       With Polkadot's XCM (Cross-Consensus Messaging), you can donate to this campaign
-                      from <span className="font-bold text-white">ANY</span> connected parachain!
+                      from <span className="font-bold text-text-primary">ANY</span> connected parachain!
                       No need to bridge assets manually - XCM handles everything automatically.
                     </p>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                      <div className="bg-[#0A0A0A] rounded-lg p-4 border border-white/10">
+                      <div className="bg-background-dark rounded-lg p-4 border border-border">
                         <div className="flex items-center gap-2 mb-2">
                           <span className="text-2xl">💰</span>
-                          <h4 className="font-bold text-white">Supported Chains</h4>
+                          <h4 className="font-bold text-text-primary">Supported Chains</h4>
                         </div>
-                        <ul className="text-sm text-white/60 space-y-1">
+                        <ul className="text-sm text-text-secondary space-y-1">
                           <li>• Polkadot Relay Chain</li>
                           <li>• Moonbeam (GLMR, USDC)</li>
                           <li>• Acala (ACA, aUSD)</li>
@@ -600,12 +600,12 @@ const CampaignDetailsPage = () => {
                         </ul>
                       </div>
 
-                      <div className="bg-[#0A0A0A] rounded-lg p-4 border border-white/10">
+                      <div className="bg-background-dark rounded-lg p-4 border border-border">
                         <div className="flex items-center gap-2 mb-2">
                           <span className="text-2xl">⚙️</span>
-                          <h4 className="font-bold text-white">How It Works</h4>
+                          <h4 className="font-bold text-text-primary">How It Works</h4>
                         </div>
-                        <ol className="text-sm text-white/60 space-y-1">
+                        <ol className="text-sm text-text-secondary space-y-1">
                           <li>1. Select your source chain</li>
                           <li>2. Choose asset (DOT, USDC, etc.)</li>
                           <li>3. Enter amount</li>
@@ -616,12 +616,12 @@ const CampaignDetailsPage = () => {
                     </div>
                   </div>
 
-                  <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                  <div className="bg-surface/50 border border-border rounded-xl p-4">
                     <div className="flex items-start gap-3">
                       <span className="text-2xl">✅</span>
                       <div>
-                        <h4 className="font-bold text-white mb-1">Why Cross-Chain?</h4>
-                        <ul className="text-sm text-white/60 space-y-1">
+                        <h4 className="font-bold text-text-primary mb-1">Why Cross-Chain?</h4>
+                        <ul className="text-sm text-text-secondary space-y-1">
                           <li>• <strong>Convenience:</strong> Use assets from any chain</li>
                           <li>• <strong>Security:</strong> Native Polkadot protocol (no bridges!)</li>
                           <li>• <strong>Speed:</strong> Transfers complete in seconds</li>
@@ -631,12 +631,12 @@ const CampaignDetailsPage = () => {
                     </div>
                   </div>
 
-                  <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                  <div className="bg-surface/50 border border-border rounded-xl p-4">
                     <div className="flex items-start gap-3">
                       <span className="text-2xl">💡</span>
                       <div>
-                        <h4 className="font-bold text-white mb-1">Pro Tip</h4>
-                        <p className="text-sm text-white/60">
+                        <h4 className="font-bold text-text-primary mb-1">Pro Tip</h4>
+                        <p className="text-sm text-text-secondary">
                           Cross-chain donations work seamlessly with our <strong>Quadratic Funding</strong> system!
                           Your donation will receive matching multipliers just like regular donations.
                         </p>
@@ -645,8 +645,8 @@ const CampaignDetailsPage = () => {
                   </div>
 
                   <div className="text-center pt-4">
-                    <p className="text-white/60 text-sm font-sans">
-                      👉 Use the <strong className="text-white">Cross-Chain Donation</strong> section
+                    <p className="text-text-secondary text-sm font-sans">
+                      👉 Use the <strong className="text-text-primary">Cross-Chain Donation</strong> section
                       below to get started!
                     </p>
                   </div>
@@ -659,11 +659,11 @@ const CampaignDetailsPage = () => {
               <button
                 onClick={handleWithdraw}
                 disabled={isWithdrawing}
-                className="w-full py-4 bg-white text-black rounded-xl font-sans font-bold text-lg hover:bg-gray-200 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full py-4 bg-white text-black rounded-sm font-semibold text-lg hover:-translate-y-px hover:shadow-btn-hover transition-all duration-600 ease-gravity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isWithdrawing ? (
                   <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-black"></div>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                     Processing withdrawal...
                   </>
                 ) : (
@@ -680,11 +680,11 @@ const CampaignDetailsPage = () => {
               <button
                 onClick={handleCancelCampaign}
                 disabled={isCancelling}
-                className="w-full py-4 bg-red-500/10 text-red-400 border border-red-500/30 rounded-xl font-sans font-bold text-lg hover:bg-red-500/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full py-4 bg-error/10 text-error border border-error/30 rounded-xl font-sans font-bold text-lg hover:bg-error/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isCancelling ? (
                   <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-red-400"></div>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-error"></div>
                     Cancelling campaign...
                   </>
                 ) : (
@@ -701,11 +701,11 @@ const CampaignDetailsPage = () => {
               <button
                 onClick={handleClaimRefund}
                 disabled={isClaimingRefund}
-                className="w-full py-4 bg-white text-black rounded-xl font-sans font-bold text-lg hover:bg-gray-200 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full py-4 bg-white text-black rounded-sm font-semibold text-lg hover:-translate-y-px hover:shadow-btn-hover transition-all duration-600 ease-gravity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isClaimingRefund ? (
                   <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-black"></div>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                     Claiming refund...
                   </>
                 ) : (

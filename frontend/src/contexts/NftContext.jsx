@@ -15,7 +15,7 @@ export const useNft = () => {
 };
 
 export const NftProvider = ({ children }) => {
-  const { api, activeAccount } = useWallet();
+  const { api, selectedAccount } = useWallet();
   const [nftContract, setNftContract] = useState(null);
   const [nftContractAddress, setNftContractAddress] = useState(null);
   const [nftEnabled, setNftEnabled] = useState(false);
@@ -54,7 +54,7 @@ export const NftProvider = ({ children }) => {
 
   // Fetch user's NFTs
   const fetchUserNfts = useCallback(async () => {
-    if (!nftContract || !activeAccount) {
+    if (!nftContract || !selectedAccount) {
       setUserNfts([]);
       return;
     }
@@ -63,13 +63,13 @@ export const NftProvider = ({ children }) => {
     setError(null);
 
     try {
-      console.log('[NFT] Fetching NFTs for:', activeAccount.address);
+      console.log('[NFT] Fetching NFTs for:', selectedAccount.address);
       
       // Call contract to get user's NFTs with metadata
       const { result, output } = await nftContract.query.tokensOfOwnerWithMetadata(
-        activeAccount.address,
+        selectedAccount.address,
         { value: 0, gasLimit: -1 },
-        activeAccount.address
+        selectedAccount.address
       );
 
       if (result.isOk && output) {
@@ -87,14 +87,14 @@ export const NftProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [nftContract, activeAccount]);
+  }, [nftContract, selectedAccount]);
 
   // Mint NFT receipt after donation
   // NOTE: This method is for reference only. NFT minting MUST be called by the platform contract,
   // not directly from the frontend, as the NFT contract only allows minting from the authorized
   // platform_contract address. This function currently does nothing and just refreshes NFTs.
   const mintNftReceipt = useCallback(async (campaignId, campaignTitle, amount, timestamp) => {
-    if (!nftContract || !activeAccount || !nftEnabled) {
+    if (!nftContract || !selectedAccount || !nftEnabled) {
       console.log('[NFT] Mint skipped - contract not ready or NFT disabled');
       return null;
     }
@@ -126,17 +126,17 @@ export const NftProvider = ({ children }) => {
       console.error('[NFT] Error checking NFT after donation:', err);
       throw err;
     }
-  }, [nftContract, activeAccount, nftEnabled, fetchUserNfts, userNfts]);
+  }, [nftContract, selectedAccount, nftEnabled, fetchUserNfts, userNfts]);
 
   // Get NFT metadata by token ID
   const getNftMetadata = useCallback(async (tokenId) => {
-    if (!nftContract || !activeAccount) return null;
+    if (!nftContract || !selectedAccount) return null;
 
     try {
       console.log('[NFT] Fetching metadata for token:', tokenId);
       
       const { result, output } = await nftContract.query.getTokenMetadata(
-        activeAccount.address,
+        selectedAccount.address,
         { value: 0, gasLimit: -1 },
         tokenId
       );
@@ -153,19 +153,19 @@ export const NftProvider = ({ children }) => {
       console.error('[NFT] Error fetching metadata:', err);
       return null;
     }
-  }, [nftContract, activeAccount]);
+  }, [nftContract, selectedAccount]);
 
   // Get donation statistics for the current user
   const getDonationStats = useCallback(async () => {
-    if (!nftContract || !activeAccount) return { totalDonations: 0, totalAmount: 0 };
+    if (!nftContract || !selectedAccount) return { totalDonations: 0, totalAmount: 0 };
 
     try {
-      console.log('[NFT] Fetching donation stats for:', activeAccount.address);
+      console.log('[NFT] Fetching donation stats for:', selectedAccount.address);
       
       const { result, output } = await nftContract.query.getDonationStats(
-        activeAccount.address,
+        selectedAccount.address,
         { value: 0, gasLimit: -1 },
-        activeAccount.address
+        selectedAccount.address
       );
 
       if (result.isOk && output) {
@@ -184,7 +184,7 @@ export const NftProvider = ({ children }) => {
       console.error('[NFT] Error fetching donation stats:', err);
       return { totalDonations: 0, totalAmount: 0 };
     }
-  }, [nftContract, activeAccount]);
+  }, [nftContract, selectedAccount]);
 
   // Check if NFT feature is enabled on the platform
   const checkNftEnabled = useCallback(async (platformContract) => {
@@ -193,7 +193,7 @@ export const NftProvider = ({ children }) => {
     try {
       // This would call the platform contract's is_nft_enabled method
       // const { result } = await platformContract.query.isNftEnabled(
-      //   activeAccount?.address || '5C4hrfjw9DjXZTzV3MwzrrAr9P1MJhSrvWGWqi1eSuyUpnhM',
+      //   selectedAccount?.address || '5C4hrfjw9DjXZTzV3MwzrrAr9P1MJhSrvWGWqi1eSuyUpnhM',
       //   { value: 0, gasLimit: -1 }
       // );
       
@@ -207,7 +207,7 @@ export const NftProvider = ({ children }) => {
 
   // Transfer NFT to another address
   const transferNft = useCallback(async (toAddress, tokenId) => {
-    if (!nftContract || !activeAccount || !api) {
+    if (!nftContract || !selectedAccount || !api) {
       throw new Error('Contract not initialized or no active account');
     }
 
@@ -224,7 +224,7 @@ export const NftProvider = ({ children }) => {
           { value: 0, gasLimit },
           toAddress,
           tokenId
-        ).signAndSend(activeAccount.address, ({ status, dispatchError }) => {
+        ).signAndSend(selectedAccount.address, ({ status, dispatchError }) => {
           if (status.isInBlock) {
             console.log('[NFT] Transfer in block:', status.asInBlock.toHex());
           } else if (status.isFinalized) {
@@ -245,17 +245,17 @@ export const NftProvider = ({ children }) => {
       console.error('[NFT] Error transferring NFT:', err);
       throw err;
     }
-  }, [nftContract, activeAccount, api, fetchUserNfts]);
+  }, [nftContract, selectedAccount, api, fetchUserNfts]);
 
   // Get leaderboard of top donors
   const getLeaderboard = useCallback(async (limit = 10) => {
-    if (!nftContract || !activeAccount) return [];
+    if (!nftContract || !selectedAccount) return [];
 
     try {
       console.log('[NFT] Fetching leaderboard with limit:', limit);
       
       const { result, output } = await nftContract.query.getLeaderboard(
-        activeAccount.address,
+        selectedAccount.address,
         { value: 0, gasLimit: -1 },
         limit
       );
@@ -272,19 +272,19 @@ export const NftProvider = ({ children }) => {
       console.error('[NFT] Error fetching leaderboard:', err);
       return [];
     }
-  }, [nftContract, activeAccount]);
+  }, [nftContract, selectedAccount]);
 
   // Get NFTs filtered by rarity tier
   const getNftsByRarity = useCallback(async (rarity) => {
-    if (!nftContract || !activeAccount) return [];
+    if (!nftContract || !selectedAccount) return [];
 
     try {
       console.log('[NFT] Fetching NFTs by rarity:', rarity);
       
       const { result, output } = await nftContract.query.getNftsByRarity(
-        activeAccount.address,
+        selectedAccount.address,
         { value: 0, gasLimit: -1 },
-        activeAccount.address,
+        selectedAccount.address,
         rarity
       );
 
@@ -300,19 +300,19 @@ export const NftProvider = ({ children }) => {
       console.error('[NFT] Error fetching NFTs by rarity:', err);
       return [];
     }
-  }, [nftContract, activeAccount]);
+  }, [nftContract, selectedAccount]);
 
   // Get rarity distribution for user
   const getRarityDistribution = useCallback(async () => {
-    if (!nftContract || !activeAccount) return { Common: 0, Uncommon: 0, Rare: 0, Epic: 0, Legendary: 0 };
+    if (!nftContract || !selectedAccount) return { Common: 0, Uncommon: 0, Rare: 0, Epic: 0, Legendary: 0 };
 
     try {
-      console.log('[NFT] Fetching rarity distribution for:', activeAccount.address);
+      console.log('[NFT] Fetching rarity distribution for:', selectedAccount.address);
       
       const { result, output } = await nftContract.query.getRarityDistribution(
-        activeAccount.address,
+        selectedAccount.address,
         { value: 0, gasLimit: -1 },
-        activeAccount.address
+        selectedAccount.address
       );
 
       if (result.isOk && output) {
@@ -328,19 +328,19 @@ export const NftProvider = ({ children }) => {
       console.error('[NFT] Error fetching rarity distribution:', err);
       return { Common: 0, Uncommon: 0, Rare: 0, Epic: 0, Legendary: 0 };
     }
-  }, [nftContract, activeAccount]);
+  }, [nftContract, selectedAccount]);
 
   // Get total amount donated by user
   const getTotalDonated = useCallback(async () => {
-    if (!nftContract || !activeAccount) return 0;
+    if (!nftContract || !selectedAccount) return 0;
 
     try {
-      console.log('[NFT] Fetching total donated for:', activeAccount.address);
+      console.log('[NFT] Fetching total donated for:', selectedAccount.address);
       
       const { result, output } = await nftContract.query.getTotalDonated(
-        activeAccount.address,
+        selectedAccount.address,
         { value: 0, gasLimit: -1 },
-        activeAccount.address
+        selectedAccount.address
       );
 
       if (result.isOk && output) {
@@ -356,19 +356,19 @@ export const NftProvider = ({ children }) => {
       console.error('[NFT] Error fetching total donated:', err);
       return 0;
     }
-  }, [nftContract, activeAccount]);
+  }, [nftContract, selectedAccount]);
 
   // Get achievements for user
   const getAchievements = useCallback(async () => {
-    if (!nftContract || !activeAccount) return [];
+    if (!nftContract || !selectedAccount) return [];
 
     try {
-      console.log('[NFT] Fetching achievements for:', activeAccount.address);
+      console.log('[NFT] Fetching achievements for:', selectedAccount.address);
       
       const { result, output } = await nftContract.query.getAchievements(
-        activeAccount.address,
+        selectedAccount.address,
         { value: 0, gasLimit: -1 },
-        activeAccount.address
+        selectedAccount.address
       );
 
       if (result.isOk && output) {
@@ -383,7 +383,7 @@ export const NftProvider = ({ children }) => {
       console.error('[NFT] Error fetching achievements:', err);
       return [];
     }
-  }, [nftContract, activeAccount]);
+  }, [nftContract, selectedAccount]);
 
   // Check if transfers are enabled
   const areTransfersEnabled = useCallback(async () => {
@@ -393,7 +393,7 @@ export const NftProvider = ({ children }) => {
       console.log('[NFT] Checking if transfers are enabled');
       
       const { result, output } = await nftContract.query.areTransfersEnabled(
-        activeAccount?.address || '5C4hrfjw9DjXZTzV3MwzrrAr9P1MJhSrvWGWqi1eSuyUpnhM',
+        selectedAccount?.address || '5C4hrfjw9DjXZTzV3MwzrrAr9P1MJhSrvWGWqi1eSuyUpnhM',
         { value: 0, gasLimit: -1 }
       );
 
@@ -409,14 +409,14 @@ export const NftProvider = ({ children }) => {
       console.error('[NFT] Error checking transfer status:', err);
       return false;
     }
-  }, [nftContract, activeAccount]);
+  }, [nftContract, selectedAccount]);
 
   // Fetch NFTs when account changes
   useEffect(() => {
-    if (activeAccount && nftContract) {
+    if (selectedAccount && nftContract) {
       fetchUserNfts();
     }
-  }, [activeAccount, nftContract, fetchUserNfts]);
+  }, [selectedAccount, nftContract, fetchUserNfts]);
 
   const value = {
     nftContract,

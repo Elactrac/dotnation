@@ -76,19 +76,19 @@ const CampaignCard = ({ campaign }) => {
     };
 
     const statusStyles = {
-        Active: 'badge-info',
-        Successful: 'badge-success',
-        Failed: 'badge-error',
-        Withdrawn: 'bg-text-muted/20 text-text-muted',
+        Active: 'bg-white/10 text-white border-white/20',
+        Successful: 'bg-white/10 text-white border-white/20',
+        Failed: 'bg-white/10 text-white border-white/20',
+        Withdrawn: 'bg-white/10 text-white border-white/20',
     };
 
     return (
-        <article className="card card-hover card-spacing space-card" aria-label={`Campaign: ${campaign.title}`}>
+        <article className="group bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 hover:bg-white/10 hover:border-white/20 transition-all duration-300" aria-label={`Campaign: ${campaign.title}`}>
             {/* Header */}
-            <div className="flex-between">
-                <h3 className="text-display-sm pr-4">{campaign.title}</h3>
+            <div className="flex items-start justify-between gap-4 mb-4">
+                <h3 className="text-xl font-serif font-bold text-white flex-1">{campaign.title}</h3>
                 <span 
-                    className={`whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold ${statusStyles[status.text] || statusStyles.Withdrawn}`}
+                    className={`whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold font-sans border ${statusStyles[status.text] || statusStyles.Withdrawn}`}
                     role="status"
                     aria-label={`Campaign status: ${status.text}`}
                 >
@@ -97,37 +97,37 @@ const CampaignCard = ({ campaign }) => {
             </div>
 
             {/* Progress Bar */}
-            <div className="space-y-2" role="region" aria-label="Funding progress">
-                <div className="flex-between">
-                    <span className="text-body-sm font-bold text-primary">{formatDotBalance(campaign.raised)}</span>
-                    <span className="text-body-sm text-text-secondary">Goal: {formatDotBalance(campaign.goal)}</span>
+            <div className="space-y-3 mb-6" role="region" aria-label="Funding progress">
+                <div className="flex items-center justify-between">
+                    <span className="text-base font-bold font-sans text-white">{formatDotBalance(campaign.raised)}</span>
+                    <span className="text-sm font-sans text-white/60">Goal: {formatDotBalance(campaign.goal)}</span>
                 </div>
                 <div 
-                    className="w-full bg-border rounded-full h-2.5"
+                    className="w-full bg-white/10 rounded-full h-2"
                     role="progressbar"
                     aria-valuenow={progress}
                     aria-valuemin="0"
                     aria-valuemax="100"
                     aria-label={`${formatDotBalance(campaign.raised)} raised of ${formatDotBalance(campaign.goal)} goal, ${progress.toFixed(1)}% complete`}
                 >
-                    <div className="bg-primary h-2.5 rounded-full transition-all duration-300" style={{ width: `${progress}%` }}></div>
+                    <div className="bg-white h-2 rounded-full transition-all duration-500" style={{ width: `${progress}%` }}></div>
                 </div>
             </div>
 
             {/* Quadratic Funding Matching Display */}
             {contract && status.text === 'Active' && !isLoadingMatching && BigInt(estimatedMatching || '0') > 0n && (
-                <div className="bg-primary/10 border border-primary/30 rounded-lg p-3 space-y-1" role="status" aria-label="Quadratic funding matching">
+                <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-2 mb-6" role="status" aria-label="Quadratic funding matching">
                     <div className="flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 0 24 24" fill="currentColor" className="text-primary" aria-hidden="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 0 24 24" fill="currentColor" className="text-white" aria-hidden="true">
                             <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
                         </svg>
-                        <span className="text-caption font-semibold text-primary">Estimated Matching Boost</span>
+                        <span className="text-xs font-semibold font-sans text-white">Estimated Matching Boost</span>
                     </div>
-                    <div className="flex-between items-baseline">
-                        <span className="text-body-sm text-text-secondary">+{formatDotBalance(BigInt(estimatedMatching))}</span>
-                        <span className="text-caption text-text-muted">from matching pool</span>
+                    <div className="flex items-center justify-between">
+                        <span className="text-sm font-sans text-white/80">+{formatDotBalance(BigInt(estimatedMatching))}</span>
+                        <span className="text-xs font-sans text-white/40">from matching pool</span>
                     </div>
-                    <div className="text-caption text-text-muted pt-1 border-t border-primary/20">
+                    <div className="text-xs font-sans text-white/60 pt-2 border-t border-white/10">
                         Total potential: {formatDotBalance(BigInt(campaign.raised) + BigInt(estimatedMatching))} 🎉
                     </div>
                 </div>
@@ -135,21 +135,21 @@ const CampaignCard = ({ campaign }) => {
 
             {/* AI Summary Section */}
             {(summary || summaryError) && (
-                <div className="border-t border-border pt-4" role={summaryError ? 'alert' : 'region'} aria-live="polite" aria-label="AI-generated summary">
-                    <p className={`text-body-sm ${summaryError ? 'text-error' : 'text-text-secondary'}`}>
+                <div className="border-t border-white/10 pt-4 mb-6" role={summaryError ? 'alert' : 'region'} aria-live="polite" aria-label="AI-generated summary">
+                    <p className={`text-sm font-sans ${summaryError ? 'text-red-400' : 'text-white/60'}`}>
                         {summaryError || summary}
                     </p>
                 </div>
             )}
 
             {/* Footer with Metrics and Actions */}
-            <div className="flex-between border-t border-border pt-4 mt-auto">
+            <div className="flex items-center justify-between border-t border-white/10 pt-4 mt-auto">
                 <div className="text-center" role="status" aria-label={`${campaign.donations?.length || 0} donors`}>
-                    <p className="text-display-sm font-bold">{campaign.donations?.length || 0}</p>
-                    <span className="text-caption">Donors</span>
+                    <p className="text-2xl font-bold font-serif text-white">{campaign.donations?.length || 0}</p>
+                    <span className="text-xs font-sans text-white/60">Donors</span>
                 </div>
 
-                <div className="flex-center gap-2" role="group" aria-label="Campaign actions">
+                <div className="flex items-center gap-2" role="group" aria-label="Campaign actions">
                     <ActionButton 
                         title="Summarize with AI" 
                         ariaLabel={isSummarizing ? 'Generating AI summary' : (summary || summaryError) ? 'Hide AI summary' : 'Summarize campaign with AI'} 
@@ -167,7 +167,7 @@ const CampaignCard = ({ campaign }) => {
                         <ActionButton 
                             title="Withdraw Funds" 
                             ariaLabel={`Withdraw funds from ${campaign.title}`}
-                            className="bg-primary/20 text-primary hover:bg-primary/30"
+                            className="bg-white/10 text-white hover:bg-white/20"
                         >
                             <WithdrawIcon />
                         </ActionButton>
@@ -195,7 +195,7 @@ const ActionButton = ({ title, onClick, disabled, children, className = '', aria
         title={title}
         aria-label={ariaLabel || title}
         aria-disabled={disabled}
-        className={`size-10 flex-center rounded-full bg-surface text-text-secondary hover:bg-surface/80 hover:text-text-primary transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus-ring ${className}`}>
+        className={`w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-white/60 hover:bg-white/10 hover:text-white border border-white/10 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${className}`}>
         {children}
     </button>
 );

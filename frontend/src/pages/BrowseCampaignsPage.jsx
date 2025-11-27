@@ -130,11 +130,11 @@ const BrowseCampaignsPage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#050505]">
+      <div className="min-h-screen bg-background-dark">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto"></div>
-            <p className="mt-4 text-white/50 text-sm">Loading campaigns...</p>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-text-primary mx-auto"></div>
+            <p className="mt-4 text-text-muted text-sm">Loading campaigns...</p>
           </div>
         </div>
       </div>
@@ -143,14 +143,14 @@ const BrowseCampaignsPage = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#050505]">
+      <div className="min-h-screen bg-background-dark">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-6">
+          <div className="bg-error/10 border border-error/20 rounded-xl p-6">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center">
-                <FiX className="w-4 h-4 text-red-400" />
+              <div className="w-8 h-8 rounded-full bg-error/20 flex items-center justify-center">
+                <FiX className="w-4 h-4 text-error" />
               </div>
-              <p className="text-red-400 text-sm">Error loading campaigns: {error}</p>
+              <p className="text-error text-sm">Error loading campaigns: {error}</p>
             </div>
           </div>
         </div>
@@ -159,37 +159,37 @@ const BrowseCampaignsPage = () => {
   }
 
   return (
-    <div className="relative min-h-screen bg-[#050505] text-white">
+    <div className="relative min-h-screen bg-background-dark text-text-primary">
       {/* Ambient Background */}
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-white/5 rounded-full blur-[150px] opacity-10"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-white/5 rounded-full blur-[150px] opacity-10"></div>
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-surface/50 rounded-full blur-[150px] opacity-10"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-surface/50 rounded-full blur-[150px] opacity-10"></div>
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="space-y-8">
           {/* Header */}
           <div className="text-left">
-            <h1 className="text-4xl md:text-5xl font-serif text-white mb-3">
+            <h1 className="text-4xl md:text-5xl font-serif text-text-primary mb-3">
               Browse Campaigns
             </h1>
-            <p className="text-lg text-white/60 font-sans max-w-2xl">Discover and support amazing causes from around the world.</p>
+            <p className="text-lg text-text-secondary font-sans max-w-2xl">Discover and support amazing causes from around the world.</p>
           </div>
 
           {/* Search and Filters */}
-          <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6">
+          <div className="bg-surface/50 backdrop-blur-xl rounded-2xl border border-border p-6">
             <div className="space-y-6">
               {/* Search Bar */}
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <FiSearch className="h-5 w-5 text-white/40" />
+                  <FiSearch className="h-5 w-5 text-text-muted" />
                 </div>
                 <input
                   type="text"
                   placeholder="Search campaigns..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 bg-[#0A0A0A] border border-white/10 rounded-xl text-white placeholder-white/40 font-sans focus:ring-1 focus:ring-white/50 focus:border-white/50 transition-all"
+                  className="w-full pl-12 pr-4 py-3 bg-background-dark border border-border rounded-xl text-text-primary placeholder-text-muted font-sans focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-all"
                 />
               </div>
 
@@ -199,8 +199,8 @@ const BrowseCampaignsPage = () => {
                   <button
                     onClick={() => setIsFiltersOpen(!isFiltersOpen)}
                     className={`flex items-center gap-2 px-5 py-2.5 rounded-xl border font-medium transition-all ${activeFiltersCount > 0
-                      ? 'bg-white text-black border-white hover:bg-gray-200'
-                      : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white'
+                      ? 'bg-white text-black border-primary hover:bg-primary/90'
+                      : 'bg-surface/50 border-border text-text-secondary hover:bg-surface hover:text-text-primary'
                       } md:hidden`}
                   >
                     <FiSliders className="w-4 h-4" />
@@ -210,7 +210,7 @@ const BrowseCampaignsPage = () => {
                   {activeFiltersCount > 0 && (
                     <button
                       onClick={clearFilters}
-                      className="px-4 py-2 text-sm text-white/60 hover:text-white font-medium transition-colors"
+                      className="px-4 py-2 text-sm text-text-secondary hover:text-text-primary font-medium transition-colors"
                     >
                       Clear All
                     </button>
@@ -218,11 +218,11 @@ const BrowseCampaignsPage = () => {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <span className="text-sm text-white/60 whitespace-nowrap font-medium uppercase tracking-wider">Sort by:</span>
+                  <span className="text-sm text-text-secondary whitespace-nowrap font-medium uppercase tracking-wider">Sort by:</span>
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
-                    className="px-4 py-2 bg-[#0A0A0A] border border-white/10 rounded-xl text-white text-sm font-sans focus:ring-1 focus:ring-white/50 focus:border-white/50 cursor-pointer hover:bg-white/5 transition-colors"
+                    className="px-4 py-2 bg-background-dark border border-border rounded-xl text-text-primary text-sm font-sans focus:ring-1 focus:ring-primary/50 focus:border-primary/50 cursor-pointer hover:bg-surface/50 transition-colors"
                   >
                     <option value="newest">Newest First</option>
                     <option value="oldest">Oldest First</option>
@@ -240,20 +240,20 @@ const BrowseCampaignsPage = () => {
 
           {/* Results Summary */}
           <div className="flex justify-between items-center flex-wrap gap-4">
-            <p className="text-white/60 text-sm">
-              Showing <span className="text-white font-medium">{filteredCampaigns.length}</span> of <span className="text-white font-medium">{campaigns?.length || 0}</span> campaigns
+            <p className="text-text-secondary text-sm">
+              Showing <span className="text-text-primary font-medium">{filteredCampaigns.length}</span> of <span className="text-text-primary font-medium">{campaigns?.length || 0}</span> campaigns
             </p>
           </div>
 
           {/* Campaigns Grid */}
           {filteredCampaigns.length === 0 ? (
-            <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-16 text-center">
+            <div className="bg-surface/50 backdrop-blur-xl rounded-2xl border border-border p-16 text-center">
               <div className="space-y-4">
-                <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <FiSearch className="w-8 h-8 text-white/40" />
+                <div className="w-16 h-16 bg-surface rounded-full flex items-center justify-center mx-auto mb-6">
+                  <FiSearch className="w-8 h-8 text-text-muted" />
                 </div>
-                <h3 className="text-2xl font-serif text-white">No Campaigns Found</h3>
-                <p className="text-white/60 max-w-md mx-auto">
+                <h3 className="text-2xl font-serif text-text-primary">No Campaigns Found</h3>
+                <p className="text-text-secondary max-w-md mx-auto">
                   {activeFiltersCount > 0
                     ? "Try adjusting your filters or search terms to find more campaigns."
                     : "There are no campaigns available at the moment."
@@ -262,7 +262,7 @@ const BrowseCampaignsPage = () => {
                 {activeFiltersCount > 0 && (
                   <button
                     onClick={clearFilters}
-                    className="px-8 py-3 bg-white text-black rounded-xl hover:bg-gray-200 font-medium transition-all mt-4"
+                    className="px-8 py-3 bg-white text-black rounded-sm font-semibold hover:-translate-y-px hover:shadow-btn-hover transition-all duration-600 ease-gravity mt-4"
                   >
                     Clear Filters
                   </button>
@@ -286,13 +286,13 @@ const BrowseCampaignsPage = () => {
           {/* Mobile Filters Panel */}
           {isFiltersOpen && (
             <div className="fixed inset-0 z-50 md:hidden">
-              <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setIsFiltersOpen(false)} />
-              <div className="absolute right-0 top-0 h-full w-80 bg-[#0A0A0A] border-l border-white/10 p-6 overflow-y-auto">
+              <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-sm" onClick={() => setIsFiltersOpen(false)} />
+              <div className="absolute right-0 top-0 h-full w-80 bg-background-dark border-l border-border p-6 overflow-y-auto">
                 <div className="flex items-center justify-between mb-8">
-                  <h3 className="text-2xl font-serif text-white">Filters</h3>
+                  <h3 className="text-2xl font-serif text-text-primary">Filters</h3>
                   <button
                     onClick={() => setIsFiltersOpen(false)}
-                    className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                    className="p-2 text-text-secondary hover:text-text-primary hover:bg-surface rounded-lg transition-colors"
                   >
                     <FiX className="w-6 h-6" />
                   </button>
@@ -301,11 +301,11 @@ const BrowseCampaignsPage = () => {
                 <div className="space-y-8">
                   {/* Status Filter */}
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-white/40 mb-3">Status</label>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-text-muted mb-3">Status</label>
                     <select
                       value={statusFilter}
                       onChange={(e) => setStatusFilter(e.target.value)}
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-1 focus:ring-white/50 focus:border-white/50"
+                      className="w-full px-4 py-3 bg-surface/50 border border-border rounded-xl text-text-primary focus:ring-1 focus:ring-primary/50 focus:border-primary/50"
                     >
                       <option value="all">All Campaigns</option>
                       <option value="Active">Active</option>
@@ -316,11 +316,11 @@ const BrowseCampaignsPage = () => {
 
                   {/* Sort Options */}
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-white/40 mb-3">Sort By</label>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-text-muted mb-3">Sort By</label>
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-1 focus:ring-white/50 focus:border-white/50"
+                      className="w-full px-4 py-3 bg-surface/50 border border-border rounded-xl text-text-primary focus:ring-1 focus:ring-primary/50 focus:border-primary/50"
                     >
                       <option value="newest">Newest First</option>
                       <option value="oldest">Oldest First</option>
@@ -332,7 +332,7 @@ const BrowseCampaignsPage = () => {
 
                   {/* Goal Range */}
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-white/40 mb-3">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-text-muted mb-3">
                       Goal Range: {formatDOT(goalRange[0])} - {formatDOT(goalRange[1])} DOT
                     </label>
                     <input
@@ -342,7 +342,7 @@ const BrowseCampaignsPage = () => {
                       step="1000"
                       value={goalRange[0]}
                       onChange={(e) => setGoalRange([Number(e.target.value), goalRange[1]])}
-                      className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-white"
+                      className="w-full h-1 bg-border rounded-lg appearance-none cursor-pointer accent-primary"
                     />
                     <input
                       type="range"
@@ -351,21 +351,21 @@ const BrowseCampaignsPage = () => {
                       step="1000"
                       value={goalRange[1]}
                       onChange={(e) => setGoalRange([goalRange[0], Number(e.target.value)])}
-                      className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-white mt-4"
+                      className="w-full h-1 bg-border rounded-lg appearance-none cursor-pointer accent-primary mt-4"
                     />
                   </div>
 
                   {/* Categories */}
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-white/40 mb-3">Categories</label>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-text-muted mb-3">Categories</label>
                     <div className="flex flex-wrap gap-2">
                       {availableCategories.map((category) => (
                         <button
                           key={category}
                           onClick={() => handleCategoryToggle(category)}
                           className={`px-3 py-1.5 text-xs font-medium rounded-full transition-all border ${selectedCategories.includes(category)
-                            ? 'bg-white text-black border-white'
-                            : 'bg-white/5 border-white/10 text-white/60 hover:text-white hover:border-white/30'
+                            ? 'bg-white text-black border-primary'
+                            : 'bg-surface/50 border-border text-text-secondary hover:text-text-primary hover:border-text-muted'
                             }`}
                         >
                           {category}
@@ -378,7 +378,7 @@ const BrowseCampaignsPage = () => {
                   {activeFiltersCount > 0 && (
                     <button
                       onClick={clearFilters}
-                      className="w-full px-6 py-3 bg-white/10 text-white rounded-xl hover:bg-white/20 font-medium transition-colors"
+                      className="w-full px-6 py-3 bg-surface text-text-primary rounded-xl hover:bg-surface/80 font-medium transition-colors"
                     >
                       Clear All Filters
                     </button>

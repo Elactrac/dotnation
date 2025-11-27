@@ -9,7 +9,7 @@ const NewLandingPageTest = () => {
       <div className="text-white text-center p-8">
         <h1 className="text-4xl font-bold">Test Landing Page</h1>
         <p>If you see this, the basic structure works</p>
-        <button onClick={connectWallet} className="mt-4 px-6 py-2 bg-primary text-white rounded">
+        <button onClick={connectWallet} className="mt-4 px-6 py-2 bg-white text-black rounded">
           Connect Wallet
         </button>
         <Link to="/dashboard" className="block mt-4 text-primary">Go to Dashboard</Link>

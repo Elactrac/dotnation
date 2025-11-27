@@ -16,15 +16,15 @@ const CreateCampaignPage = () => {
     <div className="relative w-full">
       <div className="relative w-full max-w-6xl px-4 sm:px-6 lg:px-8 py-12 mx-auto">
         <div className="mb-12 text-center">
-          <h1 className="text-5xl md:text-6xl font-bold font-display tracking-tight bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent mb-6">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold tracking-tight text-text-primary mb-6">
             Create New Campaign
           </h1>
-          <p className="text-lg md:text-xl text-gray-300 font-body max-w-3xl mx-auto">
+          <p className="text-lg md:text-xl text-text-secondary max-w-3xl mx-auto">
             Launch your crowdfunding campaign on the blockchain with AI-powered assistance
           </p>
         </div>
 
-        <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-xl rounded-3xl border-2 border-gray-700 p-6 md:p-10 lg:p-14 shadow-2xl hover:border-primary/50 transition-all duration-500">
+        <div className="bg-background-surface/50 backdrop-blur-glass rounded-sm border border-border-subtle p-6 md:p-10 lg:p-14 shadow-glass">
           <CreateCampaignForm onSuccess={handleSuccess} />
         </div>
       </div>
