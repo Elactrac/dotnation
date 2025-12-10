@@ -179,8 +179,8 @@ const MembersDashboard = () => {
                         <Link to="/members/browse" className="text-sm font-medium text-gray-600 hover:text-black transition-colors hidden sm:block">
                             Browse Creators
                         </Link>
-                        <Link to="/creator/dashboard" className="px-6 py-2.5 bg-black text-white text-sm font-medium rounded-full hover:bg-gray-800 transition-all hover:shadow-lg hover:-translate-y-0.5">
-                            Creator Dashboard
+                        <Link to="/settings" className="px-6 py-2.5 bg-gray-100 text-gray-900 text-sm font-medium rounded-full hover:bg-gray-200 transition-all hover:shadow-lg hover:-translate-y-0.5">
+                            Settings
                         </Link>
                     </div>
                 </div>

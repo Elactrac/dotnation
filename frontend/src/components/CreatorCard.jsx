@@ -23,7 +23,8 @@ const CreatorCard = ({ creator }) => {
                     setLowestPrice(`${minPrice.toFixed(0)} DOT`);
                 }
             } catch (error) {
-                console.error('Error fetching tiers:', error);
+                // Silently handle error - use default price from props
+                console.debug('Using default price for creator:', creator.name);
             }
         };
         
@@ -32,7 +33,7 @@ const CreatorCard = ({ creator }) => {
     
     return (
         <article
-            className="card card-hover card-spacing space-card group"
+            className="bg-white/80 backdrop-blur-xl rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 group space-y-6"
             aria-label={`Creator: ${creator.name}`}
         >
             {/* Header with Avatar */}
@@ -41,23 +42,23 @@ const CreatorCard = ({ creator }) => {
                     {creator.avatar}
                 </div>
                 <div className="flex-1 min-w-0">
-                    <h3 className="text-display-sm mb-1 truncate">{creator.name}</h3>
-                    <div className="flex items-center gap-2 text-sm text-text-secondary">
+                    <h3 className="text-xl font-serif text-gray-900 mb-1 truncate">{creator.name}</h3>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
                         <span>{creator.subscribers} subscribers</span>
-                        <span className="text-text-muted">•</span>
-                        <span className="badge badge-info">{creator.price}/month</span>
+                        <span className="text-gray-400">•</span>
+                        <span className="px-2 py-0.5 bg-blue-50 text-blue-600 text-xs font-medium rounded-full">{creator.price}/month</span>
                     </div>
                 </div>
             </div>
 
             {/* Description */}
-            <p className="text-body-sm text-text-secondary mb-6 line-clamp-2">
+            <p className="text-sm text-gray-600 mb-6 line-clamp-2 leading-relaxed">
                 {creator.description}
             </p>
 
             {/* Stats */}
-            <div className="flex items-center justify-between border-t border-border pt-4 mt-auto">
-                <div className="flex items-center gap-4 text-caption text-text-muted">
+            <div className="flex items-center justify-between border-t border-gray-200 pt-4 mt-auto">
+                <div className="flex items-center gap-4 text-xs text-gray-500">
                     <div className="flex items-center gap-1">
                         <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
@@ -79,7 +80,7 @@ const CreatorCard = ({ creator }) => {
 
                 <Link
                     to={`/members/${creator.id}`}
-                    className="btn btn-primary btn-sm group-hover:scale-105 transition-transform duration-300"
+                    className="px-4 py-2 bg-black text-white text-sm font-medium rounded-full hover:bg-gray-800 transition-all group-hover:scale-105 duration-300"
                     aria-label={`View ${creator.name}'s profile`}
                 >
                     View Profile →

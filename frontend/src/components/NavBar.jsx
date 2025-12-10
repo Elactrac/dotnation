@@ -25,16 +25,7 @@ const NavBar = ({ variant = 'dashboard', showBatchOps = true }) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
-  // Handle keyboard navigation for Batch Ops dropdown
-  const handleBatchOpsKeyDown = (e) => {
-    if (e.key === 'Escape') {
-      setIsBatchOpsOpen(false);
-      batchOpsRef.current?.focus();
-    } else if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      setIsBatchOpsOpen(!isBatchOpsOpen);
-    }
-  };
+
 
   // Handle keyboard navigation for wallet menu
   const handleWalletMenuKeyDown = (e) => {
@@ -87,15 +78,10 @@ const NavBar = ({ variant = 'dashboard', showBatchOps = true }) => {
 
   // Navigation items based on variant
   const getNavItems = () => {
-    const baseItems = [
-      { to: '/dashboard', label: 'Dashboard' },
-      { to: '/campaigns', label: 'Campaigns' },
-      { to: '/members', label: 'Members' },
-    ];
-
     if (variant === 'dashboard') {
       return [
-        ...baseItems,
+        { to: '/dashboard', label: 'Dashboard' },
+        { to: '/campaigns', label: 'Campaigns' },
         { to: '/my-campaigns', label: 'My Campaigns' },
         { to: '/leaderboard', label: 'Leaderboard' },
       ];
@@ -103,37 +89,47 @@ const NavBar = ({ variant = 'dashboard', showBatchOps = true }) => {
 
     if (variant === 'members') {
       return [
-        ...baseItems,
+        { to: '/dashboard', label: 'Dashboard' },
+        { to: '/campaigns', label: 'Campaigns' },
+        { to: '/members', label: 'Members' },
         { to: '/about', label: 'About' },
       ];
     }
 
-    // Landing variant
-    return [
-      { href: '#features', label: 'Features' },
-      { href: '#how-it-works', label: 'How it Works' },
-      { to: '/dashboard', label: 'Explore' },
-    ];
+    // Landing variant - simplified with just platform toggle
+    return [];
   };
 
   const navItems = getNavItems();
 
   // Render logo
-  const Logo = () => (
-    <Link to="/" className="flex items-center gap-3 group" aria-label="Paperweight home page">
-      <div className="w-10 h-10 bg-white text-black rounded-lg flex items-center justify-center font-serif text-xl font-bold group-hover:scale-105 transition-transform shadow-glow">
-        P
-      </div>
-      {variant === 'landing' ? (
-        <div className="flex flex-col">
-          <span className="font-serif text-2xl tracking-tight text-text-primary leading-none">Paperweight</span>
-          <span className="text-[10px] uppercase tracking-widest text-text-muted font-medium">Crowd</span>
+  const Logo = () => {
+    const currentPath = window.location.pathname;
+    const isMembersPage = currentPath.startsWith('/members') || currentPath.startsWith('/creator');
+
+    return (
+      <Link to="/" className="flex items-center gap-3 group" aria-label="Paperweight home page">
+        <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-serif text-xl font-bold group-hover:scale-105 transition-transform ${isMembersPage && variant === 'landing'
+          ? 'bg-black text-white'
+          : 'bg-white text-black shadow-glow'
+          }`}>
+          P
         </div>
-      ) : (
-        <h2 className="text-text-primary text-2xl font-bold font-serif tracking-tight">Paperweight</h2>
-      )}
-    </Link>
-  );
+        {variant === 'landing' ? (
+          <div className="flex flex-col">
+            <span className={`font-serif text-2xl tracking-tight leading-none ${isMembersPage ? 'text-gray-900' : 'text-text-primary'
+              }`}>Paperweight</span>
+            <span className={`text-[10px] uppercase tracking-widest font-medium ${isMembersPage ? 'text-gray-600' : 'text-text-muted'
+              }`}>
+              {isMembersPage ? 'Members' : 'Crowd'}
+            </span>
+          </div>
+        ) : (
+          <h2 className="text-text-primary text-2xl font-bold font-serif tracking-tight">Paperweight</h2>
+        )}
+      </Link>
+    );
+  };
 
   // Render wallet button/menu for dashboard variant
   const WalletSection = () => {
@@ -271,249 +267,269 @@ const NavBar = ({ variant = 'dashboard', showBatchOps = true }) => {
     );
   };
 
-  // Batch operations dropdown - click-based only
-  const BatchOpsDropdown = () => (
-    <div
-      className="relative"
-      ref={batchOpsRef}
-    >
-      <button
-        className="text-text-secondary hover:text-text-primary transition-colors duration-300 flex items-center gap-1"
-        onClick={() => setIsBatchOpsOpen(!isBatchOpsOpen)}
-        onKeyDown={handleBatchOpsKeyDown}
-        aria-expanded={isBatchOpsOpen}
-        aria-haspopup="true"
-        aria-label="Batch operations menu"
-      >
-        Batch Ops
-        <svg className={`w-4 h-4 transition-transform duration-200 ${isBatchOpsOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-        </svg>
-      </button>
-      {isBatchOpsOpen && (
-        <div
-          className="absolute top-full left-0 mt-2 w-52 rounded-sm border border-border-subtle bg-background-surface backdrop-blur-glass shadow-glass overflow-hidden z-50"
-          role="menu"
-          aria-label="Batch operations"
-        >
-          <NavLink
-            to="/batch-create"
-            className="block px-4 py-3 text-sm text-text-secondary hover:text-text-primary hover:bg-background-overlay transition-colors"
-            role="menuitem"
-            onClick={() => setIsBatchOpsOpen(false)}
-          >
-            Batch Create Campaigns
-          </NavLink>
-          <NavLink
-            to="/batch-withdraw"
-            className="block px-4 py-3 text-sm text-text-secondary hover:text-text-primary hover:bg-background-overlay transition-colors"
-            role="menuitem"
-            onClick={() => setIsBatchOpsOpen(false)}
-          >
-            Batch Withdraw
-          </NavLink>
-        </div>
-      )}
-    </div>
-  );
+
 
   // Get header styles based on variant
   const getHeaderStyles = () => {
+    const currentPath = window.location.pathname;
+    const isMembersPage = currentPath.startsWith('/members') || currentPath.startsWith('/creator');
+
     if (variant === 'landing') {
+      // Light header for Members landing, dark for Crowdfunding landing
+      if (isMembersPage) {
+        return 'sticky top-0 z-50 border-b border-gray-100 bg-white/80 backdrop-blur-xl';
+      }
       return 'sticky top-0 z-50 border-b border-border bg-background-dark/80 backdrop-blur-xl';
     }
     if (variant === 'members') {
-      return 'sticky top-0 w-full z-50 border-b border-border bg-background-dark/80 backdrop-blur-xl';
+      return 'sticky top-0 w-full z-50 border-b border-gray-100 bg-white/80 backdrop-blur-xl';
     }
     return 'sticky top-0 z-50 flex items-center justify-between whitespace-nowrap px-4 md:px-10 py-4 border-b border-border backdrop-blur-xl bg-background-dark/90';
   };
 
   // Render mobile menu
-  const MobileMenu = () => (
-    <>
-      {/* Mobile Menu Overlay */}
-      {isMobileMenuOpen && (
+  const MobileMenu = () => {
+    const currentPath = window.location.pathname;
+    const isMembersPageMobile = currentPath.startsWith('/members') || currentPath.startsWith('/creator');
+
+    return (
+      <>
+        {/* Mobile Menu Overlay */}
+        {isMobileMenuOpen && (
+          <div
+            className="fixed inset-0 bg-background-dark/60 backdrop-blur-sm z-40 lg:hidden"
+            onClick={() => setIsMobileMenuOpen(false)}
+            aria-hidden="true"
+          />
+        )}
+
+        {/* Mobile Menu Drawer */}
         <div
-          className="fixed inset-0 bg-background-dark/60 backdrop-blur-sm z-40 lg:hidden"
-          onClick={() => setIsMobileMenuOpen(false)}
-          aria-hidden="true"
-        />
-      )}
-
-      {/* Mobile Menu Drawer */}
-      <div
-        id="mobile-menu"
-        className={`fixed top-0 right-0 h-full w-80 bg-surface backdrop-blur-xl border-l border-border shadow-2xl transform transition-transform duration-300 ease-in-out z-50 lg:hidden ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
-          }`}
-        role="navigation"
-        aria-label="Mobile navigation"
-      >
-        <div className="flex flex-col h-full overflow-y-auto">
-          {/* Mobile Menu Header */}
-          <div className="flex items-center justify-between p-6 border-b border-border">
-            <h3 className="text-xl font-bold text-text-primary font-serif">Menu</h3>
-            <button
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="p-2 text-text-secondary hover:text-text-primary transition-colors"
-              aria-label="Close mobile menu"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Mobile Navigation Links */}
-          <nav className="flex flex-col p-6 space-y-2" aria-label="Mobile primary navigation">
-            {navItems.map((item) => (
-              item.to ? (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={({ isActive }) =>
-                    `px-4 py-3 rounded-lg text-base font-medium transition-colors ${isActive
-                      ? 'bg-primary/20 text-text-primary border border-primary/30'
-                      : 'text-text-secondary hover:bg-surface/80 hover:text-text-primary'
-                    }`
-                  }
-                >
-                  {item.label}
-                </NavLink>
-              ) : (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="px-4 py-3 rounded-lg text-base font-medium text-text-secondary hover:bg-surface/80 hover:text-text-primary transition-colors"
-                >
-                  {item.label}
-                </a>
-              )
-            ))}
-
-            {/* Batch Operations - Mobile (dashboard only) */}
-            {variant === 'dashboard' && showBatchOps && (
-              <div className="pt-2">
-                <p className="px-4 pb-2 text-xs text-text-muted font-semibold uppercase tracking-wider">Batch Operations</p>
-                <NavLink
-                  to="/batch-create"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={({ isActive }) =>
-                    `px-4 py-3 rounded-lg text-base font-medium transition-colors block ${isActive
-                      ? 'bg-primary/20 text-text-primary border border-primary/30'
-                      : 'text-text-secondary hover:bg-surface/80 hover:text-text-primary'
-                    }`
-                  }
-                >
-                  Batch Create Campaigns
-                </NavLink>
-                <NavLink
-                  to="/batch-withdraw"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={({ isActive }) =>
-                    `px-4 py-3 rounded-lg text-base font-medium transition-colors block ${isActive
-                      ? 'bg-primary/20 text-text-primary border border-primary/30'
-                      : 'text-text-secondary hover:bg-surface/80 hover:text-text-primary'
-                    }`
-                  }
-                >
-                  Batch Withdraw
-                </NavLink>
-              </div>
-            )}
-          </nav>
-
-          {/* Mobile Action Buttons */}
-          <div className="mt-auto p-6 space-y-3 border-t border-border">
-            <Link
-              to="/create-campaign"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="flex items-center justify-center w-full h-12 px-6 bg-white text-black text-base font-semibold rounded-sm hover:-translate-y-px hover:shadow-btn-hover transition-all duration-600 ease-gravity"
-            >
-              Create Project
-            </Link>
-
-            {selectedAccount ? (
-              <div className="space-y-2">
-                <div className="px-4 py-3 bg-surface/50 rounded-lg border border-border">
-                  <p className="text-xs text-text-muted mb-1">Connected Account</p>
-                  <p className="text-sm text-text-primary font-medium truncate">{selectedAccount.meta.name}</p>
-                  <p className="text-xs text-text-secondary font-mono truncate">{formatAddress(selectedAccount.address)}</p>
-                </div>
-                <button
-                  onClick={() => { navigate('/profile'); setIsMobileMenuOpen(false); }}
-                  className="w-full px-4 py-3 rounded-lg bg-surface/50 text-text-primary text-sm font-medium hover:bg-surface transition-colors border border-border"
-                >
-                  View Profile
-                </button>
-                <button
-                  onClick={() => { navigate('/my-donations'); setIsMobileMenuOpen(false); }}
-                  className="w-full px-4 py-3 rounded-lg bg-surface/50 text-text-primary text-sm font-medium hover:bg-surface transition-colors"
-                >
-                  My Donations
-                </button>
-                <button
-                  onClick={() => { navigate('/my-nfts'); setIsMobileMenuOpen(false); }}
-                  className="w-full px-4 py-3 rounded-lg bg-surface/50 text-text-primary text-sm font-medium hover:bg-surface transition-colors"
-                >
-                  My NFTs
-                </button>
-                <button
-                  onClick={() => { disconnectWallet(); setIsMobileMenuOpen(false); }}
-                  className="w-full px-4 py-3 rounded-lg bg-error/10 text-error text-sm font-medium hover:bg-error/20 transition-colors"
-                >
-                  Disconnect Wallet
-                </button>
-              </div>
-            ) : (
+          id="mobile-menu"
+          className={`fixed top-0 right-0 h-full w-80 bg-surface backdrop-blur-xl border-l border-border shadow-2xl transform transition-transform duration-300 ease-in-out z-50 lg:hidden ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
+            }`}
+          role="navigation"
+          aria-label="Mobile navigation"
+        >
+          <div className="flex flex-col h-full overflow-y-auto">
+            {/* Mobile Menu Header */}
+            <div className="flex items-center justify-between p-6 border-b border-border">
+              <h3 className="text-xl font-bold text-text-primary font-serif">Menu</h3>
               <button
-                onClick={() => { connectWallet(); setIsMobileMenuOpen(false); }}
-                className="w-full flex items-center justify-center gap-2 rounded-full h-12 px-6 bg-surface/50 text-text-primary text-base font-medium hover:bg-surface transition-colors border border-border"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="p-2 text-text-secondary hover:text-text-primary transition-colors"
+                aria-label="Close mobile menu"
               >
-                Connect Wallet
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
-            )}
+            </div>
+
+            {/* Mobile Navigation Links */}
+            <nav className="flex flex-col p-6 space-y-2" aria-label="Mobile primary navigation">
+              {/* Platform toggle for landing variant */}
+              {variant === 'landing' && (
+                <div className="mb-4 p-1 bg-surface/50 rounded-lg border border-border">
+                  <Link
+                    to="/"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={`block px-4 py-3 rounded-md text-base font-medium transition-colors ${!isMembersPageMobile
+                      ? 'bg-white text-black shadow-sm'
+                      : 'text-text-secondary hover:bg-surface/50'
+                      }`}
+                  >
+                    Crowdfunding
+                  </Link>
+                  <Link
+                    to="/members"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={`block px-4 py-3 rounded-md text-base font-medium transition-colors ${isMembersPageMobile
+                      ? 'bg-white text-black shadow-sm'
+                      : 'text-text-secondary hover:bg-surface/50'
+                      }`}
+                  >
+                    Members
+                  </Link>
+                </div>
+              )}
+              {navItems.map((item) => (
+                item.to ? (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={({ isActive }) =>
+                      `px-4 py-3 rounded-lg text-base font-medium transition-colors ${isActive
+                        ? 'bg-primary/20 text-text-primary border border-primary/30'
+                        : 'text-text-secondary hover:bg-surface/80 hover:text-text-primary'
+                      }`
+                    }
+                  >
+                    {item.label}
+                  </NavLink>
+                ) : (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="px-4 py-3 rounded-lg text-base font-medium text-text-secondary hover:bg-surface/80 hover:text-text-primary transition-colors"
+                  >
+                    {item.label}
+                  </a>
+                )
+              ))}
+
+              {/* Batch Operations - Mobile (dashboard only) */}
+              {variant === 'dashboard' && showBatchOps && (
+                <div className="pt-2">
+                  <p className="px-4 pb-2 text-xs text-text-muted font-semibold uppercase tracking-wider">Batch Operations</p>
+                  <NavLink
+                    to="/batch-create"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={({ isActive }) =>
+                      `px-4 py-3 rounded-lg text-base font-medium transition-colors block ${isActive
+                        ? 'bg-primary/20 text-text-primary border border-primary/30'
+                        : 'text-text-secondary hover:bg-surface/80 hover:text-text-primary'
+                      }`
+                    }
+                  >
+                    Batch Create Campaigns
+                  </NavLink>
+                  <NavLink
+                    to="/batch-withdraw"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={({ isActive }) =>
+                      `px-4 py-3 rounded-lg text-base font-medium transition-colors block ${isActive
+                        ? 'bg-primary/20 text-text-primary border border-primary/30'
+                        : 'text-text-secondary hover:bg-surface/80 hover:text-text-primary'
+                      }`
+                    }
+                  >
+                    Batch Withdraw
+                  </NavLink>
+                </div>
+              )}
+            </nav>
+
+            {/* Mobile Action Buttons */}
+            <div className="mt-auto p-6 space-y-3 border-t border-border">
+              {/* Landing variant actions */}
+              {variant === 'landing' && (
+                <>
+                  <Link
+                    to={isMembersPageMobile ? '/members/browse' : '/browse'}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center justify-center w-full h-12 px-6 border border-border text-text-primary text-base font-medium rounded-sm hover:bg-surface transition-all"
+                  >
+                    {isMembersPageMobile ? 'Browse Creators' : 'Browse Projects'}
+                  </Link>
+                </>
+              )}
+
+              {/* Dashboard variant actions */}
+              {variant === 'dashboard' && (
+                <Link
+                  to="/create-campaign"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center justify-center w-full h-12 px-6 bg-white text-black text-base font-semibold rounded-sm hover:-translate-y-px hover:shadow-btn-hover transition-all duration-600 ease-gravity"
+                >
+                  Create Project
+                </Link>
+              )}
+
+              {selectedAccount ? (
+                <div className="space-y-2">
+                  <div className="px-4 py-3 bg-surface/50 rounded-lg border border-border">
+                    <p className="text-xs text-text-muted mb-1">Connected Account</p>
+                    <p className="text-sm text-text-primary font-medium truncate">{selectedAccount.meta.name}</p>
+                    <p className="text-xs text-text-secondary font-mono truncate">{formatAddress(selectedAccount.address)}</p>
+                  </div>
+                  <button
+                    onClick={() => { navigate('/profile'); setIsMobileMenuOpen(false); }}
+                    className="w-full px-4 py-3 rounded-lg bg-surface/50 text-text-primary text-sm font-medium hover:bg-surface transition-colors border border-border"
+                  >
+                    View Profile
+                  </button>
+                  <button
+                    onClick={() => { navigate('/my-donations'); setIsMobileMenuOpen(false); }}
+                    className="w-full px-4 py-3 rounded-lg bg-surface/50 text-text-primary text-sm font-medium hover:bg-surface transition-colors"
+                  >
+                    My Donations
+                  </button>
+                  <button
+                    onClick={() => { navigate('/my-nfts'); setIsMobileMenuOpen(false); }}
+                    className="w-full px-4 py-3 rounded-lg bg-surface/50 text-text-primary text-sm font-medium hover:bg-surface transition-colors"
+                  >
+                    My NFTs
+                  </button>
+                  <button
+                    onClick={() => { disconnectWallet(); setIsMobileMenuOpen(false); }}
+                    className="w-full px-4 py-3 rounded-lg bg-error/10 text-error text-sm font-medium hover:bg-error/20 transition-colors"
+                  >
+                    Disconnect Wallet
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => { connectWallet(); setIsMobileMenuOpen(false); }}
+                  className="w-full flex items-center justify-center gap-2 rounded-full h-12 px-6 bg-surface/50 text-text-primary text-base font-medium hover:bg-surface transition-colors border border-border"
+                >
+                  Connect Wallet
+                </button>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    </>
-  );
+      </>
+    );
+  };
 
   // Landing variant header
   if (variant === 'landing') {
+    const currentPath = window.location.pathname;
+    const isMembersActive = currentPath.startsWith('/members') || currentPath.startsWith('/creator');
+
     return (
       <header className={getHeaderStyles()}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           <Logo />
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
-            {navItems.map((item) => (
-              item.to ? (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  className="text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
-                >
-                  {item.label}
-                </NavLink>
-              ) : (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  className="text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
-                >
-                  {item.label}
-                </a>
-              )
-            ))}
+          {/* Desktop Platform Toggle */}
+          <nav className={`hidden md:flex items-center gap-2 rounded-full p-1 backdrop-blur-xl ${isMembersActive
+            ? 'bg-gray-100 border border-gray-200'
+            : 'bg-surface/30 border border-border'
+            }`}>
+            <Link
+              to="/"
+              className={`px-6 py-2 text-sm font-medium rounded-full transition-all duration-300 ${!isMembersActive
+                ? (isMembersActive ? 'bg-white text-black shadow-sm' : 'bg-white text-black shadow-sm')
+                : (isMembersActive ? 'text-gray-600 hover:text-gray-900 hover:bg-gray-50' : 'text-text-secondary hover:text-text-primary hover:bg-surface/50')
+                }`}
+            >
+              Crowdfunding
+            </Link>
+            <Link
+              to="/members"
+              className={`px-6 py-2 text-sm font-medium rounded-full transition-all duration-300 ${isMembersActive
+                ? (isMembersActive ? 'bg-black text-white shadow-sm' : 'bg-white text-black shadow-sm')
+                : (isMembersActive ? 'text-gray-600 hover:text-gray-900 hover:bg-gray-50' : 'text-text-secondary hover:text-text-primary hover:bg-surface/50')
+                }`}
+            >
+              Members
+            </Link>
           </nav>
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-4">
-            <Link to="/create-campaign" className="text-sm font-medium text-text-primary hover:text-text-secondary transition-colors">
-              Start a Campaign
+            <Link
+              to={isMembersActive ? '/members/browse' : '/browse'}
+              className={`text-sm font-medium transition-colors ${isMembersActive
+                ? 'text-gray-600 hover:text-gray-900'
+                : 'text-text-secondary hover:text-text-primary'
+                }`}
+            >
+              {isMembersActive ? 'Browse Creators' : 'Browse Projects'}
             </Link>
             <WalletSection />
           </div>
@@ -522,7 +538,10 @@ const NavBar = ({ variant = 'dashboard', showBatchOps = true }) => {
           <button
             ref={mobileMenuRef}
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-2 text-text-secondary hover:text-text-primary transition-colors"
+            className={`md:hidden p-2 transition-colors ${isMembersActive
+              ? 'text-gray-600 hover:text-gray-900'
+              : 'text-text-secondary hover:text-text-primary'
+              }`}
             aria-label="Toggle mobile menu"
             aria-expanded={isMobileMenuOpen}
           >
@@ -608,10 +627,10 @@ const NavBar = ({ variant = 'dashboard', showBatchOps = true }) => {
         <Logo />
       </div>
 
-      <div className="flex flex-1 justify-end gap-4 md:gap-8 items-center">
-        {/* Desktop Navigation */}
-        <nav className="hidden lg:flex items-center gap-8 text-sm font-medium" aria-label="Primary navigation">
-          {navItems.map((item) => (
+      <div className="flex flex-1 justify-end gap-4 md:gap-6 items-center">
+        {/* Desktop Navigation - Simplified */}
+        <nav className="hidden lg:flex items-center gap-6 text-sm font-medium" aria-label="Primary navigation">
+          {navItems.slice(0, 3).map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
@@ -625,18 +644,19 @@ const NavBar = ({ variant = 'dashboard', showBatchOps = true }) => {
               {item.label}
             </NavLink>
           ))}
-          {showBatchOps && <BatchOpsDropdown />}
         </nav>
 
-        {/* Desktop action buttons */}
-        <div className="hidden md:flex gap-4">
-          <Link
-            to="/create-campaign"
-            className="flex items-center justify-center h-10 px-6 bg-white text-black text-sm font-semibold rounded-sm hover:-translate-y-px hover:shadow-btn-hover transition-all duration-600 ease-gravity"
-            aria-label="Create a new project"
-          >
-            <span>Create Project</span>
-          </Link>
+        {/* Desktop action buttons - Simplified */}
+        <div className="hidden md:flex gap-3 items-center">
+          {selectedAccount && (
+            <Link
+              to="/create-campaign"
+              className="flex items-center justify-center h-10 px-5 bg-white text-black text-sm font-semibold rounded-sm hover:-translate-y-px hover:shadow-btn-hover transition-all duration-600 ease-gravity"
+              aria-label="Create a new project"
+            >
+              <span>Create</span>
+            </Link>
+          )}
           <WalletSection />
         </div>
 

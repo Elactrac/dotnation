@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { web3FromAddress } from '@polkadot/extension-dapp';
 import { decodeAddress } from '@polkadot/util-crypto';
@@ -31,7 +32,7 @@ import {
  */
 const CrossChainDonate = ({ campaignId, contractAddress, onSuccess }) => {
   // Use wallet context for account management
-  const { selectedAccount, accounts } = useWallet();
+  const { selectedAccount } = useWallet();
 
   const [sourceChain, setSourceChain] = useState('paseo');
   const [selectedAsset, setSelectedAsset] = useState('PAS');
@@ -41,7 +42,6 @@ const CrossChainDonate = ({ campaignId, contractAddress, onSuccess }) => {
   const [txStatus, setTxStatus] = useState('');
   const [estimatedDot, setEstimatedDot] = useState(0);
   const [step, setStep] = useState(1); // 1: XCM Transfer, 2: Contract Donation
-  const [xcmTxHash, setXcmTxHash] = useState('');
 
   // Update DOT estimation when amount/asset changes
   useEffect(() => {
@@ -51,7 +51,7 @@ const CrossChainDonate = ({ campaignId, contractAddress, onSuccess }) => {
     }
   }, [amount, selectedAsset]);
 
-  const handleCrossChainDonate = async () => {
+  const handleXcmTransfer = async () => {
     console.log('=== Cross-Chain Donate Button Clicked ===');
     console.log('Selected Account:', selectedAccount);
     console.log('Amount:', amount);
@@ -399,7 +399,7 @@ const CrossChainDonate = ({ campaignId, contractAddress, onSuccess }) => {
               setTxStatus('✅ Cross-chain transfer complete! Please proceed to Step 2.');
               setLoading(false);
               setStep(2);
-              setXcmTxHash(status.asFinalized.toString());
+              // setXcmTxHash(status.asFinalized.toString());
 
               // Clean up connections after successful transaction
               if (api) await api.disconnect();
@@ -435,8 +435,8 @@ const CrossChainDonate = ({ campaignId, contractAddress, onSuccess }) => {
       setTxStatus('Initiating contract donation...');
 
       // Initialize API for Mandala (destination chain)
-      const provider = new WsProvider(DESTINATION_CHAIN.rpc);
-      const api = await ApiPromise.create({ provider });
+      // const provider = new WsProvider(DESTINATION_CHAIN.rpc);
+      // const api = await ApiPromise.create({ provider });
 
       // Get contract instance (this part depends on how you handle contracts in your app)
       // For now, we'll assume a direct transfer to the contract with a specific call
@@ -690,6 +690,12 @@ const CrossChainDonate = ({ campaignId, contractAddress, onSuccess }) => {
       </div>
     </div>
   );
+};
+
+CrossChainDonate.propTypes = {
+  campaignId: PropTypes.string.isRequired,
+  contractAddress: PropTypes.string.isRequired,
+  onSuccess: PropTypes.func.isRequired
 };
 
 export default CrossChainDonate;

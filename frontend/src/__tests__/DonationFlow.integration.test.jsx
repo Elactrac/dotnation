@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -49,8 +50,8 @@ vi.mock('../contexts/CampaignContext', async (importOriginal) => {
         signAndSend: vi.fn((address, options, callback) => {
           // Simulate finalized transaction
           setTimeout(() => {
-            callback({ 
-              status: { isFinalized: true }, 
+            callback({
+              status: { isFinalized: true },
               dispatchError: null,
               events: []
             });
@@ -111,8 +112,8 @@ describe('Donation Flow Integration Tests', () => {
   describe('Donation Interface Rendering', () => {
     it('should render donation interface with all elements', () => {
       renderWithProviders(
-        <DonationInterface 
-          campaignId={1} 
+        <DonationInterface
+          campaignId={1}
           campaign={mockCampaign}
           onDonationSuccess={vi.fn()}
         />
@@ -134,8 +135,8 @@ describe('Donation Flow Integration Tests', () => {
 
     it('should display campaign progress information', () => {
       renderWithProviders(
-        <DonationInterface 
-          campaignId={1} 
+        <DonationInterface
+          campaignId={1}
           campaign={mockCampaign}
           onDonationSuccess={vi.fn()}
         />
@@ -151,17 +152,17 @@ describe('Donation Flow Integration Tests', () => {
   describe('Donation Amount Input', () => {
     it('should allow user to type custom donation amount', async () => {
       const user = userEvent.setup();
-      
+
       renderWithProviders(
-        <DonationInterface 
-          campaignId={1} 
+        <DonationInterface
+          campaignId={1}
           campaign={mockCampaign}
           onDonationSuccess={vi.fn()}
         />
       );
 
       const amountInput = screen.getByPlaceholderText('0.00');
-      
+
       await user.clear(amountInput);
       await user.type(amountInput, '15');
 
@@ -170,10 +171,10 @@ describe('Donation Flow Integration Tests', () => {
 
     it('should allow user to select suggested amount', async () => {
       const user = userEvent.setup();
-      
+
       renderWithProviders(
-        <DonationInterface 
-          campaignId={1} 
+        <DonationInterface
+          campaignId={1}
           campaign={mockCampaign}
           onDonationSuccess={vi.fn()}
         />
@@ -181,13 +182,13 @@ describe('Donation Flow Integration Tests', () => {
 
       // Find button with text "5" (5 DOT suggestion)
       const buttons = screen.getAllByRole('button');
-      const fiveDotButton = buttons.find(btn => 
+      const fiveDotButton = buttons.find(btn =>
         btn.textContent === '5' || btn.textContent.includes('5 DOT')
       );
-      
+
       if (fiveDotButton) {
         await user.click(fiveDotButton);
-        
+
         const amountInput = screen.getByPlaceholderText('0.00');
         await waitFor(() => {
           expect(amountInput.value).toBe('5');
@@ -197,17 +198,17 @@ describe('Donation Flow Integration Tests', () => {
 
     it('should clear input when user types after selecting suggested amount', async () => {
       const user = userEvent.setup();
-      
+
       renderWithProviders(
-        <DonationInterface 
-          campaignId={1} 
+        <DonationInterface
+          campaignId={1}
           campaign={mockCampaign}
           onDonationSuccess={vi.fn()}
         />
       );
 
       const amountInput = screen.getByPlaceholderText('0.00');
-      
+
       // Type a custom amount
       await user.clear(amountInput);
       await user.type(amountInput, '20');
@@ -219,10 +220,10 @@ describe('Donation Flow Integration Tests', () => {
   describe('Donation Validation', () => {
     it('should show error for zero amount', async () => {
       const user = userEvent.setup();
-      
+
       renderWithProviders(
-        <DonationInterface 
-          campaignId={1} 
+        <DonationInterface
+          campaignId={1}
           campaign={mockCampaign}
           onDonationSuccess={vi.fn()}
         />
@@ -245,10 +246,10 @@ describe('Donation Flow Integration Tests', () => {
 
     it('should show error for negative amount', async () => {
       const user = userEvent.setup();
-      
+
       renderWithProviders(
-        <DonationInterface 
-          campaignId={1} 
+        <DonationInterface
+          campaignId={1}
           campaign={mockCampaign}
           onDonationSuccess={vi.fn()}
         />
@@ -270,10 +271,10 @@ describe('Donation Flow Integration Tests', () => {
 
     it('should show error for empty amount', async () => {
       const user = userEvent.setup();
-      
+
       renderWithProviders(
-        <DonationInterface 
-          campaignId={1} 
+        <DonationInterface
+          campaignId={1}
           campaign={mockCampaign}
           onDonationSuccess={vi.fn()}
         />
@@ -291,10 +292,10 @@ describe('Donation Flow Integration Tests', () => {
 
     it('should accept donation between 1 and 1,000,000 DOT', async () => {
       const user = userEvent.setup();
-      
+
       renderWithProviders(
-        <DonationInterface 
-          campaignId={1} 
+        <DonationInterface
+          campaignId={1}
           campaign={mockCampaign}
           onDonationSuccess={vi.fn()}
         />
@@ -317,10 +318,10 @@ describe('Donation Flow Integration Tests', () => {
   describe('Donation Submission', () => {
     it('should disable donate button while submitting', async () => {
       const user = userEvent.setup();
-      
+
       renderWithProviders(
-        <DonationInterface 
-          campaignId={1} 
+        <DonationInterface
+          campaignId={1}
           campaign={mockCampaign}
           onDonationSuccess={vi.fn()}
         />
@@ -338,10 +339,10 @@ describe('Donation Flow Integration Tests', () => {
 
     it('should accept valid donation amount', async () => {
       const user = userEvent.setup();
-      
+
       renderWithProviders(
-        <DonationInterface 
-          campaignId={1} 
+        <DonationInterface
+          campaignId={1}
           campaign={mockCampaign}
           onDonationSuccess={vi.fn()}
         />
@@ -351,12 +352,12 @@ describe('Donation Flow Integration Tests', () => {
 
       // Enter valid amounts and verify they're accepted
       const validAmounts = ['1', '5', '10', '100', '1000'];
-      
+
       for (const amount of validAmounts) {
         await user.clear(amountInput);
         await user.type(amountInput, amount);
         expect(amountInput.value).toBe(amount);
-        
+
         // Should not show error for valid amount
         expect(screen.queryByText(/invalid/i)).not.toBeInTheDocument();
       }
@@ -366,10 +367,10 @@ describe('Donation Flow Integration Tests', () => {
   describe('User Feedback', () => {
     it('should show loading state during donation', async () => {
       const user = userEvent.setup();
-      
+
       renderWithProviders(
-        <DonationInterface 
-          campaignId={1} 
+        <DonationInterface
+          campaignId={1}
           campaign={mockCampaign}
           onDonationSuccess={vi.fn()}
         />
@@ -388,10 +389,10 @@ describe('Donation Flow Integration Tests', () => {
     it('should handle donation submission flow', async () => {
       const user = userEvent.setup();
       const onSuccess = vi.fn();
-      
+
       renderWithProviders(
-        <DonationInterface 
-          campaignId={1} 
+        <DonationInterface
+          campaignId={1}
           campaign={mockCampaign}
           onDonationSuccess={onSuccess}
         />
@@ -401,10 +402,10 @@ describe('Donation Flow Integration Tests', () => {
       const donateButton = screen.getByRole('button', { name: /donate/i });
 
       await user.type(amountInput, '10');
-      
+
       // Button should be enabled with valid amount
       expect(donateButton).not.toBeDisabled();
-      
+
       await user.click(donateButton);
 
       // Button should be disabled during submission
@@ -415,8 +416,8 @@ describe('Donation Flow Integration Tests', () => {
   describe('NFT Integration', () => {
     it('should indicate NFT will be minted for donation', () => {
       renderWithProviders(
-        <DonationInterface 
-          campaignId={1} 
+        <DonationInterface
+          campaignId={1}
           campaign={mockCampaign}
           onDonationSuccess={vi.fn()}
         />

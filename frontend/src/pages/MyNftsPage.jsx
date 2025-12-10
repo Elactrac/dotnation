@@ -6,11 +6,11 @@ import TransferNftModal from '../components/TransferNftModal';
 import AchievementsDisplay from '../components/AchievementsDisplay';
 
 const MyNftsPage = () => {
-  const { 
-    userNfts, 
-    loading, 
-    fetchUserNfts, 
-    getDonationStats, 
+  const {
+    userNfts,
+    loading,
+    fetchUserNfts,
+    getDonationStats,
     nftEnabled,
     getRarityDistribution,
     getAchievements,
@@ -55,7 +55,7 @@ const MyNftsPage = () => {
       loadAchievements();
       checkTransfersEnabled();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedAccount, nftEnabled]);
 
   const formatDate = (timestamp) => {
@@ -68,22 +68,7 @@ const MyNftsPage = () => {
     });
   };
 
-  // Rarity color mapping
-  const getRarityColor = (rarity) => {
-    switch (rarity) {
-      case 'Legendary':
-        return 'from-yellow-400 to-orange-500';
-      case 'Epic':
-        return 'from-purple-400 to-pink-500';
-      case 'Rare':
-        return 'from-blue-400 to-indigo-500';
-      case 'Uncommon':
-        return 'from-green-400 to-teal-500';
-      case 'Common':
-      default:
-        return 'from-gray-400 to-slate-500';
-    }
-  };
+
 
   const getRarityValue = (rarity) => {
     switch (rarity) {
@@ -277,7 +262,7 @@ const MyNftsPage = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredAndSortedNfts.map((nft) => {
-              const rarityColor = getRarityColor(nft.rarity || 'Common');
+
               return (
                 <div
                   key={nft.tokenId}

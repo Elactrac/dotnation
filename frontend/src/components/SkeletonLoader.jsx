@@ -260,6 +260,83 @@ export const SearchSkeleton = () => {
   );
 };
 
+/**
+ * Creator Card Skeleton Loader (for Members platform)
+ */
+export const CreatorCardSkeleton = ({ count = 3 }) => {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {Array.from({ length: count }).map((_, index) => (
+        <div
+          key={index}
+          className="group rounded-2xl bg-white border border-gray-200 overflow-hidden"
+        >
+          {/* Avatar/Banner */}
+          <div className="relative h-48 overflow-hidden bg-gray-100 animate-pulse" />
+          
+          {/* Content */}
+          <div className="p-6 space-y-4">
+            <div className="h-6 w-3/4 bg-gray-200 rounded animate-pulse" />
+            <div className="h-4 w-full bg-gray-100 rounded animate-pulse" />
+            <div className="h-4 w-5/6 bg-gray-100 rounded animate-pulse" />
+            
+            {/* Stats */}
+            <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+              <div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
+              <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+            </div>
+            
+            {/* Button */}
+            <div className="w-full h-10 bg-gray-100 rounded-lg animate-pulse" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+/**
+ * Content Post Skeleton Loader (for creator content)
+ */
+export const ContentPostSkeleton = ({ count = 6 }) => {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {Array.from({ length: count }).map((_, index) => (
+        <div
+          key={index}
+          className="bg-white rounded-xl border border-gray-200 overflow-hidden"
+        >
+          {/* Thumbnail */}
+          <div className="relative h-48 bg-gray-100 animate-pulse" />
+          
+          {/* Post info */}
+          <div className="p-4 space-y-3">
+            <div className="h-5 w-full bg-gray-200 rounded animate-pulse" />
+            <div className="h-4 w-4/5 bg-gray-100 rounded animate-pulse" />
+            <div className="h-4 w-3/5 bg-gray-100 rounded animate-pulse" />
+            
+            {/* Meta info */}
+            <div className="flex items-center gap-3 pt-2">
+              <div className="h-3 w-16 bg-gray-200 rounded animate-pulse" />
+              <div className="h-3 w-12 bg-gray-200 rounded animate-pulse" />
+              <div className="h-3 w-12 bg-gray-200 rounded animate-pulse" />
+            </div>
+            
+            {/* Tier and actions */}
+            <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+              <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+              <div className="flex gap-2">
+                <div className="h-8 w-8 bg-gray-100 rounded animate-pulse" />
+                <div className="h-8 w-8 bg-gray-100 rounded animate-pulse" />
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 CampaignCardSkeleton.propTypes = {
   count: PropTypes.number
 };
@@ -277,6 +354,14 @@ TableSkeleton.propTypes = {
   columns: PropTypes.number
 };
 
+CreatorCardSkeleton.propTypes = {
+  count: PropTypes.number
+};
+
+ContentPostSkeleton.propTypes = {
+  count: PropTypes.number
+};
+
 export default {
   CampaignCardSkeleton,
   CampaignListSkeleton,
@@ -284,5 +369,7 @@ export default {
   ProfileSkeleton,
   DonationSkeleton,
   TableSkeleton,
-  SearchSkeleton
+  SearchSkeleton,
+  CreatorCardSkeleton,
+  ContentPostSkeleton
 };

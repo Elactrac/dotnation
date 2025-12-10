@@ -435,7 +435,7 @@ const CreatorDashboard = () => {
                                 <div className="flex items-center gap-4">
                                     <img 
                                         src={member.avatar} 
-                                        alt={member.name}
+                                        alt={`${member.name} - ${member.tier} tier member`}
                                         className="w-12 h-12 rounded-full object-cover grayscale hover:grayscale-0 transition-all"
                                     />
                                     <div>
@@ -562,7 +562,7 @@ const CreatorDashboard = () => {
                             <tr key={member.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                                 <td className="px-6 py-4">
                                     <div className="flex items-center gap-3">
-                                        <img src={member.avatar} alt={member.name} className="w-10 h-10 rounded-full object-cover" />
+                                        <img src={member.avatar} alt={`${member.name} profile picture`} className="w-10 h-10 rounded-full object-cover" />
                                         <div>
                                             <p className="font-semibold text-gray-900">{member.name}</p>
                                             <p className="text-sm text-gray-500">@{member.name.toLowerCase().replace(' ', '')}</p>
@@ -874,9 +874,9 @@ const CreatorDashboard = () => {
                         </Link>
                     </div>
                     <div className="flex items-center gap-3">
-                        <button className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-black transition-colors">
-                            View Profile
-                        </button>
+                        <Link to="/members" className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-black transition-colors">
+                            View Public Profile
+                        </Link>
                         <button onClick={() => setShowPostModal(true)} className="px-6 py-2.5 bg-black text-white text-sm font-semibold rounded-full hover:bg-gray-800 transition-all hover:shadow-lg">
                             <FiPlus className="inline-block mr-1.5 -mt-0.5" />
                             New Post

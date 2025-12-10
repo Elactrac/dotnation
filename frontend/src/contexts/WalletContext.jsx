@@ -4,6 +4,7 @@ import { web3Accounts, web3Enable } from '@polkadot/extension-dapp';
 import { metrics } from '../utils/metrics';
 import { setUserContext, trackEvent, trackError } from '../utils/sentry';
 import { useApi } from './ApiContext';
+import WalletErrorModal from '../components/WalletErrorModal';
 
 export const WalletContext = createContext({});
 
@@ -25,6 +26,7 @@ export const WalletProvider = ({ children }) => {
   const [selectedAccount, setSelectedAccount] = useState(null);
   const [error, setError] = useState(null);
   const [balance, setBalance] = useState(null);
+  const [showErrorModal, setShowErrorModal] = useState(false);
 
   useEffect(() => {
     const getBalance = async () => {
@@ -125,6 +127,7 @@ export const WalletProvider = ({ children }) => {
       }
     } catch (err) {
       setError(err.message);
+      setShowErrorModal(true); // Show error modal to user
       console.error('Failed to connect wallet:', err);
       metrics.recordApiCall('connectWallet', Date.now() - startTime, false);
       metrics.recordError('WALLET_ERROR', err.message, { operation: 'connectWallet' });
@@ -186,6 +189,14 @@ export const WalletProvider = ({ children }) => {
       }}
     >
       {children}
+      <WalletErrorModal 
+        isOpen={showErrorModal} 
+        onClose={() => {
+          setShowErrorModal(false);
+          setError(null);
+        }}
+        error={error}
+      />
     </WalletContext.Provider>
   );
 };

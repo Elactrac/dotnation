@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -156,7 +157,7 @@ describe('Campaign Creation Integration Tests', () => {
       await waitFor(() => {
         expect(screen.getByText(/deadline is required/i)).toBeInTheDocument();
       });
-      
+
       // Verify the help text is shown
       expect(screen.getByText(/must be between 1 hour and 1 year from now/i)).toBeInTheDocument();
     });
@@ -212,10 +213,10 @@ describe('Campaign Creation Integration Tests', () => {
       expect(screen.getByRole('spinbutton', { name: /goal/i })).toBeInTheDocument();
       expect(screen.getByLabelText(/campaign deadline/i)).toBeInTheDocument();
       expect(screen.getByPlaceholderText(/enter the beneficiary.*polkadot address/i)).toBeInTheDocument();
-      
+
       // Verify submit button exists
       expect(screen.getByRole('button', { name: /create campaign/i })).toBeInTheDocument();
-      
+
       // Verify AI assistance buttons
       expect(screen.getByLabelText(/generate ai title suggestions/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/generate ai description from title/i)).toBeInTheDocument();
@@ -269,7 +270,7 @@ describe('Campaign Creation Integration Tests', () => {
       await waitFor(() => {
         const titleInput = screen.getByPlaceholderText(/enter a compelling campaign title/i);
         expect(titleInput).toHaveAttribute('aria-invalid', 'true');
-        
+
         const descriptionInput = screen.getByPlaceholderText(/tell your story/i);
         expect(descriptionInput).toHaveAttribute('aria-invalid', 'true');
       });

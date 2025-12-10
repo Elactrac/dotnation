@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { DonationInterface } from './DonationInterface';
@@ -171,7 +172,7 @@ describe('DonationInterface', () => {
   describe('Wallet Connection', () => {
     it('shows warning when wallet is not connected', () => {
       mockSelectedAccount = null;
-      
+
       render(
         <DonationInterface campaignId={mockCampaignId} campaign={mockActiveCampaign} />
       );
@@ -182,7 +183,7 @@ describe('DonationInterface', () => {
 
     it('disables inputs when wallet is not connected', () => {
       mockSelectedAccount = null;
-      
+
       render(
         <DonationInterface campaignId={mockCampaignId} campaign={mockActiveCampaign} />
       );
@@ -198,7 +199,7 @@ describe('DonationInterface', () => {
 
     it('shows "Connect Wallet to Donate" button text when not connected', () => {
       mockSelectedAccount = null;
-      
+
       render(
         <DonationInterface campaignId={mockCampaignId} campaign={mockActiveCampaign} />
       );
@@ -310,7 +311,7 @@ describe('DonationInterface', () => {
       );
 
       const input = screen.getByPlaceholderText('Enter donation amount');
-      
+
       // Enter invalid amount
       fireEvent.change(input, { target: { value: '0.0005' } });
       expect(screen.getByText('Minimum donation is 0.001 DOT')).toBeInTheDocument();
@@ -490,7 +491,7 @@ describe('DonationInterface', () => {
 
     it('shows warning toast when trying to donate without wallet', async () => {
       mockSelectedAccount = null;
-      
+
       render(
         <DonationInterface campaignId={mockCampaignId} campaign={mockActiveCampaign} />
       );
@@ -517,7 +518,7 @@ describe('DonationInterface', () => {
 
       // The button should be disabled due to validation
       screen.getByRole('button', { name: /Enter Amount/i });
-      
+
       // The validation should prevent the call
       expect(mockDonateToCampaign).not.toHaveBeenCalled();
     });
@@ -576,7 +577,7 @@ describe('DonationInterface', () => {
 
     it('displays warning toast with correct styling', async () => {
       mockSelectedAccount = null;
-      
+
       render(
         <DonationInterface campaignId={mockCampaignId} campaign={mockActiveCampaign} />
       );
@@ -622,13 +623,13 @@ describe('DonationInterface', () => {
 
     it('can display multiple toasts simultaneously', async () => {
       mockSelectedAccount = null;
-      
+
       render(
         <DonationInterface campaignId={mockCampaignId} campaign={mockActiveCampaign} />
       );
 
       const donateButton = screen.getByRole('button', { name: /Connect Wallet to Donate/i });
-      
+
       // Trigger toast (wallet not connected)
       fireEvent.click(donateButton);
 
@@ -643,7 +644,7 @@ describe('DonationInterface', () => {
   describe('Button States', () => {
     it('disables button when wallet is not connected', () => {
       mockSelectedAccount = null;
-      
+
       render(
         <DonationInterface campaignId={mockCampaignId} campaign={mockActiveCampaign} />
       );

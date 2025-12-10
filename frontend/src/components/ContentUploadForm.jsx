@@ -265,25 +265,42 @@ const ContentUploadForm = ({
     setErrors({});
   };
 
+  // Step labels
+  const stepLabels = ['Details', 'Content', 'Preview'];
+
   // Render step indicator
   const renderStepIndicator = () => (
-    <div className="flex items-center justify-center mb-8">
-      {[1, 2, 3].map((stepNum) => (
-        <div key={stepNum} className="flex items-center">
-          <div className={`flex items-center justify-center w-10 h-10 rounded-full font-semibold transition-all ${
-            step >= stepNum 
-              ? 'bg-black text-white' 
-              : 'bg-gray-200 text-gray-500'
-          }`}>
-            {stepNum}
+    <div className="mb-8">
+      <div className="flex items-center justify-center mb-3">
+        {[1, 2, 3].map((stepNum) => (
+          <div key={stepNum} className="flex items-center">
+            <div className={`flex items-center justify-center w-10 h-10 rounded-full font-semibold transition-all ${
+              step >= stepNum 
+                ? 'bg-black text-white shadow-md' 
+                : 'bg-gray-200 text-gray-500'
+            }`}>
+              {step > stepNum ? <FiCheck className="w-5 h-5" /> : stepNum}
+            </div>
+            {stepNum < 3 && (
+              <div className={`w-16 h-1 mx-2 transition-all ${
+                step > stepNum ? 'bg-black' : 'bg-gray-200'
+              }`} />
+            )}
           </div>
-          {stepNum < 3 && (
-            <div className={`w-16 h-1 mx-2 ${
-              step > stepNum ? 'bg-black' : 'bg-gray-200'
-            }`} />
-          )}
-        </div>
-      ))}
+        ))}
+      </div>
+      <div className="flex items-center justify-center gap-[88px]">
+        {stepLabels.map((label, index) => (
+          <span 
+            key={label} 
+            className={`text-xs font-medium uppercase tracking-wider transition-colors ${
+              step >= index + 1 ? 'text-gray-900' : 'text-gray-400'
+            }`}
+          >
+            {label}
+          </span>
+        ))}
+      </div>
     </div>
   );
 
@@ -447,7 +464,7 @@ const ContentUploadForm = ({
               {contentPreviewUrl && contentType === CONTENT_TYPES.IMAGE && (
                 <img 
                   src={contentPreviewUrl} 
-                  alt="Preview" 
+                  alt={`Preview of uploaded image: ${contentFile.name}`}
                   className="w-full rounded-lg object-cover max-h-64"
                 />
               )}
@@ -501,7 +518,7 @@ const ContentUploadForm = ({
                 <div className="flex items-start gap-3">
                   <img 
                     src={thumbnailPreviewUrl} 
-                    alt="Thumbnail" 
+                    alt={`Thumbnail preview: ${thumbnailFile.name}`}
                     className="w-16 h-16 rounded-lg object-cover"
                   />
                   <div>
@@ -581,7 +598,7 @@ const ContentUploadForm = ({
           {contentPreviewUrl && contentType === CONTENT_TYPES.IMAGE && (
             <img 
               src={contentPreviewUrl} 
-              alt="Preview" 
+              alt={`Preview: ${title || 'Uploaded content'}`}
               className="w-full rounded-lg object-cover max-h-80 mt-4"
             />
           )}
@@ -598,7 +615,7 @@ const ContentUploadForm = ({
               <p className="text-sm font-medium text-gray-700 mb-2">Thumbnail:</p>
               <img 
                 src={thumbnailPreviewUrl} 
-                alt="Thumbnail" 
+                alt={`Thumbnail preview for ${title}`}
                 className="w-48 rounded-lg object-cover"
               />
             </div>

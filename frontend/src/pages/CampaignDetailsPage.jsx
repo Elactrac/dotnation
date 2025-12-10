@@ -580,7 +580,7 @@ const CampaignDetailsPage = () => {
                       What is Cross-Chain Donation?
                     </h3>
                     <p className="text-text-secondary font-sans leading-relaxed mb-4">
-                      With Polkadot's XCM (Cross-Consensus Messaging), you can donate to this campaign
+                      With Polkadot&apos;s XCM (Cross-Consensus Messaging), you can donate to this campaign
                       from <span className="font-bold text-text-primary">ANY</span> connected parachain!
                       No need to bridge assets manually - XCM handles everything automatically.
                     </p>

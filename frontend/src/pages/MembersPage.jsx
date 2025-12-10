@@ -6,6 +6,8 @@ import CreatorCard from '../components/CreatorCard';
 const MembersPage = () => {
     const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
+    console.log('[MembersPage] Component rendered');
+
     // Search and filter states
     const [searchQuery, setSearchQuery] = useState('');
     const [sortBy, setSortBy] = useState('subscribers-high');
@@ -329,76 +331,81 @@ const MembersPage = () => {
 
     // Mesh grid canvas effect
     useEffect(() => {
-        const canvas = document.getElementById('mesh-canvas-members');
-        if (!canvas) return;
+        // Temporarily disable canvas for debugging
+        console.log('[MembersPage] Canvas effect skipped for debugging');
+        return;
 
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = document.documentElement.scrollHeight;
 
-        let mouseX = window.innerWidth / 2;
-        let mouseY = window.innerHeight / 2;
+        // const canvas = document.getElementById('mesh-canvas-members');
+        // if (!canvas) return;
 
-        const handleMouseMove = (e) => {
-            mouseX = e.clientX;
-            mouseY = e.clientY + window.pageYOffset;
-        };
+        // const ctx = canvas.getContext('2d');
+        // canvas.width = window.innerWidth;
+        // canvas.height = document.documentElement.scrollHeight;
 
-        const drawMesh = () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // let mouseX = window.innerWidth / 2;
+        // let mouseY = window.innerHeight / 2;
 
-            const gridSize = 40;
-            const maxDistance = 200;
+        // const handleMouseMove = (e) => {
+        //     mouseX = e.clientX;
+        //     mouseY = e.clientY + window.pageYOffset;
+        // };
 
-            // Draw vertical lines
-            for (let x = 0; x < canvas.width; x += gridSize) {
-                const distX = Math.abs(mouseX - x);
-                if (distX < maxDistance) {
-                    const opacity = (1 - distX / maxDistance) * 0.1; // Reduced opacity for light theme
-                    ctx.strokeStyle = `rgba(0, 122, 255, ${opacity})`; // Blue tint
-                } else {
-                    ctx.strokeStyle = 'rgba(0, 0, 0, 0.03)'; // Very subtle gray
-                }
+        // const drawMesh = () => {
+        //     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                ctx.beginPath();
-                ctx.moveTo(x, 0);
-                ctx.lineTo(x, canvas.height);
-                ctx.stroke();
-            }
+        //     const gridSize = 40;
+        //     const maxDistance = 200;
 
-            // Draw horizontal lines
-            for (let y = 0; y < canvas.height; y += gridSize) {
-                const distY = Math.abs(mouseY - y);
-                if (distY < maxDistance) {
-                    const opacity = (1 - distY / maxDistance) * 0.1;
-                    ctx.strokeStyle = `rgba(0, 122, 255, ${opacity})`;
-                } else {
-                    ctx.strokeStyle = 'rgba(0, 0, 0, 0.03)';
-                }
+        //     // Draw vertical lines
+        //     for (let x = 0; x < canvas.width; x += gridSize) {
+        //         const distX = Math.abs(mouseX - x);
+        //         if (distX < maxDistance) {
+        //             const opacity = (1 - distX / maxDistance) * 0.1; // Reduced opacity for light theme
+        //             ctx.strokeStyle = `rgba(0, 122, 255, ${opacity})`; // Blue tint
+        //         } else {
+        //             ctx.strokeStyle = 'rgba(0, 0, 0, 0.03)'; // Very subtle gray
+        //         }
 
-                ctx.beginPath();
-                ctx.moveTo(0, y);
-                ctx.lineTo(canvas.width, y);
-                ctx.stroke();
-            }
+        //         ctx.beginPath();
+        //         ctx.moveTo(x, 0);
+        //         ctx.lineTo(x, canvas.height);
+        //         ctx.stroke();
+        //     }
 
-            requestAnimationFrame(drawMesh);
-        };
+        //     // Draw horizontal lines
+        //     for (let y = 0; y < canvas.height; y += gridSize) {
+        //         const distY = Math.abs(mouseY - y);
+        //         if (distY < maxDistance) {
+        //             const opacity = (1 - distY / maxDistance) * 0.1;
+        //             ctx.strokeStyle = `rgba(0, 122, 255, ${opacity})`;
+        //         } else {
+        //             ctx.strokeStyle = 'rgba(0, 0, 0, 0.03)';
+        //         }
 
-        drawMesh();
+        //         ctx.beginPath();
+        //         ctx.moveTo(0, y);
+        //         ctx.lineTo(canvas.width, y);
+        //         ctx.stroke();
+        //     }
 
-        const handleResize = () => {
-            canvas.width = window.innerWidth;
-            canvas.height = document.documentElement.scrollHeight;
-        };
+        //     requestAnimationFrame(drawMesh);
+        // };
 
-        document.addEventListener('mousemove', handleMouseMove);
-        window.addEventListener('resize', handleResize);
+        // drawMesh();
 
-        return () => {
-            document.removeEventListener('mousemove', handleMouseMove);
-            window.removeEventListener('resize', handleResize);
-        };
+        // const handleResize = () => {
+        //     canvas.width = window.innerWidth;
+        //     canvas.height = document.documentElement.scrollHeight;
+        // };
+
+        // document.addEventListener('mousemove', handleMouseMove);
+        // window.addEventListener('resize', handleResize);
+
+        // return () => {
+        //     document.removeEventListener('mousemove', handleMouseMove);
+        //     window.removeEventListener('resize', handleResize);
+        // };
     }, []);
 
     // Available categories
@@ -408,6 +415,7 @@ const MembersPage = () => {
 
     // Filter and sort creators
     const filteredCreators = useMemo(() => {
+        console.log('[MembersPage] Filtering creators, total:', creators.length);
         let filtered = creators.filter(creator => {
             // Search query filter
             if (searchQuery) {
@@ -452,6 +460,7 @@ const MembersPage = () => {
             }
         });
 
+        console.log('[MembersPage] Filtered creators count:', filtered.length);
         return filtered;
     }, [creators, searchQuery, sortBy, priceRange, selectedCategories]);
 
@@ -524,7 +533,7 @@ const MembersPage = () => {
             <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pt-32">
                 <div className="space-y-8">
                     {/* Header */}
-                    <div className="text-left fade-in-up">
+                    <div className="text-left">
                         <h1 className="text-5xl font-serif mb-3 text-gray-900">
                             Browse Creators
                         </h1>
@@ -554,8 +563,8 @@ const MembersPage = () => {
                                     <button
                                         onClick={() => setIsFiltersOpen(!isFiltersOpen)}
                                         className={`flex items-center gap-2 px-5 py-2.5 rounded-xl border font-sans transition-all duration-300 ${activeFiltersCount > 0
-                                                ? 'bg-blue-50 border-blue-200 text-blue-600'
-                                                : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+                                            ? 'bg-blue-50 border-blue-200 text-blue-600'
+                                            : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
                                             } md:hidden`}
                                     >
                                         <FiSliders className="w-4 h-4" />
@@ -592,7 +601,7 @@ const MembersPage = () => {
                     </div>
 
                     {/* Results Summary */}
-                    <div className="flex justify-between items-center flex-wrap gap-4 fade-in-up">
+                    <div className="flex justify-between items-center flex-wrap gap-4">
                         <p className="text-gray-600 font-sans">
                             Showing <span className="text-gray-900 font-bold">{filteredCreators.length}</span> of <span className="text-gray-900 font-bold">{creators.length}</span> creators
                         </p>
@@ -605,7 +614,7 @@ const MembersPage = () => {
 
                     {/* Creators Grid */}
                     {filteredCreators.length === 0 ? (
-                        <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-gray-200 p-12 text-center shadow-sm scale-in">
+                        <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-gray-200 p-12 text-center shadow-sm">
                             <div className="space-y-4">
                                 <FiSearch className="w-16 h-16 text-gray-300 mx-auto" />
                                 <h3 className="text-2xl font-serif text-gray-900">No Creators Found</h3>
@@ -626,7 +635,7 @@ const MembersPage = () => {
                             </div>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 stagger-children">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                             {filteredCreators.map((creator) => (
                                 <CreatorCard
                                     key={creator.id}
@@ -703,8 +712,8 @@ const MembersPage = () => {
                                                     key={category}
                                                     onClick={() => handleCategoryToggle(category)}
                                                     className={`px-4 py-2 text-sm font-sans rounded-full transition-all duration-300 ${selectedCategories.includes(category)
-                                                            ? 'bg-blue-600 text-white shadow-md'
-                                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                                        ? 'bg-blue-600 text-white shadow-md'
+                                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                                         }`}
                                                 >
                                                     {category}

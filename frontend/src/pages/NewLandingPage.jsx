@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { FiArrowRight, FiTrendingUp, FiShield, FiGlobe, FiCpu, FiLayers, FiChevronDown } from 'react-icons/fi';
 import Footer from '../components/Footer';
 import NavBar from '../components/NavBar';
+import Button from '../components/Button';
 
 const NewLandingPage = () => {
   const [openFaqIndex, setOpenFaqIndex] = useState(null);
@@ -73,42 +74,49 @@ const NewLandingPage = () => {
       <NavBar variant="landing" />
 
       {/* Hero Section (Compact Collage - Above the Fold) */}
-      <section className="relative w-full py-12 lg:py-20 overflow-hidden">
+      <section className="relative w-full py-16 lg:py-24 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             {/* Left Content */}
             <div className="text-left">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-surface/50 backdrop-blur-md mb-6">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-surface/50 backdrop-blur-md mb-7">
                 <span className="w-1.5 h-1.5 bg-secondary rounded-full animate-pulse"></span>
                 <span className="text-xs font-medium text-text-secondary tracking-wide uppercase">Polkadot Crowdfunding</span>
               </div>
 
-              <h1 className="font-serif text-5xl sm:text-6xl lg:text-7xl leading-[1.1] tracking-tight text-text-primary mb-6 text-balance">
+              <h1 className="font-serif text-5xl sm:text-6xl lg:text-7xl leading-[1.1] tracking-tight text-text-primary mb-7 text-balance">
                 Fund the <br />
                 <span className="italic text-text-secondary">extraordinary.</span>
               </h1>
 
-              <p className="text-lg text-text-secondary max-w-lg leading-relaxed mb-8 text-balance font-light">
+              <p className="text-lg sm:text-xl text-text-secondary max-w-lg leading-relaxed mb-10 text-balance font-light">
                 The decentralized platform for visionary projects. Launch your campaign, rally your community, and build on-chain.
               </p>
 
               <div className="flex flex-col sm:flex-row items-center gap-4">
-                <Link to="/create-campaign" className="w-full sm:w-auto px-8 py-3.5 bg-white text-black text-base font-semibold rounded-sm hover:-translate-y-px hover:shadow-btn-hover transition-all duration-600 ease-gravity flex items-center justify-center gap-2">
-                  Start Funding <FiArrowRight />
-                </Link>
-                <Link to="/dashboard" className="w-full sm:w-auto px-8 py-3.5 border border-border-strong bg-transparent text-text-primary text-base font-medium rounded-sm hover:border-white transition-all duration-600 ease-gravity flex items-center justify-center">
+                <Button 
+                  to="/create-campaign" 
+                  variant="primary-light" 
+                  icon={<FiArrowRight />}
+                >
+                  Start a Campaign
+                </Button>
+                <Button 
+                  to="/browse" 
+                  variant="secondary-dark"
+                >
                   Explore Projects
-                </Link>
+                </Button>
               </div>
             </div>
 
             {/* Right Collage (Compact & Dark) */}
-            <div className="relative h-[500px] w-full hidden lg:block">
+            <div className="relative h-[550px] w-full hidden lg:block">
               {/* Card 1: Tech/Hardware */}
-              <div className="absolute top-0 right-10 w-64 h-80 bg-surface border border-border rounded-xl overflow-hidden transform rotate-6 hover:rotate-0 transition-all duration-700 hover:scale-105 z-20 shadow-2xl group">
-                <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&h=800&fit=crop&q=80" alt="Tech Campaign" className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity" />
+              <div className="absolute top-0 right-10 w-72 h-96 bg-surface border border-border rounded-xl overflow-hidden transform rotate-6 hover:rotate-0 transition-all duration-700 hover:scale-105 z-20 shadow-2xl group">
+                <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&h=800&fit=crop&q=80" alt="NextGen Hardware Wallet - Tech crowdfunding campaign" className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity" />
                 <div className="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/50 to-transparent"></div>
-                <div className="absolute bottom-0 left-0 right-0 p-5">
+                <div className="absolute bottom-0 left-0 right-0 p-6">
                   <div className="flex justify-between items-end mb-2">
                     <span className="text-xs font-bold text-secondary uppercase tracking-wider">Tech</span>
                     <span className="text-xs text-text-secondary">85% Funded</span>
@@ -118,10 +126,10 @@ const NewLandingPage = () => {
               </div>
 
               {/* Card 2: Art/Community */}
-              <div className="absolute bottom-10 left-10 w-60 h-72 bg-surface border border-border rounded-xl overflow-hidden transform -rotate-3 hover:rotate-0 transition-all duration-700 hover:scale-105 z-10 shadow-2xl group">
-                <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&h=800&fit=crop&q=80" alt="Art Campaign" className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity" />
+              <div className="absolute bottom-10 left-10 w-64 h-80 bg-surface border border-border rounded-xl overflow-hidden transform -rotate-3 hover:rotate-0 transition-all duration-700 hover:scale-105 z-10 shadow-2xl group">
+                <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&h=800&fit=crop&q=80" alt="Digital Renaissance - Art crowdfunding campaign" className="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity" />
                 <div className="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/50 to-transparent"></div>
-                <div className="absolute bottom-0 left-0 right-0 p-5">
+                <div className="absolute bottom-0 left-0 right-0 p-6">
                   <div className="flex justify-between items-end mb-2">
                     <span className="text-xs font-bold text-primary uppercase tracking-wider">Art</span>
                     <span className="text-xs text-text-secondary">120% Funded</span>
@@ -165,16 +173,16 @@ const NewLandingPage = () => {
             <h2 className="text-3xl md:text-4xl font-serif text-text-primary mb-2">Trending Projects</h2>
             <p className="text-text-secondary">Support the most innovative ideas on Polkadot.</p>
           </div>
-          <Link to="/dashboard" className="hidden sm:flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors">
+          <Link to="/browse" className="hidden sm:flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors">
             View All <FiArrowRight />
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {featuredCampaigns.map((campaign, index) => (
             <div key={index} className="group rounded-2xl bg-surface border border-border overflow-hidden hover:border-primary/30 transition-all hover:-translate-y-1">
               <div className="relative h-48 overflow-hidden">
-                <img src={campaign.image} alt={campaign.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <img src={campaign.image} alt={`${campaign.title} - ${campaign.category} campaign by ${campaign.author}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 <div className="absolute top-4 left-4 px-3 py-1 bg-background-dark/60 backdrop-blur-md rounded-full text-xs font-medium text-text-primary border border-border">
                   {campaign.category}
                 </div>
@@ -201,7 +209,7 @@ const NewLandingPage = () => {
         </div>
 
         <div className="mt-8 text-center sm:hidden">
-          <Link to="/dashboard" className="inline-flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors">
+          <Link to="/browse" className="inline-flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors">
             View All Projects <FiArrowRight />
           </Link>
         </div>

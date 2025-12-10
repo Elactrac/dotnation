@@ -5,6 +5,7 @@ import { formatDOT } from '../utils/formatters';
 import PageErrorBoundary from '../components/PageErrorBoundary';
 import CampaignCard from '../components/CampaignCard';
 import { CampaignCardSkeleton } from '../components/SkeletonLoader';
+import EmptyState from '../components/EmptyState';
 
 // Helper function to calculate campaign progress
 const calculateProgress = (raised, goal) => {
@@ -198,13 +199,18 @@ const BrowseCampaignsPage = () => {
                 <div className="flex items-center gap-4">
                   <button
                     onClick={() => setIsFiltersOpen(!isFiltersOpen)}
-                    className={`flex items-center gap-2 px-5 py-2.5 rounded-xl border font-medium transition-all ${activeFiltersCount > 0
-                      ? 'bg-white text-black border-primary hover:bg-primary/90'
-                      : 'bg-surface/50 border-border text-text-secondary hover:bg-surface hover:text-text-primary'
-                      } md:hidden`}
+                    className={`flex items-center gap-2 px-5 py-2.5 rounded-xl border font-medium transition-all relative ${activeFiltersCount > 0
+                      ? 'bg-primary/10 border-primary/30 text-primary'
+                      : 'bg-surface/50 border-border text-text-secondary hover:border-primary/30'
+                      }`}
                   >
                     <FiSliders className="w-4 h-4" />
-                    Filters {activeFiltersCount > 0 && `(${activeFiltersCount})`}
+                    Filters
+                    {activeFiltersCount > 0 && (
+                      <span className="ml-1 px-2 py-0.5 bg-primary text-white text-xs font-bold rounded-full">
+                        {activeFiltersCount}
+                      </span>
+                    )}
                   </button>
 
                   {activeFiltersCount > 0 && (
@@ -247,28 +253,23 @@ const BrowseCampaignsPage = () => {
 
           {/* Campaigns Grid */}
           {filteredCampaigns.length === 0 ? (
-            <div className="bg-surface/50 backdrop-blur-xl rounded-2xl border border-border p-16 text-center">
-              <div className="space-y-4">
-                <div className="w-16 h-16 bg-surface rounded-full flex items-center justify-center mx-auto mb-6">
-                  <FiSearch className="w-8 h-8 text-text-muted" />
-                </div>
-                <h3 className="text-2xl font-serif text-text-primary">No Campaigns Found</h3>
-                <p className="text-text-secondary max-w-md mx-auto">
-                  {activeFiltersCount > 0
-                    ? "Try adjusting your filters or search terms to find more campaigns."
-                    : "There are no campaigns available at the moment."
-                  }
-                </p>
-                {activeFiltersCount > 0 && (
-                  <button
-                    onClick={clearFilters}
-                    className="px-8 py-3 bg-white text-black rounded-sm font-semibold hover:-translate-y-px hover:shadow-btn-hover transition-all duration-600 ease-gravity mt-4"
-                  >
-                    Clear Filters
-                  </button>
-                )}
-              </div>
-            </div>
+            <EmptyState
+              icon={FiSearch}
+              title="No Campaigns Found"
+              description={
+                activeFiltersCount > 0
+                  ? "Try adjusting your filters or search terms to find more campaigns."
+                  : "There are no campaigns available at the moment."
+              }
+              action={activeFiltersCount > 0 ? (
+                <button
+                  onClick={clearFilters}
+                  className="px-8 py-3 bg-white text-black rounded-sm font-semibold hover:-translate-y-px hover:shadow-btn-hover transition-all duration-600 ease-gravity"
+                >
+                  Clear Filters
+                </button>
+              ) : null}
+            />
           ) : isLoading ? (
             <CampaignCardSkeleton count={6} />
           ) : (

@@ -180,13 +180,13 @@ const ContentPostList = ({
               {post.thumbnailUrl ? (
                 <img 
                   src={post.thumbnailUrl} 
-                  alt={post.title}
+                  alt={`Thumbnail for ${post.title}`}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               ) : post.contentType === 'image' && post.contentUrl ? (
                 <img 
                   src={post.contentUrl} 
-                  alt={post.title}
+                  alt={`Content image for ${post.title}`}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               ) : (
@@ -220,6 +220,7 @@ const ContentPostList = ({
                     onClick={() => onView(post)}
                     className="p-3 bg-white text-black rounded-full hover:bg-gray-100 transition-colors"
                     title="View post"
+                    aria-label={`View post: ${post.title}`}
                   >
                     <FiEye className="w-5 h-5" />
                   </button>
@@ -230,6 +231,7 @@ const ContentPostList = ({
                   rel="noopener noreferrer"
                   className="p-3 bg-white text-black rounded-full hover:bg-gray-100 transition-colors"
                   title="Open in IPFS"
+                  aria-label={`Open ${post.title} in IPFS`}
                 >
                   <FiExternalLink className="w-5 h-5" />
                 </a>
@@ -238,6 +240,7 @@ const ContentPostList = ({
                     onClick={() => onEdit(post)}
                     className="p-3 bg-white text-black rounded-full hover:bg-gray-100 transition-colors"
                     title="Edit post"
+                    aria-label={`Edit post: ${post.title}`}
                   >
                     <FiEdit className="w-5 h-5" />
                   </button>
@@ -289,6 +292,7 @@ const ContentPostList = ({
                       onClick={() => onEdit(post)}
                       className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
                       title="Edit"
+                      aria-label={`Edit ${post.title}`}
                     >
                       <FiEdit className="w-4 h-4" />
                     </button>
@@ -298,6 +302,7 @@ const ContentPostList = ({
                       onClick={() => handleDelete(post)}
                       className="p-2 text-gray-400 hover:text-red-600 transition-colors"
                       title="Delete"
+                      aria-label={`Delete ${post.title}`}
                     >
                       <FiTrash2 className="w-4 h-4" />
                     </button>
